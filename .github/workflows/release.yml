@@ -69,7 +69,7 @@ jobs:
           mv -f requirements-darwin-arm64 requirements
           tar cvzf release-darwin-arm64.tar.gz dist requirements
           mv -f requirements-darwin-amd64 requirements
-          tar cvzf requirements-darwin-amd64.tar.gz dist requirements
+          tar cvzf release-darwin-amd64.tar.gz dist requirements
           mv requirements-windows-amd64.exe requirements.exe
           zip -9vr release-windows.zip dist requirements.exe
 
