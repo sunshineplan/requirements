@@ -10,8 +10,8 @@ build:
 
 test:
 	npm install
-    npm run check
-    npm run build
+	npm run check
+	npm run build
 	go build -v ./...
 	go clean
 
