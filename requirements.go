@@ -57,7 +57,7 @@ func add(c *gin.Context) {
 	}
 	svc.Printf("%s %v add %s", c.ClientIP(), username, data)
 	go sendMail(
-		fmt.Sprintf("[业务系统]%s新增了一项业务", username),
+		fmt.Sprintf("[业务系统]%s新增了一项业务-%s", username, time.Now().Format("20060102 15:04")),
 		fmt.Sprintf("%s\n\nIP: %s", data, c.ClientIP()),
 		nil,
 	)
@@ -97,7 +97,7 @@ func edit(c *gin.Context) {
 	}
 	svc.Printf("%s %v edit %s", c.ClientIP(), username, data.New)
 	go sendMail(
-		fmt.Sprintf("[业务系统]%s编辑了一项业务", username),
+		fmt.Sprintf("[业务系统]%s编辑了一项业务-%s", username, time.Now().Format("20060102 15:04")),
 		fmt.Sprintf("原始内容:\n%s\n\n修改内容:\n%s\n\nIP: %s", data.Old, data.New, c.ClientIP()),
 		nil,
 	)
@@ -127,7 +127,7 @@ func del(c *gin.Context) {
 	if v, ok := requirementsList[id]; ok {
 		svc.Printf("%s %v delete %s", c.ClientIP(), username, v)
 		go sendMail(
-			fmt.Sprintf("[业务系统]%s删除了一项业务", username),
+			fmt.Sprintf("[业务系统]%s删除了一项业务-%s", username, time.Now().Format("20060102 15:04")),
 			fmt.Sprintf("%s\n\nIP: %s", v, c.ClientIP()),
 			nil,
 		)
