@@ -56,7 +56,7 @@
       $component = "show";
     }}
   >
-    公关推广部业务系统
+    业务系统
   </span>
   <div class="navbar-nav flex-row">
     {#if username}
