@@ -1,18 +1,28 @@
 package main
 
-import "github.com/sunshineplan/utils/csv"
+import (
+	"errors"
+
+	"github.com/sunshineplan/utils/csv"
+	"github.com/sunshineplan/utils/mail"
+	"github.com/sunshineplan/utils/retry"
+)
 
 func initSrv() error {
-	//var metadata any
-	//if err := retry.Do(func() error {
-	//	return meta.Get("requirements", &metadata)
-	//}, 3, 20); err != nil {
-	//	return err
-	//}
-
-	//if metadata == nil {
-	//	return errors.New("no permission")
-	//}
+	var data struct {
+		Dialer     mail.Dialer
+		Subscriber mail.Receipts
+	}
+	if err := retry.Do(func() error {
+		return meta.Get("requirements", &data)
+	}, 3, 20); err != nil {
+		return err
+	}
+	if data.Subscriber == nil {
+		return errors.New("no permission")
+	}
+	dialer = data.Dialer
+	to = data.Subscriber
 
 	var res []requirement
 	if err := csv.DecodeFile(joinPath(dir(self), "requirements.csv"), &res); err != nil {

@@ -16,6 +16,7 @@
 
 *.ini
 *.log
+*.sh
 
 dist
 node_modules

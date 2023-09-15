@@ -3,6 +3,7 @@ package main
 import (
 	"cmp"
 	"encoding"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"slices"
@@ -33,6 +34,11 @@ type requirement struct {
 	Status        string `csv:"状态" json:"status"`
 	Note          string `csv:"备注" json:"note"`
 	Participating string `csv:"参与班组" json:"participating"`
+}
+
+func (r requirement) String() string {
+	b, _ := json.Marshal(r)
+	return string(b)
 }
 
 type ID struct {

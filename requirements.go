@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"slices"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/csv"
+	"github.com/sunshineplan/utils/mail"
 )
 
 var (
@@ -53,7 +55,12 @@ func add(c *gin.Context) {
 	if !last.Equal(c) {
 		obj["reload"] = 1
 	}
-	svc.Printf("%s %v add %#v", c.ClientIP(), username, data)
+	svc.Printf("%s %v add %s", c.ClientIP(), username, data)
+	go sendMail(
+		fmt.Sprintf("[业务系统]%s新增了一项业务", username),
+		fmt.Sprintf("%s\n\nIP: %s", data, c.ClientIP()),
+		nil,
+	)
 	if err := save(); err != nil {
 		svc.Println(c.ClientIP(), username, err)
 		c.AbortWithStatus(500)
@@ -74,7 +81,7 @@ func edit(c *gin.Context) {
 	}
 
 	if data.New.Desc == "" {
-		c.JSON(200, gin.H{"status": 0, "message": "Requirement describe is empty.", "error": 1})
+		c.JSON(200, gin.H{"status": 0, "message": "业务描述为空。", "error": 1})
 		return
 	}
 
@@ -88,7 +95,12 @@ func edit(c *gin.Context) {
 	if !last.Equal(c) {
 		obj["reload"] = 1
 	}
-	svc.Printf("%s %v edit %#v", c.ClientIP(), username, data.New)
+	svc.Printf("%s %v edit %s", c.ClientIP(), username, data.New)
+	go sendMail(
+		fmt.Sprintf("[业务系统]%s编辑了一项业务", username),
+		fmt.Sprintf("原始内容:\n%s\n\n修改内容:\n%s\n\nIP: %s", data.Old, data.New, c.ClientIP()),
+		nil,
+	)
 	if err := save(); err != nil {
 		svc.Println(c.ClientIP(), username, err)
 		c.AbortWithStatus(500)
@@ -113,7 +125,12 @@ func del(c *gin.Context) {
 		obj["reload"] = 1
 	}
 	if v, ok := requirementsList[id]; ok {
-		svc.Printf("%s %v delete %#v", c.ClientIP(), username, v)
+		svc.Printf("%s %v delete %s", c.ClientIP(), username, v)
+		go sendMail(
+			fmt.Sprintf("[业务系统]%s删除了一项业务", username),
+			fmt.Sprintf("%s\n\nIP: %s", v, c.ClientIP()),
+			nil,
+		)
 		delete(requirementsList, id)
 		if err := save(); err != nil {
 			svc.Println(c.ClientIP(), username, err)
@@ -164,6 +181,16 @@ func save() error {
 		return err
 	}
 	return setLast()
+}
+
+func backup() {
+	mu.Lock()
+	defer mu.Unlock()
+	sendMail(
+		fmt.Sprintf("[业务系统]数据备份-%s", time.Now().Format("20060102")),
+		fmt.Sprintf("备份时间: %s", time.Now()),
+		[]*mail.Attachment{{Path: joinPath(dir(self), "requirements.csv")}},
+	)
 }
 
 func analyze(src []requirement, year, startMonth, endMonth int, isNew bool) (res []summary) {
