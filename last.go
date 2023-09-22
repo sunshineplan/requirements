@@ -11,12 +11,6 @@ import (
 
 var last Last
 
-func init() {
-	if err := setLast(); err != nil {
-		svc.Fatal(err)
-	}
-}
-
 type Last time.Time
 
 func setLast() error {
