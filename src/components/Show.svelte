@@ -195,28 +195,28 @@
   th:nth-of-type(1),
   th:nth-of-type(2),
   th:nth-of-type(11) {
-    width: 90px;
+    width: 6rem;
   }
   th:nth-of-type(6),
   th:nth-of-type(7),
   th:nth-of-type(8),
   th:nth-of-type(9) {
-    width: 80px;
+    width: 5rem;
   }
   @media (max-width: 1200px) {
     th:nth-of-type(3) {
-      width: 150px;
+      width: 10rem;
     }
   }
   th:nth-of-type(4),
   th:nth-of-type(5) {
-    width: 110px;
+    width: 8rem;
   }
   th:nth-of-type(10) {
-    width: 120px;
+    width: 9rem;
   }
   th:nth-of-type(12) {
-    width: 35px;
+    width: 2rem;
   }
 
   td {

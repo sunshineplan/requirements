@@ -27,7 +27,10 @@ const createRequirements = () => {
     },
     save: async (r: Requirement) => {
       let resp: Response | undefined = undefined
-      if (r.id) resp = await post('/edit', { old: get(requirement), new: r })
+      if (r.id) {
+        if (get(requirement) === r) return 0
+        resp = await post('/edit', { old: get(requirement), new: r })
+      }
       else resp = await post('/add', r)
       if (resp.ok) {
         const res = await resp.json()
