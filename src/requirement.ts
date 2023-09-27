@@ -28,7 +28,7 @@ const createRequirements = () => {
     save: async (r: Requirement) => {
       let resp: Response | undefined = undefined
       if (r.id) {
-        if (get(requirement) === r) return 0
+        if (isEqual(get(requirement), r)) return 0
         resp = await post('/edit', { old: get(requirement), new: r })
       }
       else resp = await post('/add', r)
@@ -103,4 +103,9 @@ const reset = async () => {
   requirement.set(<Requirement>{})
   requirements.set([])
   await requirements.clear()
+}
+
+const isEqual = (a: Requirement, b: Requirement): boolean => {
+  for (const key in a) if (a[key] != b[key]) return false
+  return true
 }
