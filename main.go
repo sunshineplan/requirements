@@ -49,7 +49,7 @@ func init() {
 		}
 		backup()
 		return nil
-	}, 0)
+	}, 0, true)
 
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])

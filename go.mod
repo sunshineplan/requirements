@@ -7,8 +7,8 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/password v1.0.4
-	github.com/sunshineplan/service v1.0.18
-	github.com/sunshineplan/utils v0.1.60
+	github.com/sunshineplan/service v1.0.19
+	github.com/sunshineplan/utils v0.1.61
 )
 
 require (
