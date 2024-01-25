@@ -54,6 +54,11 @@ const createRequirements = () => {
       } else await fire('Fatal', await resp.text(), 'error')
       return 0
     },
+    done: async (r: Requirement) => {
+      if (r.status == '已完成') return 0
+      r.status = '已完成'
+      return requirements.save(r)
+    },
     delete: async (requirement: Requirement) => {
       const resp = await post('/delete/' + requirement.id)
       if (resp.ok) {

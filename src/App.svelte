@@ -3,7 +3,7 @@
   import Login from "./components/Login.svelte";
   import Show from "./components/Show.svelte";
   import Requirement from "./components/Requirement.svelte";
-  import { component, loading } from "./stores";
+  import { mode, component, loading } from "./stores";
   import { init } from "./requirement";
   import { onMount } from "svelte";
 
@@ -24,22 +24,26 @@
   };
 
   const handlePopstate = () => {
-    if (username)
+    if (username) {
       switch (window.location.pathname) {
         case "/":
           $component = "show";
-          break;
+          return;
         case "/add":
+          $mode = "add";
+          break;
         case "/edit":
-          $component = "requirement";
+          $mode = "edit";
+          break;
+        default:
+          $mode = "view";
       }
+      $component = "requirement";
+    }
   };
-
-  onMount(() => {
-    window.addEventListener("popstate", handlePopstate);
-    return () => window.removeEventListener("popstate", handlePopstate);
-  });
 </script>
+
+<svelte:window on:popstate={handlePopstate} />
 
 <Nav bind:username on:reload={load} />
 {#await promise then _}

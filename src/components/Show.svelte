@@ -1,6 +1,7 @@
 <script lang="ts">
+  import Action from "./Action.svelte";
   import { stringify } from "csv-stringify/browser/esm/sync";
-  import { component } from "../stores";
+  import { mode, component } from "../stores";
   import { requirement, requirements } from "../requirement";
 
   const columns = {
@@ -27,13 +28,17 @@
   const add = () => {
     $requirement = <Requirement>{};
     window.history.pushState({}, "", "/add");
+    $mode = "add";
     $component = "requirement";
   };
 
-  const edit = (r: Requirement) => {
-    $requirement = r;
-    window.history.pushState({}, "", "/edit");
-    $component = "requirement";
+  const view = (e: MouseEvent, r: Requirement) => {
+    if ((e.target as HTMLElement).dataset["action"] != "done") {
+      $requirement = r;
+      window.history.pushState({}, "", "/view");
+      $mode = "view";
+      $component = "requirement";
+    }
   };
 
   const download = () => {
@@ -51,10 +56,10 @@
       ],
       {
         type: "text/csv",
-      }
+      },
     );
     link.href = URL.createObjectURL(file);
-    link.download = "下载.csv";
+    link.download = "download.csv";
     link.click();
     URL.revokeObjectURL(link.href);
   };
@@ -93,7 +98,7 @@
   <button class="btn btn-primary" on:click={add}>新增业务</button>
   <button class="btn btn-primary" on:click={download}>导出</button>
   <div class="search">
-    <div class="icon"><i class="material-icons">search</i></div>
+    <div class="icon"><span class="material-symbols-outlined">search</span></div>
     <input bind:value={search} type="search" placeholder="搜索" />
   </div>
 </header>
@@ -119,18 +124,19 @@
     </thead>
     <tbody>
       {#each output as requirement (requirement.id)}
-        <tr>
+        <tr on:click={(e) => view(e, requirement)}>
           {#each Object.entries(columns) as [key, val] (key)}
             <td title={/编号|类型|日期/i.test(key) ? "" : requirement[val]}>
               {requirement[val]}
             </td>
           {/each}
           <td>
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <i class="material-icons edit" on:click={() => edit(requirement)}>
-              edit
-            </i>
+            <Action
+              {requirement}
+              --icon="18px"
+              on:reload
+              on:refresh={() => filter(search, sort, desc)}
+            />
           </td>
         </tr>
       {/each}
@@ -216,22 +222,13 @@
     width: 9rem;
   }
   th:nth-of-type(12) {
-    width: 2rem;
+    width: 4rem;
   }
 
   td {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-  }
-
-  .edit {
-    font-size: 18px;
-    color: #007bff !important;
-    cursor: pointer;
-  }
-  .edit:hover {
-    color: #0056b3 !important;
   }
 
   .sortable {

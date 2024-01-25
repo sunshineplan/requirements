@@ -48,17 +48,19 @@ export const post = async (url: string, data?: any) => {
   return resp
 }
 
-export const confirm = async (type: string) => {
+export const confirm = async (text: string, isDanger?: boolean) => {
+  let focusCancel = false, confirmButton = 'swal btn btn-primary'
+  if (isDanger) focusCancel = true, confirmButton = 'swal btn btn-danger'
   const confirm = await Swal.fire({
     title: '你确定吗？',
-    text: `这条${type}将被永久删除。`,
+    text,
     icon: 'warning',
-    confirmButtonText: '删除',
+    confirmButtonText: '确定',
     cancelButtonText: '取消',
     showCancelButton: true,
-    focusCancel: true,
+    focusCancel,
     customClass: {
-      confirmButton: 'swal btn btn-danger',
+      confirmButton,
       cancelButton: 'swal btn btn-primary'
     },
     buttonsStyling: false

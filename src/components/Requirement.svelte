@@ -1,10 +1,17 @@
 <script lang="ts">
+  import Action from "./Action.svelte";
   import { onMount, createEventDispatcher } from "svelte";
   import { valid, confirm } from "../misc";
-  import { component } from "../stores";
+  import { mode, goHome } from "../stores";
   import { requirement, requirements } from "../requirement";
 
   const dispatch = createEventDispatcher();
+
+  const modeList = {
+    add: "新增",
+    edit: "编辑",
+    view: "查看",
+  };
 
   const types = [
     "内容策划",
@@ -16,7 +23,6 @@
     "馆所业务",
   ];
   const statuses = ["进行中", "已完成", "已关闭"];
-  const mode = window.location.pathname == "/add" ? "新增" : "编辑";
 
   let type = $requirement.type || "";
   let desc = $requirement.desc || "";
@@ -42,55 +48,93 @@
     document.getElementById("note").scrollTop = 0;
   });
 
+  const current = () => {
+    return <Requirement>{
+      type,
+      desc,
+      date,
+      deadline,
+      submitter,
+      recipient,
+      acceptor,
+      status,
+      note,
+      participating,
+    };
+  };
+
   const save = async () => {
     if (valid()) {
       validated = false;
-      const r = <Requirement>{
-        type,
-        desc,
-        date,
-        deadline,
-        submitter,
-        recipient,
-        acceptor,
-        status,
-        note,
-        participating,
-      };
-      if (mode == "编辑") r.id = $requirement.id;
+      const r = current();
+      if ($mode == "edit") r.id = $requirement.id;
       try {
         const res = await requirements.save(r);
-        if (res === 0) goback();
+        if (res === 0) goHome();
       } catch {
         dispatch("reload");
-        goback();
+        goHome();
       }
     } else validated = true;
   };
 
   const del = async () => {
-    if (await confirm("业务")) {
+    if (await confirm("这条业务将被永久删除。", true)) {
       try {
         await requirements.delete($requirement);
       } catch {
         dispatch("reload");
       }
-      goback();
+      goHome();
     }
   };
 
-  const goback = () => {
-    window.history.pushState({}, "", "/");
-    $component = "show";
+  const back = async () => {
+    const r = current();
+    let edited = false;
+    switch ($mode) {
+      case "view":
+        break;
+      case "add":
+        for (const k in r) {
+          if (r[k] != "") {
+            edited = true;
+            break;
+          }
+        }
+        break;
+      case "edit":
+        for (const k in r) {
+          if (r[k] != $requirement[k]) {
+            edited = true;
+            break;
+          }
+        }
+    }
+    if (edited && !(await confirm("数据未保存，确定将放弃保存并返回。", true)))
+      return;
+    goHome();
   };
 </script>
 
-<svelte:head><title>{mode}业务 - 业务系统</title></svelte:head>
+<svelte:head><title>{modeList[$mode]}业务 - 业务系统</title></svelte:head>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div style="height: 100%;">
   <header>
-    <h3>{mode}业务</h3>
+    <div class="back">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <span class="material-symbols-outlined" on:click={back}>arrow_back</span>
+    </div>
+    <h3>{modeList[$mode]}业务</h3>
+    {#if $mode == "view"}
+      <Action
+        requirement={$requirement}
+        --icon="22px"
+        --margin="10px"
+        on:reload
+      />
+    {/if}
   </header>
   <div class="row g-3" class:was-validated={validated}>
     <div class="col-md-8 col-sm-12">
@@ -103,26 +147,35 @@
         rows="3"
         autofocus
         required
+        disabled={$mode == "view"}
       />
       <div class="invalid-feedback">必填字段</div>
     </div>
     <div class="w-100 m-0" />
     <div class="col-md-3 col-sm-4">
       <label class="form-label" for="type">类型</label>
-      <select class="form-select" id="type" bind:value={type} required>
-        {#each types as type (type)}
-          <option value={type}>{type}</option>
-        {/each}
-      </select>
+      {#if $mode == "view"}
+        <input class="form-control" id="type" value={type} disabled />
+      {:else}
+        <select class="form-select" id="type" bind:value={type} required>
+          {#each types as type (type)}
+            <option value={type}>{type}</option>
+          {/each}
+        </select>
+      {/if}
       <div class="invalid-feedback">必填字段</div>
     </div>
     <div class="col-md-3 col-sm-4">
       <label class="form-label" for="status">状态</label>
-      <select class="form-select" id="status" bind:value={status} required>
-        {#each statuses as status (status)}
-          <option value={status}>{status}</option>
-        {/each}
-      </select>
+      {#if $mode == "view"}
+        <input class="form-control" id="status" value={status} disabled />
+      {:else}
+        <select class="form-select" id="status" bind:value={status} required>
+          {#each statuses as status (status)}
+            <option value={status}>{status}</option>
+          {/each}
+        </select>
+      {/if}
       <div class="invalid-feedback">必填字段</div>
     </div>
     <div class="w-100 m-0" />
@@ -134,6 +187,7 @@
         type="date"
         bind:value={date}
         required
+        disabled={$mode == "view"}
       />
       <div class="invalid-feedback">必填字段</div>
     </div>
@@ -145,6 +199,7 @@
         type="date"
         bind:value={deadline}
         required
+        disabled={$mode == "view"}
       />
       <div class="invalid-feedback">必填字段</div>
     </div>
@@ -157,6 +212,7 @@
         list="submitter-list"
         bind:value={submitter}
         required
+        disabled={$mode == "view"}
       />
       <datalist id="submitter-list">
         {#each submitters as submitter (submitter)}
@@ -173,6 +229,7 @@
         list="recipient-list"
         bind:value={recipient}
         required
+        disabled={$mode == "view"}
       />
       <datalist id="recipient-list">
         {#each recipients as recipient (recipient)}
@@ -189,6 +246,7 @@
         list="acceptor-list"
         bind:value={acceptor}
         required
+        disabled={$mode == "view"}
       />
       <datalist id="acceptor-list">
         {#each acceptors as acceptor (acceptor)}
@@ -204,28 +262,65 @@
         id="participating"
         bind:value={participating}
         required
+        disabled={$mode == "view"}
       />
       <div class="invalid-feedback">必填字段</div>
     </div>
     <div class="col-md-8 col-sm-12">
       <label class="form-label" for="note">备注</label>
-      <textarea class="form-control" id="note" bind:value={note} />
+      <textarea
+        class="form-control"
+        id="note"
+        bind:value={note}
+        disabled={$mode == "view"}
+      />
     </div>
-    <div class="col-12">
-      <button class="btn btn-primary" on:click={save}>保存</button>
-      <button class="btn btn-primary" on:click={goback}>取消</button>
-    </div>
-    {#if mode == "编辑"}
+    {#if $mode == "view"}
       <div class="col-12">
-        <button class="btn btn-danger" on:click={del}>删除</button>
+        <button class="btn btn-primary" on:click={goHome}>返回</button>
       </div>
+    {:else}
+      <div class="col-12">
+        <button class="btn btn-primary" on:click={save}>保存</button>
+        <button class="btn btn-primary" on:click={goHome}>取消</button>
+      </div>
+      {#if $mode == "edit"}
+        <div class="col-12">
+          <button class="btn btn-danger" on:click={del}>删除</button>
+        </div>
+      {/if}
     {/if}
   </div>
 </div>
 
 <style>
   header {
-    padding-left: 20px;
+    display: flex;
+    align-items: center;
+    height: 70px;
+  }
+
+  header h3 {
+    margin: 0;
+  }
+
+  .back {
+    height: 50px;
+    width: 50px;
+    margin-right: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .back:hover {
+    background-color: rgba(15, 20, 25, 0.1);
+    border-radius: 50%;
+  }
+
+  .back span {
+    font-size: 30px;
+    cursor: default;
   }
 
   .row {
