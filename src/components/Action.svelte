@@ -31,31 +31,37 @@
   };
 </script>
 
-{#if requirement.status != "已完成"}
+<div>
+  {#if requirement.status != "已完成"}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <span
+      data-action="done"
+      title="完成"
+      class="material-symbols-outlined done"
+      on:click={() => done(requirement)}
+    >
+      done_outline
+    </span>
+  {:else}
+    <span class="material-symbols-outlined hidden">done_outline</span>
+  {/if}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <span
-    data-action="done"
-    title="完成"
-    class="material-symbols-outlined done"
-    on:click={() => done(requirement)}
+    title="编辑"
+    class="material-symbols-outlined edit"
+    on:click={() => edit(requirement)}
   >
-    done_outline
+    edit
   </span>
-{:else}
-  <span class="material-symbols-outlined hidden">done_outline</span>
-{/if}
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<span
-  title="编辑"
-  class="material-symbols-outlined edit"
-  on:click={() => edit(requirement)}
->
-  edit
-</span>
+</div>
 
 <style>
+  div {
+    display: flex;
+  }
+
   span {
     font-size: var(--icon);
     cursor: pointer;

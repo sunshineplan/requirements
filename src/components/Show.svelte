@@ -130,10 +130,11 @@
               {requirement[val]}
             </td>
           {/each}
-          <td>
+          <td style="vertical-align: middle">
             <Action
               {requirement}
               --icon="18px"
+              --margin="2px"
               on:reload
               on:refresh={() => filter(search, sort, desc)}
             />
@@ -222,7 +223,7 @@
     width: 9rem;
   }
   th:nth-of-type(12) {
-    width: 4rem;
+    width: 3.2rem;
   }
 
   td {
