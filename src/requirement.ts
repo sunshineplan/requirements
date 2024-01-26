@@ -83,19 +83,20 @@ const createRequirements = () => {
 }
 export const requirements = createRequirements()
 
-
+export let participants = <string[]>[]
 
 export const init = async (): Promise<string> => {
   const resp = await fetch('/info')
   if (resp.ok) {
-    const username = await resp.text()
-    if (username) {
+    const res = await resp.json()
+    if (res.username) {
+      participants = res.participants
       const n = await requirements.load()
       if (!n) {
         await requirements.fetch()
         await requirements.load()
       }
-      return username
+      return res.username
     } else await reset()
   } else if (resp.status == 409) {
     await requirements.clear()

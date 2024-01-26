@@ -90,6 +90,14 @@
         else return -res;
       });
   };
+
+  const participants = (s: string) => {
+    const res = s.split(",");
+    if (res.length > 1) {
+      return res.map((i) => i.charAt(0)).join(" | ");
+    }
+    return s;
+  };
 </script>
 
 <svelte:head><title>业务系统</title></svelte:head>
@@ -98,7 +106,9 @@
   <button class="btn btn-primary" on:click={add}>新增业务</button>
   <button class="btn btn-primary" on:click={download}>导出</button>
   <div class="search">
-    <div class="icon"><span class="material-symbols-outlined">search</span></div>
+    <div class="icon">
+      <span class="material-symbols-outlined">search</span>
+    </div>
     <input bind:value={search} type="search" placeholder="搜索" />
   </div>
 </header>
@@ -127,7 +137,9 @@
         <tr on:click={(e) => view(e, requirement)}>
           {#each Object.entries(columns) as [key, val] (key)}
             <td title={/编号|类型|日期/i.test(key) ? "" : requirement[val]}>
-              {requirement[val]}
+              {val == "participating"
+                ? participants(requirement[val])
+                : requirement[val]}
             </td>
           {/each}
           <td style="vertical-align: middle">

@@ -2,12 +2,14 @@ package main
 
 import (
 	"crypto/rand"
+	"errors"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/log"
+	"github.com/sunshineplan/utils/txt"
 )
 
 func run() error {
@@ -15,6 +17,14 @@ func run() error {
 		svc.Logger = log.New(*logPath, "", log.LstdFlags)
 		gin.DefaultWriter = svc.Logger
 		gin.DefaultErrorWriter = svc.Logger
+	}
+
+	participants, err := txt.ReadFile(joinPath(dir(self), "participants.txt"))
+	if err != nil {
+		return err
+	}
+	if len(participants) == 0 {
+		return errors.New("no participants")
 	}
 
 	router := gin.Default()
@@ -41,11 +51,11 @@ func run() error {
 	router.GET("/info", func(c *gin.Context) {
 		user, _ := getUser(c)
 		if user == "" {
-			c.String(200, "")
+			c.JSON(200, struct{}{})
 			return
 		}
 		if last.Equal(c) {
-			c.String(200, user)
+			c.JSON(200, map[string]any{"username": user, "participants": participants})
 		} else {
 			c.SetCookie("last", last.String(), 856400*365, "", "", false, true)
 			c.AbortWithStatus(409)

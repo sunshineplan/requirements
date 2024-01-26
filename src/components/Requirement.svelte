@@ -3,7 +3,7 @@
   import { onMount, createEventDispatcher } from "svelte";
   import { valid, confirm } from "../misc";
   import { mode, goHome } from "../stores";
-  import { requirement, requirements } from "../requirement";
+  import { requirement, requirements, participants } from "../requirement";
 
   const dispatch = createEventDispatcher();
 
@@ -33,7 +33,9 @@
   let acceptor = $requirement.acceptor || "";
   let status = $requirement.status || "";
   let note = $requirement.note || "";
-  let participating = $requirement.participating || "";
+  let participating = $requirement.participating
+    ? $requirement.participating.split(",")
+    : [];
   let validated = false;
 
   let submitters: string[] = [];
@@ -59,12 +61,12 @@
       acceptor,
       status,
       note,
-      participating,
+      participating: participating.join(","),
     };
   };
 
   const save = async () => {
-    if (valid()) {
+    if (valid() && participating.length > 0) {
       validated = false;
       const r = current();
       if ($mode == "edit") r.id = $requirement.id;
@@ -257,14 +259,34 @@
     </div>
     <div class="col-md-6">
       <label class="form-label" for="participating">参与班组</label>
-      <input
-        class="form-control"
-        id="participating"
-        bind:value={participating}
-        required
-        disabled={$mode == "view"}
-      />
-      <div class="invalid-feedback">必填字段</div>
+      <div id="participating">
+        {#each participants as participant, index (participant)}
+          <div class="form-check form-check-inline">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              class:invalid={validated && participating.length == 0}
+              id={"participant" + index}
+              bind:group={participating}
+              value={participant}
+              disabled={$mode == "view"}
+            />
+            <label
+              class="form-check-label"
+              class:invalid={validated && participating.length == 0}
+              for={"participant" + index}
+            >
+              {participant}
+            </label>
+          </div>
+        {/each}
+      </div>
+      <div
+        class="invalid-feedback"
+        class:invalid={validated && participating.length == 0}
+      >
+        必选字段
+      </div>
     </div>
     <div class="col-md-8 col-sm-12">
       <label class="form-label" for="note">备注</label>
@@ -277,12 +299,12 @@
     </div>
     {#if $mode == "view"}
       <div class="col-12">
-        <button class="btn btn-primary" on:click={goHome}>返回</button>
+        <button class="btn btn-primary" on:click={back}>返回</button>
       </div>
     {:else}
       <div class="col-12">
         <button class="btn btn-primary" on:click={save}>保存</button>
-        <button class="btn btn-primary" on:click={goHome}>取消</button>
+        <button class="btn btn-primary" on:click={back}>取消</button>
       </div>
       {#if $mode == "edit"}
         <div class="col-12">
@@ -327,5 +349,15 @@
     padding: 0 20px;
     overflow: auto;
     max-height: calc(100% - 60px);
+  }
+
+  #participating {
+    display: flex;
+  }
+
+  .invalid {
+    display: block;
+    color: var(--bs-form-invalid-color) !important;
+    border-color: var(--bs-form-invalid-border-color) !important;
   }
 </style>

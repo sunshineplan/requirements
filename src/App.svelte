@@ -5,7 +5,6 @@
   import Requirement from "./components/Requirement.svelte";
   import { mode, component, loading } from "./stores";
   import { init } from "./requirement";
-  import { onMount } from "svelte";
 
   let username: string = "";
 
