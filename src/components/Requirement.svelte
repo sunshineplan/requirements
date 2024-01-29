@@ -2,7 +2,7 @@
   import Action from "./Action.svelte";
   import { onMount, createEventDispatcher } from "svelte";
   import { valid, confirm } from "../misc";
-  import { mode, goHome } from "../stores";
+  import { mode, goto, clear } from "../stores";
   import { requirement, requirements, participants } from "../requirement";
 
   const dispatch = createEventDispatcher();
@@ -72,10 +72,13 @@
       if ($mode == "edit") r.id = $requirement.id;
       try {
         const res = await requirements.save(r);
-        if (res === 0) goHome();
+        if (res === 0) {
+          if ($mode == "add") clear();
+          goto("show");
+        }
       } catch {
         dispatch("reload");
-        goHome();
+        goto("show");
       }
     } else validated = true;
   };
@@ -87,7 +90,7 @@
       } catch {
         dispatch("reload");
       }
-      goHome();
+      goto("show");
     }
   };
 
@@ -115,7 +118,7 @@
     }
     if (edited && !(await confirm("数据未保存，确定将放弃保存并返回。", true)))
       return;
-    goHome();
+    goto("show");
   };
 </script>
 

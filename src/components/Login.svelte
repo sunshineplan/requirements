@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { fire, post } from "../misc";
-  import { component } from "../stores";
+  import { goto } from "../stores";
 
   const dispatch = createEventDispatcher();
 
@@ -25,8 +25,7 @@
           if (rememberme) localStorage.setItem("rememberme", "true");
           else localStorage.removeItem("rememberme");
           dispatch("info");
-          window.history.pushState({}, "", "/");
-          $component = "show";
+          goto("show");
         } else await fire("错误", json.message, "error");
       } else await fire("错误", await resp.text(), "error");
     }

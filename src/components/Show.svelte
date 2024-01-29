@@ -1,7 +1,8 @@
 <script lang="ts">
   import Action from "./Action.svelte";
+  import { onMount } from "svelte";
   import { stringify } from "csv-stringify/browser/esm/sync";
-  import { mode, component } from "../stores";
+  import { search, sort, desc, goto, scroll } from "../stores";
   import { requirement, requirements } from "../requirement";
 
   const columns = {
@@ -18,26 +19,19 @@
     参与班组: "participating",
   } as { [key: string]: keyof Requirement };
 
-  let sort = "";
-  let desc = true;
-  let search = "";
   let output: Requirement[] = [];
 
-  $: filter(search, sort, desc);
+  $: $search, $sort, $desc, filter();
 
   const add = () => {
     $requirement = <Requirement>{};
-    window.history.pushState({}, "", "/add");
-    $mode = "add";
-    $component = "requirement";
+    goto("add");
   };
 
   const view = (e: MouseEvent, r: Requirement) => {
     if ((e.target as HTMLElement).dataset["action"] != "done") {
       $requirement = r;
-      window.history.pushState({}, "", "/view");
-      $mode = "view";
-      $component = "requirement";
+      goto("view");
     }
   };
 
@@ -64,31 +58,36 @@
     URL.revokeObjectURL(link.href);
   };
 
-  const filter = (search: string, sort: string, desc: boolean) => {
+  const filter = () => {
     let array: Requirement[] = [];
-    if (!search) array = $requirements;
+    if (!$search) array = $requirements;
     else
       array = $requirements.filter((i) => {
         return (
-          i.type.includes(search) ||
-          i.desc.includes(search) ||
-          i.submitter.includes(search) ||
-          i.recipient.includes(search) ||
-          i.acceptor.includes(search) ||
-          i.note.includes(search)
+          i.type.includes($search) ||
+          i.desc.includes($search) ||
+          i.submitter.includes($search) ||
+          i.recipient.includes($search) ||
+          i.acceptor.includes($search) ||
+          i.note.includes($search)
         );
       });
-    if (!sort) output = array.sort();
+    if (!$sort) output = array.sort();
     else
       output = array.toSorted((a, b) => {
-        const v1 = a[columns[sort]],
-          v2 = b[columns[sort]];
+        const v1 = a[columns[$sort]],
+          v2 = b[columns[$sort]];
         let res = 0;
         if (v1 < v2) res = 1;
         else if (v1 > v2) res = -1;
-        if (desc) return res;
+        if ($desc) return res;
         else return -res;
       });
+  };
+
+  const restore = () => {
+    filter();
+    scroll(true);
   };
 
   const participants = (s: string) => {
@@ -98,6 +97,8 @@
     }
     return s;
   };
+
+  onMount(() => scroll(true));
 </script>
 
 <svelte:head><title>业务系统</title></svelte:head>
@@ -109,7 +110,12 @@
     <div class="icon">
       <span class="material-symbols-outlined">search</span>
     </div>
-    <input bind:value={search} type="search" placeholder="搜索" />
+    <input
+      bind:value={$search}
+      type="search"
+      placeholder="搜索"
+      on:input={() => scroll()}
+    />
   </div>
 </header>
 <div class="table-responsive">
@@ -118,12 +124,16 @@
       <tr>
         {#each Object.entries(columns) as [key, _] (key)}
           <th
-            class="sortable {sort == key ? (desc ? 'desc' : 'asc') : 'default'}"
+            class="sortable {$sort == key
+              ? $desc
+                ? 'desc'
+                : 'asc'
+              : 'default'}"
             on:click={() => {
-              const before = sort;
-              sort = key;
-              if (before == sort) desc = !desc;
-              else desc = true;
+              const before = $sort;
+              $sort = key;
+              if (before == $sort) $desc = !$desc;
+              else $desc = true;
             }}
           >
             {key}
@@ -136,7 +146,9 @@
       {#each output as requirement (requirement.id)}
         <tr on:click={(e) => view(e, requirement)}>
           {#each Object.entries(columns) as [key, val] (key)}
-            <td title={/编号|类型|日期/i.test(key) ? "" : requirement[val]}>
+            <td
+              title={/编号|类型|日期|班组/i.test(key) ? "" : requirement[val]}
+            >
               {val == "participating"
                 ? participants(requirement[val])
                 : requirement[val]}
@@ -148,7 +160,7 @@
               --icon="18px"
               --margin="2px"
               on:reload
-              on:refresh={() => filter(search, sort, desc)}
+              on:refresh={restore}
             />
           </td>
         </tr>

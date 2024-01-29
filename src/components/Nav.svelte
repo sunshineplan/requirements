@@ -2,7 +2,7 @@
   import Swal from "sweetalert2";
   import { createEventDispatcher } from "svelte";
   import { fire, post } from "../misc";
-  import { component } from "../stores";
+  import { goto } from "../stores";
 
   const dispatch = createEventDispatcher();
 
@@ -40,8 +40,7 @@
     const resp = await post("/logout", undefined);
     if (resp.ok) {
       dispatch("reload");
-      window.history.pushState({}, "", "/");
-      $component = "show";
+      goto("show");
     } else await fire("错误", "未知错误", "error");
   };
 </script>
@@ -49,15 +48,7 @@
 <nav class="navbar navbar-light topbar">
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <span
-    class="brand"
-    on:click={() => {
-      window.history.pushState({}, "", "/");
-      $component = "show";
-    }}
-  >
-    业务系统
-  </span>
+  <span class="brand" on:click={() => goto("show")}>业务系统</span>
   <div class="navbar-nav flex-row">
     {#if username}
       <span class="nav-link">{username}</span>

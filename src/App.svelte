@@ -3,12 +3,13 @@
   import Login from "./components/Login.svelte";
   import Show from "./components/Show.svelte";
   import Requirement from "./components/Requirement.svelte";
-  import { mode, component, loading } from "./stores";
+  import { mode, component, clear, loading } from "./stores";
   import { init } from "./requirement";
 
   let username: string = "";
 
   const load = async () => {
+    clear();
     loading.start();
     username = await init();
     loading.end();
