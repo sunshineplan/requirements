@@ -2,14 +2,12 @@ package main
 
 import (
 	"crypto/rand"
-	"errors"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/log"
-	"github.com/sunshineplan/utils/txt"
 )
 
 func run() error {
@@ -19,12 +17,11 @@ func run() error {
 		gin.DefaultErrorWriter = svc.Logger
 	}
 
-	participants, err := txt.ReadFile(joinPath(dir(self), "participants.txt"))
-	if err != nil {
+	if err := loadUsers(); err != nil {
 		return err
 	}
-	if len(participants) == 0 {
-		return errors.New("no participants")
+	if err := loadParticipants(); err != nil {
+		return err
 	}
 
 	router := gin.Default()
@@ -54,8 +51,18 @@ func run() error {
 			c.JSON(200, struct{}{})
 			return
 		}
+		infoMutex.Lock()
+		defer infoMutex.Unlock()
+		obj := map[string]any{"username": user, "participants": participants}
+		if user == "admin" {
+			var s []string
+			for _, i := range users {
+				s = append(s, i[0])
+			}
+			obj["users"] = s
+		}
 		if last.Equal(c) {
-			c.JSON(200, map[string]any{"username": user, "participants": participants})
+			c.JSON(200, obj)
 		} else {
 			c.SetCookie("last", last.String(), 856400*365, "", "", false, true)
 			c.AbortWithStatus(409)
@@ -82,6 +89,12 @@ func run() error {
 	base.POST("/add", add)
 	base.POST("/edit", edit)
 	base.POST("/delete/:id", del)
+
+	admin := base.Group("/", adminRequired)
+	admin.POST("/participants", updateParticipants)
+	admin.POST("/addUser", func(c *gin.Context) { updateUser(c, true) })
+	admin.POST("/chgpwd", func(c *gin.Context) { updateUser(c, false) })
+	admin.POST("/deleteUser", deleteUser)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.Redirect(302, "/")

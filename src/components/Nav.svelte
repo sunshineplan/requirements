@@ -55,6 +55,11 @@
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span class="nav-link link" on:click={statistics}>统计</span>
+      {#if username == "admin"}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <span class="nav-link link" on:click={() => goto("setting")}>设置</span>
+      {/if}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span class="nav-link link" on:click={logout}>退出</span>

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 
@@ -12,19 +13,42 @@ import (
 	"github.com/sunshineplan/utils/txt"
 )
 
-var authMutex sync.Mutex
+var (
+	infoMutex sync.Mutex
+	users     [][2]string
+)
 
-func getPassword(username string) (string, error) {
-	authMutex.Lock()
-	defer authMutex.Unlock()
+func loadUsers() (err error) {
 	s, err := txt.ReadFile(joinPath(dir(self), "auth.txt"))
 	if err != nil {
-		return "", err
+		return
 	}
 	for _, i := range s {
 		s := strings.Split(i, ":")
-		if len(s) == 2 && strings.TrimSpace(s[0]) == username {
-			return strings.TrimSpace(s[1]), nil
+		if len(s) == 2 {
+			users = append(users, [2]string{strings.TrimSpace(s[0]), strings.TrimSpace(s[1])})
+		}
+	}
+	if len(users) == 0 {
+		err = errors.New("empty user list")
+	}
+	return
+}
+
+func saveUsers() error {
+	var s []string
+	for _, i := range users {
+		s = append(s, i[0]+":"+i[1])
+	}
+	return txt.ExportFile(s, joinPath(dir(self), "auth.txt"))
+}
+
+func getPassword(username string) (string, error) {
+	infoMutex.Lock()
+	defer infoMutex.Unlock()
+	for _, i := range users {
+		if i[0] == username {
+			return i[1], nil
 		}
 	}
 	return "", errors.New("user not found")
@@ -44,6 +68,12 @@ func authRequired(c *gin.Context) {
 		c.Redirect(302, "/")
 	} else {
 		c.Set("username", username)
+	}
+}
+
+func adminRequired(c *gin.Context) {
+	if username := sessions.Default(c).Get("username"); username != "admin" {
+		c.AbortWithStatus(403)
 	}
 }
 
@@ -101,4 +131,67 @@ func login(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"status": 0, "message": message})
+}
+
+func updateUser(c *gin.Context, add bool) {
+	var data struct{ Username, Password string }
+	if err := c.BindJSON(&data); err != nil {
+		c.String(400, "")
+		return
+	}
+	data.Username = strings.TrimSpace(strings.ToLower(data.Username))
+
+	infoMutex.Lock()
+	defer infoMutex.Unlock()
+
+	for i := range users {
+		if data.Username == users[i][0] {
+			if add {
+				c.String(400, "用户已存在")
+				return
+			} else {
+				users[i][1] = data.Password
+			}
+		}
+	}
+	if add {
+		users = append(users, [2]string{data.Username, data.Password})
+	}
+	if err := saveUsers(); err != nil {
+		svc.Print(err)
+		c.String(500, "内部错误")
+		return
+	}
+	c.String(200, "done")
+}
+
+func deleteUser(c *gin.Context) {
+	var data struct{ Username string }
+	if err := c.BindJSON(&data); err != nil {
+		c.String(400, "")
+		return
+	}
+
+	infoMutex.Lock()
+	defer infoMutex.Unlock()
+
+	var found bool
+	users = slices.DeleteFunc(users, func(s [2]string) bool {
+		res := s[0] == data.Username
+		if res {
+			found = true
+		}
+		return res
+	})
+
+	if found {
+		if err := saveUsers(); err != nil {
+			svc.Print(err)
+			c.String(500, "内部错误")
+			return
+		}
+		c.String(200, "done")
+	} else {
+		c.String(400, "用户不存在")
+	}
 }

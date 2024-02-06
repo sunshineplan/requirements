@@ -9,7 +9,7 @@ export const sort = writable('')
 export const desc = writable(true)
 
 const scrollTop = writable(0)
-export const save = () => {
+export const saveScrollTop = () => {
   const table = document.querySelector('.table-responsive')
   if (table) scrollTop.set(table.scrollTop)
 }
@@ -29,7 +29,6 @@ export const scroll = (restore?: Boolean) => {
 }
 
 export const goto = (s: string) => {
-  if (get(component) == 'show') save()
   let url = ''
   switch (s) {
     case 'add':
@@ -39,7 +38,10 @@ export const goto = (s: string) => {
       mode.set(s)
       component.set('requirement')
       break
+    case 'setting':
+      url = s
     default:
+      saveScrollTop()
       component.set(s)
   }
   window.history.pushState({}, '', '/' + url)

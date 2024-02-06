@@ -15,6 +15,8 @@ export const valid = () => {
   let result = true
   Array.from(document.querySelectorAll('input'))
     .forEach(i => { if (!i.checkValidity()) result = false })
+  Array.from(document.querySelectorAll('textarea'))
+    .forEach(i => { if (!i.checkValidity()) result = false })
   return result
 }
 

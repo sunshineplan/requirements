@@ -11,3 +11,9 @@ interface Requirement {
   note: string
   participating: string
 }
+
+interface Info {
+  username: string
+  participants: string[]
+  users: string[]
+}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { confirm } from "../misc";
-  import { component, save, goto } from "../stores";
+  import { component, saveScrollTop, goto } from "../stores";
   import { requirement as current, requirements } from "../requirement";
 
   const dispatch = createEventDispatcher();
@@ -9,14 +9,14 @@
   export let requirement: Requirement;
 
   const done = async (r: Requirement) => {
-    if (await confirm("这条业务将被标记为已完成。")) {
+    if (await confirm("该条业务将被标记为已完成。")) {
       $current = r;
       try {
         const res = await requirements.done({ ...r });
         if (res === 0)
           if ($component == "requirement") goto("show");
           else {
-            save();
+            saveScrollTop();
             dispatch("refresh");
           }
       } catch {
@@ -39,7 +39,7 @@
     <span
       data-action="done"
       title="完成"
-      class="material-symbols-outlined done"
+      class="material-symbols-outlined link-success"
       on:click={() => done(requirement)}
     >
       done_outline
@@ -51,7 +51,7 @@
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <span
     title="编辑"
-    class="material-symbols-outlined edit"
+    class="material-symbols-outlined link-primary"
     on:click={() => edit(requirement)}
   >
     edit
@@ -65,27 +65,6 @@
 
   span {
     font-size: var(--icon);
-    cursor: pointer;
     margin-left: var(--margin);
-  }
-
-  .hidden {
-    visibility: hidden;
-  }
-
-  .done {
-    color: #198754 !important;
-  }
-
-  .done:hover {
-    color: #157347 !important;
-  }
-
-  .edit {
-    color: #007bff !important;
-  }
-
-  .edit:hover {
-    color: #0056b3 !important;
   }
 </style>

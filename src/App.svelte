@@ -1,24 +1,26 @@
 <script lang="ts">
   import Nav from "./components/Nav.svelte";
   import Login from "./components/Login.svelte";
+  import Setting from "./components/Setting.svelte";
   import Show from "./components/Show.svelte";
   import Requirement from "./components/Requirement.svelte";
   import { mode, component, clear, loading } from "./stores";
-  import { init } from "./requirement";
+  import { info } from "./requirement";
 
-  let username: string = "";
+  let username = "";
 
   const load = async () => {
     clear();
     loading.start();
-    username = await init();
+    const res = await info(true);
     loading.end();
+    username = res.username;
   };
-  const promise = load();
 
   const components: {
-    [component: string]: typeof Show | typeof Requirement;
+    [component: string]: typeof Setting | typeof Show | typeof Requirement;
   } = {
+    setting: Setting,
     show: Show,
     requirement: Requirement,
   };
@@ -46,7 +48,7 @@
 <svelte:window on:popstate={handlePopstate} />
 
 <Nav bind:username on:reload={load} />
-{#await promise then _}
+{#await load() then _}
   <div class="content" style="opacity: {$loading ? 0.5 : 1}">
     {#if !username}
       {#if !$loading}

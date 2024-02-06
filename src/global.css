@@ -26,6 +26,14 @@ button+button {
   margin: 8px 6px;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
+.material-symbols-outlined {
+  cursor: pointer;
+}
+
 @media (max-width: 900px) {
   .content {
     padding-left: 0 !important;
