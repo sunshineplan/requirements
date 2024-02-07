@@ -150,122 +150,139 @@
   </header>
   <div class="row g-3" class:was-validated={validated}>
     <div class="col-md-8 col-sm-12">
-      <label class="form-label" for="desc">描述</label>
-      <!-- svelte-ignore a11y-autofocus -->
-      <textarea
-        class="form-control"
-        id="desc"
-        bind:value={desc}
-        rows="3"
-        autofocus
-        required
-        disabled={$mode == "view"}
-      />
-      <div class="invalid-feedback">必填字段</div>
+      <div class="form-floating">
+        <textarea
+          class="form-control"
+          id="desc"
+          bind:value={desc}
+          placeholder="desc"
+          required
+          disabled={$mode == "view"}
+        />
+        <label for="desc">描述</label>
+        <div class="invalid-feedback">必填字段</div>
+      </div>
     </div>
     <div class="w-100 m-0" />
     <div class="col-md-3 col-sm-4">
-      <label class="form-label" for="type">类型</label>
-      {#if $mode == "view"}
-        <input class="form-control" id="type" value={type} disabled />
-      {:else}
-        <select class="form-select" id="type" bind:value={type} required>
-          {#each types as type (type)}
-            <option value={type}>{type}</option>
+      <div class="form-floating">
+        {#if $mode == "view"}
+          <input class="form-control" id="type" value={type} disabled />
+        {:else}
+          <select class="form-select" id="type" bind:value={type} required>
+            {#each types as type (type)}
+              <option value={type}>{type}</option>
+            {/each}
+          </select>
+        {/if}
+        <label for="type">类型</label>
+        <div class="invalid-feedback">必填字段</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-4">
+      <div class="form-floating">
+        {#if $mode == "view"}
+          <input class="form-control" id="status" value={status} disabled />
+        {:else}
+          <select class="form-select" id="status" bind:value={status} required>
+            {#each statuses as status (status)}
+              <option value={status}>{status}</option>
+            {/each}
+          </select>
+        {/if}
+        <label for="status">状态</label>
+        <div class="invalid-feedback">必填字段</div>
+      </div>
+    </div>
+    <div class="w-100 m-0" />
+    <div class="col-md-3 col-sm-4">
+      <div class="form-floating">
+        <input
+          class="form-control"
+          id="date"
+          type="date"
+          bind:value={date}
+          required
+          disabled={$mode == "view"}
+        />
+        <label for="date">提请日期</label>
+        <div class="invalid-feedback">必填字段</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-4">
+      <div class="form-floating">
+        <input
+          class="form-control"
+          id="deadline"
+          type="date"
+          bind:value={deadline}
+          required
+          disabled={$mode == "view"}
+        />
+        <label for="deadline">期限日期</label>
+        <div class="invalid-feedback">必填字段</div>
+      </div>
+    </div>
+    <div class="w-100 m-0" />
+    <div class="col-md-3 col-sm-4">
+      <div class="form-floating">
+        <input
+          class="form-control"
+          id="submitter"
+          list="submitter-list"
+          bind:value={submitter}
+          placeholder="submitter"
+          required
+          disabled={$mode == "view"}
+        />
+        <datalist id="submitter-list">
+          {#each submitters as submitter (submitter)}
+            <option>{submitter}</option>
           {/each}
-        </select>
-      {/if}
-      <div class="invalid-feedback">必填字段</div>
+        </datalist>
+        <label for="submitter">提交人</label>
+        <div class="invalid-feedback">必填字段</div>
+      </div>
     </div>
     <div class="col-md-3 col-sm-4">
-      <label class="form-label" for="status">状态</label>
-      {#if $mode == "view"}
-        <input class="form-control" id="status" value={status} disabled />
-      {:else}
-        <select class="form-select" id="status" bind:value={status} required>
-          {#each statuses as status (status)}
-            <option value={status}>{status}</option>
+      <div class="form-floating">
+        <input
+          class="form-control"
+          id="recipient"
+          list="recipient-list"
+          bind:value={recipient}
+          placeholder="recipient"
+          required
+          disabled={$mode == "view"}
+        />
+        <datalist id="recipient-list">
+          {#each recipients as recipient (recipient)}
+            <option>{recipient}</option>
           {/each}
-        </select>
-      {/if}
-      <div class="invalid-feedback">必填字段</div>
-    </div>
-    <div class="w-100 m-0" />
-    <div class="col-md-3 col-sm-4">
-      <label class="form-label" for="date">提请日期</label>
-      <input
-        class="form-control"
-        id="date"
-        type="date"
-        bind:value={date}
-        required
-        disabled={$mode == "view"}
-      />
-      <div class="invalid-feedback">必填字段</div>
+        </datalist>
+        <label for="recipient">承接人</label>
+        <div class="invalid-feedback">必填字段</div>
+      </div>
     </div>
     <div class="col-md-3 col-sm-4">
-      <label class="form-label" for="deadline">期限日期</label>
-      <input
-        class="form-control"
-        id="deadline"
-        type="date"
-        bind:value={deadline}
-        required
-        disabled={$mode == "view"}
-      />
-      <div class="invalid-feedback">必填字段</div>
-    </div>
-    <div class="w-100 m-0" />
-    <div class="col-md-3 col-sm-4">
-      <label class="form-label" for="submitter">提交人</label>
-      <input
-        class="form-control"
-        id="submitter"
-        list="submitter-list"
-        bind:value={submitter}
-        required
-        disabled={$mode == "view"}
-      />
-      <datalist id="submitter-list">
-        {#each submitters as submitter (submitter)}
-          <option>{submitter}</option>
-        {/each}
-      </datalist>
-      <div class="invalid-feedback">必填字段</div>
-    </div>
-    <div class="col-md-3 col-sm-4">
-      <label class="form-label" for="recipient">承接人</label>
-      <input
-        class="form-control"
-        id="recipient"
-        list="recipient-list"
-        bind:value={recipient}
-        required
-        disabled={$mode == "view"}
-      />
-      <datalist id="recipient-list">
-        {#each recipients as recipient (recipient)}
-          <option>{recipient}</option>
-        {/each}
-      </datalist>
-      <div class="invalid-feedback">必填字段</div>
-    </div>
-    <div class="col-md-3 col-sm-4">
-      <label class="form-label" for="acceptor">受理人</label>
-      <input
-        class="form-control"
-        id="acceptor"
-        list="acceptor-list"
-        bind:value={acceptor}
-        required
-        disabled={$mode == "view"}
-      />
-      <datalist id="acceptor-list">
-        {#each acceptors as acceptor (acceptor)}
-          <option>{acceptor}</option>
-        {/each}
-      </datalist>
-      <div class="invalid-feedback">必填字段</div>
+      <div class="form-floating">
+        <input
+          class="form-control"
+          id="acceptor"
+          list="acceptor-list"
+          bind:value={acceptor}
+          placeholder="acceptor"
+          required
+          disabled={$mode == "view"}
+        />
+        <datalist id="acceptor-list">
+          {#each acceptors as acceptor (acceptor)}
+            <option>{acceptor}</option>
+          {/each}
+        </datalist>
+        <label for="acceptor">受理人</label>
+        <div class="invalid-feedback">必填字段</div>
+      </div>
     </div>
     <div class="col-md-6">
       <label class="form-label" for="participating">参与班组</label>
@@ -301,13 +318,16 @@
       </div>
     </div>
     <div class="col-md-8 col-sm-12">
-      <label class="form-label" for="note">备注</label>
-      <textarea
-        class="form-control"
-        id="note"
-        bind:value={note}
-        disabled={$mode == "view"}
-      />
+      <div class="form-floating">
+        <textarea
+          class="form-control"
+          id="note"
+          bind:value={note}
+          placeholder="note"
+          disabled={$mode == "view"}
+        />
+        <label for="note">备注</label>
+      </div>
     </div>
     {#if $mode == "view"}
       <div class="col-12">
@@ -338,33 +358,22 @@
     margin: 0;
   }
 
-  .back {
-    height: 50px;
-    width: 50px;
-    margin-right: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .back:hover {
-    background-color: rgba(15, 20, 25, 0.1);
-    border-radius: 50%;
-  }
-
-  .back span {
-    font-size: 30px;
-    cursor: default;
-  }
-
   .row {
     padding: 0 20px;
     overflow: auto;
     max-height: calc(100% - 60px);
   }
 
+  #desc {
+    height: 5rem;
+  }
+
   #participating {
     display: flex;
+  }
+
+  #note {
+    height: 7rem;
   }
 
   .invalid {

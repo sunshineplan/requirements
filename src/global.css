@@ -22,6 +22,25 @@ button+button {
   margin-left: 0.3em;
 }
 
+.back {
+  height: 50px;
+  width: 50px;
+  margin-right: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back:hover {
+  background-color: rgba(15, 20, 25, 0.1);
+  border-radius: 50%;
+}
+
+.back span {
+  font-size: 30px;
+  cursor: default;
+}
+
 .swal {
   margin: 8px 6px;
 }

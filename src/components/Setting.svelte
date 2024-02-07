@@ -137,15 +137,17 @@
   {#await load() then _}
     <div class="row g-3" class:was-validated={validated}>
       <div class="col-md-6 col-sm-12">
-        <label class="form-label" for="participants">班组</label>
-        <textarea
-          class="form-control"
-          id="participants"
-          bind:value={teams}
-          rows="6"
-          required
-        />
-        <div class="invalid-feedback">必填字段</div>
+        <div class="form-floating">
+          <textarea
+            class="form-control"
+            id="participants"
+            bind:value={teams}
+            placeholder="participants"
+            required
+          />
+          <label for="participants">班组</label>
+          <div class="invalid-feedback">必填字段</div>
+        </div>
         <button
           class="btn btn-primary float-end mt-2"
           on:click={updateParticipants}
@@ -206,23 +208,8 @@
     margin: 0;
   }
 
-  .back {
-    height: 50px;
-    width: 50px;
-    margin-right: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .back:hover {
-    background-color: rgba(15, 20, 25, 0.1);
-    border-radius: 50%;
-  }
-
-  .back span {
-    font-size: 30px;
-    cursor: default;
+  #participants {
+    height: 9rem;
   }
 
   .row {
