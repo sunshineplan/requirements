@@ -48,8 +48,7 @@
 </header>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="login" on:keyup={handleEnter}>
-  <div class="mb-3">
-    <label for="username" class="form-label">用户名</label>
+  <div class="form-floating mb-3">
     <!-- svelte-ignore a11y-autofocus -->
     <input
       class="form-control"
@@ -60,9 +59,9 @@
       autofocus
       required
     />
+    <label for="username">用户名</label>
   </div>
-  <div class="mb-3">
-    <label for="password" class="form-label">密码</label>
+  <div class="form-floating mb-3">
     <input
       class="form-control"
       type="password"
@@ -72,6 +71,7 @@
       placeholder="Password"
       required
     />
+    <label for="password">密码</label>
   </div>
   <div class="mb-3 form-check">
     <input
