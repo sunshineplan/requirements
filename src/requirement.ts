@@ -99,7 +99,7 @@ export const info = async (load?: Boolean): Promise<Info> => {
     } else await reset()
   } else if (resp.status == 409) {
     await requirements.clear()
-    return await info()
+    return await info(load)
   } else await reset()
   return { username: '' } as Info
 }
