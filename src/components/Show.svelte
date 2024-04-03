@@ -28,7 +28,9 @@
     goto("add");
   };
 
-  const view = (e: MouseEvent, r: Requirement) => {
+  const view = async (e: MouseEvent, r: Requirement) => {
+    await new Promise((sleep) => setTimeout(sleep, 50));
+    if (window.getSelection().toString() != "") return;
     if ((e.target as HTMLElement).dataset["action"] != "done") {
       $requirement = r;
       goto("view");
