@@ -101,7 +101,7 @@ export const info = async (load?: Boolean): Promise<Info> => {
     await requirements.clear()
     return await info(load)
   } else await reset()
-  return { username: '' } as Info
+  return <Info>{ username: '' }
 }
 
 const reset = async () => {
@@ -111,6 +111,9 @@ const reset = async () => {
 }
 
 const isEqual = (a: Requirement, b: Requirement): boolean => {
-  for (const key in a) if (a[key] != b[key]) return false
+  for (const k in a) {
+    const key = k as keyof Requirement
+    if (a[key] != b[key]) return false
+  }
   return true
 }

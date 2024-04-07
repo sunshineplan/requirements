@@ -5,7 +5,7 @@
   import { search, sort, desc, goto, scroll } from "../stores";
   import { requirement, requirements } from "../requirement";
 
-  const columns = {
+  const columns: { [key: string]: keyof Requirement } = {
     编号: "id",
     类型: "type",
     描述: "desc",
@@ -17,7 +17,7 @@
     状态: "status",
     备注: "note",
     参与班组: "participating",
-  } as { [key: string]: keyof Requirement };
+  };
 
   let output: Requirement[] = [];
 
@@ -30,7 +30,7 @@
 
   const view = async (e: MouseEvent, r: Requirement) => {
     await new Promise((sleep) => setTimeout(sleep, 50));
-    if (window.getSelection().toString() != "") return;
+    if (window.getSelection()?.toString() !== "") return;
     if ((e.target as HTMLElement).dataset["action"] != "done") {
       $requirement = r;
       goto("view");
@@ -124,7 +124,7 @@
   <table class="table table-hover table-sm">
     <thead>
       <tr>
-        {#each Object.entries(columns) as [key, _] (key)}
+        {#each Object.keys(columns) as key (key)}
           <th
             class="sortable {$sort == key
               ? $desc

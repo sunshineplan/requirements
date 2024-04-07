@@ -56,12 +56,12 @@
       preConfirm: () => {
         if (valid())
           return {
-            username: (document.getElementById("username") as HTMLInputElement)
-              .value,
-            password: (document.getElementById("password") as HTMLInputElement)
-              .value,
+            username:
+              document.querySelector<HTMLInputElement>("#username")!.value,
+            password:
+              document.querySelector<HTMLInputElement>("#password")!.value,
           };
-        document.getElementById("addUser").classList.add("was-validated");
+        document.getElementById("addUser")?.classList.add("was-validated");
         return false;
       },
     });
@@ -97,8 +97,8 @@
       },
       preConfirm: () => {
         if (valid())
-          return (document.getElementById("chgpwd") as HTMLInputElement).value;
-        document.getElementById("reset").classList.add("was-validated");
+          return document.querySelector<HTMLInputElement>("#chgpwd")!.value;
+        document.getElementById("reset")!.classList.add("was-validated");
         return false;
       },
     });

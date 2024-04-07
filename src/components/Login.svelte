@@ -5,15 +5,17 @@
 
   const dispatch = createEventDispatcher();
 
-  let username = localStorage.getItem("username");
+  let username = localStorage.getItem("username")!;
   let password = "";
   let rememberme = localStorage.getItem("rememberme") === "true";
 
   const login = async () => {
-    if (!document.querySelector<HTMLSelectElement>("#username").checkValidity())
+    if (
+      !document.querySelector<HTMLSelectElement>("#username")!.checkValidity()
+    )
       await fire("错误", "用户名不能为空", "error");
     else if (
-      !document.querySelector<HTMLSelectElement>("#password").checkValidity()
+      !document.querySelector<HTMLSelectElement>("#password")!.checkValidity()
     )
       await fire("错误", "密码不能为空", "error");
     else {

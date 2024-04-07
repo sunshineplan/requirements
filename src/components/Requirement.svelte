@@ -7,7 +7,7 @@
 
   const dispatch = createEventDispatcher();
 
-  const modeList = {
+  const modeList: { [key: string]: string } = {
     add: "新增",
     edit: "编辑",
     view: "查看",
@@ -53,8 +53,8 @@
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
     acceptors = await requirements.acceptors();
-    document.getElementById("desc").scrollTop = 0;
-    document.getElementById("note").scrollTop = 0;
+    document.getElementById("desc")!.scrollTop = 0;
+    document.getElementById("note")!.scrollTop = 0;
   });
 
   const current = () => {
@@ -109,7 +109,7 @@
         break;
       case "add":
         for (const k in r) {
-          if (r[k] != "") {
+          if (r[k as keyof Requirement] != "") {
             edited = true;
             break;
           }
@@ -117,7 +117,8 @@
         break;
       case "edit":
         for (const k in r) {
-          if (r[k] != $requirement[k]) {
+          const key = k as keyof Requirement;
+          if (r[key] != $requirement[key]) {
             edited = true;
             break;
           }
