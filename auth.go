@@ -77,6 +77,11 @@ func adminRequired(c *gin.Context) {
 	}
 }
 
+type info struct {
+	username string
+	ip       string
+}
+
 func login(c *gin.Context) {
 	var login struct {
 		Username, Password string
@@ -98,7 +103,7 @@ func login(c *gin.Context) {
 		svc.Print(err)
 		message = "无效用户名"
 	} else {
-		if _, err := password.Compare(c.ClientIP()+login.Username, pwd, login.Password, false); err != nil {
+		if err := password.Compare(info{login.Username, c.ClientIP()}, pwd, login.Password); err != nil {
 			if errors.Is(err, password.ErrIncorrectPassword) {
 				message = err.Error()
 			} else {
