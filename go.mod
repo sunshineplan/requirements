@@ -1,6 +1,6 @@
 module requirements
 
-go 1.21
+go 1.22
 
 require (
 	github.com/gin-contrib/sessions v1.0.1
