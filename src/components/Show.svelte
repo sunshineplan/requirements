@@ -110,8 +110,8 @@
       dispatch("reload");
     } else if (resp.status == 409) {
       loading.start();
-      await info();
-      $search = $search;
+      await info(true);
+      filter();
       loading.end();
       await subscribe(signal);
     } else {
