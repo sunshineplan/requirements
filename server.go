@@ -3,20 +3,14 @@ package main
 import (
 	"crypto/rand"
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/utils/log"
 )
 
 func run() error {
-	if *logPath != "" {
-		svc.Logger = log.New(*logPath, "", log.LstdFlags)
-		gin.DefaultWriter = svc.Logger
-		gin.DefaultErrorWriter = svc.Logger
-	}
-
 	if err := loadUsers(); err != nil {
 		return err
 	}
@@ -65,7 +59,17 @@ func run() error {
 			c.JSON(200, obj)
 		} else {
 			c.SetCookie("last", last.String(), 856400*365, "", "", false, true)
-			c.AbortWithStatus(409)
+			c.Status(409)
+		}
+	})
+	router.GET("/poll", authRequired, func(c *gin.Context) {
+		time.Sleep(*poll)
+		infoMutex.Lock()
+		defer infoMutex.Unlock()
+		if v, _ := c.Cookie("last"); v == last.String() {
+			c.String(200, "ok")
+		} else {
+			c.Status(409)
 		}
 	})
 

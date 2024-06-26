@@ -1,9 +1,12 @@
 <script lang="ts">
   import Action from "./Action.svelte";
-  import { onMount } from "svelte";
+  import { onMount, createEventDispatcher } from "svelte";
   import { stringify } from "csv-stringify/browser/esm/sync";
-  import { search, sort, desc, goto, scroll } from "../stores";
-  import { requirement, requirements } from "../requirement";
+  import { search, sort, desc, goto, scroll, loading } from "../stores";
+  import { requirement, requirements, info } from "../requirement";
+  import { poll } from "../misc";
+
+  const dispatch = createEventDispatcher();
 
   const columns: { [key: string]: keyof Requirement } = {
     编号: "id",
@@ -99,6 +102,28 @@
     }
     return s;
   };
+
+  const subscribe = async (signal: AbortSignal) => {
+    const resp = await poll(signal);
+    if (resp.status == 200) await subscribe(signal);
+    else if (resp.status == 401) {
+      dispatch("reload");
+    } else if (resp.status == 409) {
+      loading.start();
+      await info();
+      $search = $search;
+      loading.end();
+      await subscribe(signal);
+    } else {
+      await new Promise((sleep) => setTimeout(sleep, 30000));
+      await subscribe(signal);
+    }
+  };
+  onMount(() => {
+    const controller = new AbortController();
+    subscribe(controller.signal);
+    return () => controller.abort();
+  });
 
   onMount(() => scroll(true));
 </script>

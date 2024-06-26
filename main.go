@@ -3,9 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/utils/flags"
@@ -58,7 +61,10 @@ func init() {
 	}
 }
 
-var logPath = flag.String("log", "", "Log file path")
+var (
+	poll    = flag.Duration("poll", 50*time.Second, "Poll interval")
+	logPath = flag.String("log", "", "Log file path")
+)
 
 func main() {
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
@@ -71,6 +77,12 @@ func main() {
 	flag.StringVar(&svc.Options.PIDFile, "pid", "/var/run/requirements.pid", "PID file path")
 	flags.SetConfigFile(joinPath(dir(self), "config.ini"))
 	flags.Parse()
+
+	if *logPath != "" {
+		svc.SetLogger(*logPath, "", log.LstdFlags)
+		gin.DefaultWriter = svc.Logger
+		gin.DefaultErrorWriter = svc.Logger
+	}
 
 	if err := svc.ParseAndRun(flag.Args()); err != nil {
 		svc.Fatal(err)
