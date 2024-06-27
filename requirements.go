@@ -29,7 +29,7 @@ func get(c *gin.Context) {
 		json = append(json, v)
 	}
 	slices.SortFunc(json, func(a, b requirement) int { return a.ID.compare(b.ID) })
-	c.SetCookie("last", last.String(), 856400*365, "", "", false, true)
+	c.SetCookie("last", last.String(), 856400*365, "", "", false, false)
 	c.JSON(200, json)
 }
 
@@ -66,7 +66,7 @@ func add(c *gin.Context) {
 		c.AbortWithStatus(500)
 		return
 	}
-	c.SetCookie("last", last.String(), 856400*365, "", "", false, true)
+	c.SetCookie("last", last.String(), 856400*365, "", "", false, false)
 	c.JSON(200, obj)
 }
 
@@ -106,7 +106,7 @@ func edit(c *gin.Context) {
 		c.AbortWithStatus(500)
 		return
 	}
-	c.SetCookie("last", last.String(), 856400*365, "", "", false, true)
+	c.SetCookie("last", last.String(), 856400*365, "", "", false, false)
 	c.JSON(200, obj)
 }
 
@@ -137,7 +137,7 @@ func del(c *gin.Context) {
 			c.AbortWithStatus(500)
 			return
 		}
-		c.SetCookie("last", last.String(), 856400*365, "", "", false, true)
+		c.SetCookie("last", last.String(), 856400*365, "", "", false, false)
 	}
 	c.JSON(200, obj)
 }

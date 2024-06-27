@@ -58,7 +58,7 @@ func run() error {
 		if last.Equal(c) {
 			c.JSON(200, obj)
 		} else {
-			c.SetCookie("last", last.String(), 856400*365, "", "", false, true)
+			c.SetCookie("last", last.String(), 856400*365, "", "", false, false)
 			c.Status(409)
 		}
 	})
@@ -66,11 +66,7 @@ func run() error {
 		time.Sleep(*poll)
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
-		if v, _ := c.Cookie("last"); v == last.String() {
-			c.String(200, "ok")
-		} else {
-			c.Status(409)
-		}
+		c.String(200, last.String())
 	})
 
 	auth := router.Group("/")
