@@ -10,7 +10,7 @@
     "@sveltejs/vite-plugin-svelte": "^2.5.3",
     "@tsconfig/svelte": "^5.0.4",
     "@types/js-cookie": "^3.0.6",
-    "csv-stringify": "^6.5.0",
+    "csv-stringify": "^6.5.1",
     "dexie": "^4.0.8",
     "js-cookie": "^3.0.5",
     "svelte": "^4.2.18",
