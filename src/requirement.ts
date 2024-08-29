@@ -95,7 +95,7 @@ export const info = async (load?: Boolean): Promise<Info> => {
           await requirements.load()
         }
       }
-      return { username: res.username, participants: res.participants, users: res.users }
+      return { username: res.username, participants: res.participants, types: res.types, users: res.users }
     } else await reset()
   } else if (resp.status == 409) {
     await requirements.clear()

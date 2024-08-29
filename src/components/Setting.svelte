@@ -4,7 +4,8 @@
   import { loading, goto } from "../stores";
   import { info } from "../requirement";
 
-  let teams = "";
+  let participants = "";
+  let types = "";
   let users: string[] = [];
   let validated = false;
 
@@ -12,15 +13,27 @@
     loading.start();
     const res = await info();
     loading.end();
-    teams = res.participants.join("\n");
+    participants = res.participants.join("\n");
+    types = res.types.join("\n");
     users = res.users;
   };
 
   const updateParticipants = async () => {
     if (valid()) {
       validated = false;
-      const restult = teams.split("\n").filter(Boolean);
+      const restult = participants.split("\n").filter(Boolean);
       const resp = await post("/participants", restult);
+      if (resp.ok) {
+        await fire("成功", "保存成功", "success");
+      } else await fire("错误", await resp.text(), "error");
+    } else validated = true;
+  };
+
+  const updateTypes = async () => {
+    if (valid()) {
+      validated = false;
+      const restult = types.split("\n").filter(Boolean);
+      const resp = await post("/types", restult);
       if (resp.ok) {
         await fire("成功", "保存成功", "success");
       } else await fire("错误", await resp.text(), "error");
@@ -141,7 +154,7 @@
           <textarea
             class="form-control"
             id="participants"
-            bind:value={teams}
+            bind:value={participants}
             placeholder="participants"
             required
           />
@@ -152,6 +165,22 @@
           class="btn btn-primary float-end mt-2"
           on:click={updateParticipants}
         >
+          保存
+        </button>
+      </div>
+      <div class="col-md-6 col-sm-12">
+        <div class="form-floating">
+          <textarea
+            class="form-control"
+            id="types"
+            bind:value={types}
+            placeholder="types"
+            required
+          />
+          <label for="types">类型</label>
+          <div class="invalid-feedback">必填字段</div>
+        </div>
+        <button class="btn btn-primary float-end mt-2" on:click={updateTypes}>
           保存
         </button>
       </div>

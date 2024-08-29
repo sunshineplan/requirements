@@ -15,5 +15,6 @@ interface Requirement {
 interface Info {
   username: string
   participants: string[]
+  types: string[]
   users: string[]
 }

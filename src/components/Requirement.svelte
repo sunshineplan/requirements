@@ -13,15 +13,6 @@
     view: "查看",
   };
 
-  const types = [
-    "内容策划",
-    "宣传推广",
-    "用户培训",
-    "宣传品相关",
-    "平台相关",
-    "中心业务",
-    "馆所业务",
-  ];
   const statuses = ["进行中", "已完成", "已关闭"];
 
   let type = $requirement.type || "";
@@ -38,18 +29,19 @@
     : [];
   let validated = false;
 
+  let participants: string[] = [];
+  let types: string[] = [];
+
   let submitters: string[] = [];
   let recipients: string[] = [];
   let acceptors: string[] = [];
 
-  const load = async () => {
+  onMount(async () => {
     loading.start();
     const res = await info();
     loading.end();
-    return res.participants;
-  };
-
-  onMount(async () => {
+    participants = res.participants;
+    types = res.types;
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
     acceptors = await requirements.acceptors();
@@ -288,28 +280,26 @@
     <div class="col-md-6">
       <label class="form-label" for="participating">参与班组</label>
       <div id="participating">
-        {#await load() then participants}
-          {#each participants as participant, index (participant)}
-            <div class="form-check form-check-inline">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                class:invalid={validated && participating.length == 0}
-                id={"participant" + index}
-                bind:group={participating}
-                value={participant}
-                disabled={$mode == "view"}
-              />
-              <label
-                class="form-check-label"
-                class:invalid={validated && participating.length == 0}
-                for={"participant" + index}
-              >
-                {participant}
-              </label>
-            </div>
-          {/each}
-        {/await}
+        {#each participants as participant, index (participant)}
+          <div class="form-check form-check-inline">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              class:invalid={validated && participating.length == 0}
+              id={"participant" + index}
+              bind:group={participating}
+              value={participant}
+              disabled={$mode == "view"}
+            />
+            <label
+              class="form-check-label"
+              class:invalid={validated && participating.length == 0}
+              for={"participant" + index}
+            >
+              {participant}
+            </label>
+          </div>
+        {/each}
       </div>
       <div
         class="invalid-feedback"

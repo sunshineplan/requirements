@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"slices"
@@ -20,6 +21,25 @@ var (
 
 	mu sync.Mutex
 )
+
+type requirement struct {
+	ID            ID     `csv:"编号" json:"id"`
+	Type          string `csv:"类型" json:"type"`
+	Desc          string `csv:"描述" json:"desc"`
+	Date          Date   `csv:"提请日期" json:"date"`
+	Deadline      Date   `csv:"期限日期" json:"deadline"`
+	Submitter     string `csv:"提交人" json:"submitter"`
+	Recipient     string `csv:"承接人" json:"recipient"`
+	Acceptor      string `csv:"受理人" json:"acceptor"`
+	Status        string `csv:"状态" json:"status"`
+	Note          string `csv:"备注" json:"note"`
+	Participating string `csv:"参与班组" json:"participating"`
+}
+
+func (r requirement) String() string {
+	b, _ := json.Marshal(r)
+	return string(b)
+}
 
 func get(c *gin.Context) {
 	mu.Lock()
@@ -157,8 +177,17 @@ func statistics(c *gin.Context) {
 		isNew = true
 	}
 	res := analyzeFull(src, 2022, 8, isNew)
+	fieldnames := append(append([]string{"年份", "月"}, types...), "总计")
+	var data []map[string]int
+	for _, i := range res {
+		m := i.Types
+		m["年份"] = i.Year
+		m["月"] = i.Month
+		m["总计"] = i.Total
+		data = append(data, m)
+	}
 	var buf bytes.Buffer
-	if err := csv.ExportUTF8(nil, res, &buf); err != nil {
+	if err := csv.ExportUTF8(fieldnames, data, &buf); err != nil {
 		svc.Println(c.ClientIP(), username, err)
 		c.AbortWithStatus(500)
 		return
@@ -193,32 +222,48 @@ func backup() {
 	)
 }
 
+type summary struct {
+	Year  int
+	Month int
+	Types map[string]int
+	Total int
+}
+
+func inRange(date, deadline Date, year, month int) bool {
+	if date.isZero() && deadline.isZero() {
+		return true
+	}
+	if date.isZero() {
+		if year == deadline.year {
+			return month <= deadline.month
+		}
+		return year <= deadline.year
+	}
+	if deadline.isZero() {
+		if year == date.year {
+			return month >= date.month
+		}
+		return year >= date.year
+	}
+	d1 := fmt.Sprintf("%d%02d", date.year, date.month)
+	d2 := fmt.Sprintf("%d%02d", deadline.year, deadline.month)
+	ym := fmt.Sprintf("%d%02d", year, month)
+	return d1 <= ym && ym <= d2
+}
+
 func analyze(src []requirement, year, startMonth, endMonth int, isNew bool) (res []summary) {
 	for i := startMonth; i <= endMonth; i++ {
-		sum := summary{Year: year, Month: i}
+		sum := summary{Year: year, Month: i, Types: make(map[string]int)}
 		for _, i := range src {
 			if (isNew && i.Date.year == sum.Year && i.Date.month == sum.Month) ||
 				(!isNew && inRange(i.Date, i.Deadline, sum.Year, sum.Month)) {
-				switch i.Type {
-				case 1:
-					sum.I++
-				case 2:
-					sum.II++
-				case 3:
-					sum.III++
-				case 4:
-					sum.IV++
-				case 5:
-					sum.V++
-				case 6:
-					sum.VI++
-				case 7:
-					sum.VII++
-				default:
-					svc.Println("unknown requirement type", i)
-					continue
-				}
-				sum.Totle++
+				sum.Types[i.Type]++
+				sum.Total++
+			}
+		}
+		for _, i := range types {
+			if _, ok := sum.Types[i]; !ok {
+				sum.Types[i] = 0
 			}
 		}
 		res = append(res, sum)

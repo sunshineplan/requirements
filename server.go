@@ -17,6 +17,9 @@ func run() error {
 	if err := loadParticipants(); err != nil {
 		return err
 	}
+	if err := loadTypes(); err != nil {
+		return err
+	}
 
 	router := gin.Default()
 	router.TrustedPlatform = "X-Real-IP"
@@ -47,7 +50,7 @@ func run() error {
 		}
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
-		obj := map[string]any{"username": user, "participants": participants}
+		obj := map[string]any{"username": user, "participants": participants, "types": types}
 		if user == "admin" {
 			var s []string
 			for _, i := range users {
@@ -92,6 +95,7 @@ func run() error {
 
 	admin := base.Group("/", adminRequired)
 	admin.POST("/participants", updateParticipants)
+	admin.POST("/types", updateTypes)
 	admin.POST("/addUser", func(c *gin.Context) { updateUser(c, true) })
 	admin.POST("/chgpwd", func(c *gin.Context) { updateUser(c, false) })
 	admin.POST("/deleteUser", deleteUser)
