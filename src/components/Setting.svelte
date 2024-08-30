@@ -237,7 +237,8 @@
     margin: 0;
   }
 
-  #participants {
+  #participants,
+  #types {
     height: 9rem;
   }
 

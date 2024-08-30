@@ -15,8 +15,8 @@
     描述: "desc",
     提请日期: "date",
     期限日期: "deadline",
+    完成日期: "done",
     提交人: "submitter",
-    承接人: "recipient",
     受理人: "acceptor",
     状态: "status",
     备注: "note",
@@ -257,7 +257,6 @@
   th:nth-of-type(11) {
     width: 6rem;
   }
-  th:nth-of-type(6),
   th:nth-of-type(7),
   th:nth-of-type(8),
   th:nth-of-type(9) {
@@ -269,7 +268,8 @@
     }
   }
   th:nth-of-type(4),
-  th:nth-of-type(5) {
+  th:nth-of-type(5),
+  th:nth-of-type(6) {
     width: 8rem;
   }
   th:nth-of-type(10) {

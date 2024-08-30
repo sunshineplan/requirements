@@ -28,6 +28,7 @@ type requirement struct {
 	Desc          string `csv:"描述" json:"desc"`
 	Date          Date   `csv:"提请日期" json:"date"`
 	Deadline      Date   `csv:"期限日期" json:"deadline"`
+	Done          Date   `csv:"完成日期" json:"done"`
 	Submitter     string `csv:"提交人" json:"submitter"`
 	Recipient     string `csv:"承接人" json:"recipient"`
 	Acceptor      string `csv:"受理人" json:"acceptor"`

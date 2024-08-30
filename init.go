@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"io/fs"
 
 	"github.com/sunshineplan/utils/csv"
 	"github.com/sunshineplan/utils/mail"
@@ -26,6 +27,9 @@ func initSrv() error {
 
 	var res []requirement
 	if err := csv.DecodeFile(joinPath(dir(self), "requirements.csv"), &res); err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
 		return err
 	}
 	for _, i := range res {

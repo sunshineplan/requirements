@@ -4,6 +4,7 @@ interface Requirement {
   desc: string
   date: string
   deadline: string
+  done: string
   submitter: string
   recipient: string
   acceptor: string

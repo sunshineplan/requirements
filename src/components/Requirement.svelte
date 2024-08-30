@@ -19,6 +19,7 @@
   let desc = $requirement.desc || "";
   let date = $requirement.date || "";
   let deadline = $requirement.deadline || "";
+  let done = $requirement.done || "";
   let submitter = $requirement.submitter || "";
   let recipient = $requirement.recipient || "";
   let acceptor = $requirement.acceptor || "";
@@ -216,6 +217,22 @@
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
+    {#if status == "已完成"}
+      <div class="col-md-3 col-sm-4">
+        <div class="form-floating">
+          <input
+            class="form-control"
+            id="done"
+            type="date"
+            bind:value={done}
+            required
+            disabled={$mode == "view"}
+          />
+          <label for="deadline">完成日期</label>
+          <div class="invalid-feedback">必填字段</div>
+        </div>
+      </div>
+    {/if}
     <div class="w-100 m-0" />
     <div class="col-md-3 col-sm-4">
       <div class="form-floating">

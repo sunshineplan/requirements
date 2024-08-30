@@ -40,7 +40,11 @@ func (id ID) MarshalText() ([]byte, error) {
 }
 
 func newID(last ID) ID {
-	switch year := time.Now().Year(); cmp.Compare(year, last.year) {
+	year := time.Now().Year()
+	if last.year == 0 && last.serial == 0 {
+		return ID{year, 1}
+	}
+	switch cmp.Compare(year, last.year) {
 	case 1:
 		return ID{year, 1}
 	case 0:
@@ -81,6 +85,9 @@ func (d *Date) UnmarshalText(text []byte) error {
 }
 
 func (d Date) MarshalText() ([]byte, error) {
+	if d.isZero() {
+		return nil, nil
+	}
 	return []byte(fmt.Sprintf("%04d-%02d-%02d", d.year, d.month, d.day)), nil
 }
 

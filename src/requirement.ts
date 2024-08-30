@@ -26,6 +26,7 @@ const createRequirements = () => {
       else await fire('Fatal', await resp.text(), 'error')
     },
     save: async (r: Requirement) => {
+      if (r.status != '已完成') r.done = ''
       let resp: Response | undefined = undefined
       if (r.id) {
         if (isEqual(get(requirement), r)) return 0
@@ -56,6 +57,7 @@ const createRequirements = () => {
     },
     done: async (r: Requirement) => {
       if (r.status == '已完成') return 0
+      r.done = new Date().toISOString().split('T')[0]
       r.status = '已完成'
       return requirements.save(r)
     },
