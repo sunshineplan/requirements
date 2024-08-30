@@ -45,7 +45,7 @@ func (r requirement) String() string {
 func get(c *gin.Context) {
 	mu.Lock()
 	defer mu.Unlock()
-	var json []requirement
+	json := []requirement{}
 	for _, v := range requirementsList {
 		json = append(json, v)
 	}
@@ -216,8 +216,11 @@ func save() error {
 func backup() {
 	mu.Lock()
 	defer mu.Unlock()
+	if len(requirementsList) == 0 {
+		return
+	}
 	sendMail(
-		fmt.Sprintf("[业务系统]数据备份-%s", time.Now().Format("20060102")),
+		fmt.Sprintf(*prefix+"-%s", time.Now().Format("20060102")),
 		fmt.Sprintf("备份时间: %s", time.Now()),
 		[]*mail.Attachment{{Path: joinPath(dir(self), "requirements.csv")}},
 	)
