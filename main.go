@@ -34,9 +34,6 @@ func init() {
 	if err != nil {
 		svc.Fatalln("Failed to get self path:", err)
 	}
-	if err := setLast(); err != nil {
-		svc.Fatal(err)
-	}
 	svc.Name = "Requirements"
 	svc.Desc = "Instance to serve Requirements"
 	svc.Exec = run

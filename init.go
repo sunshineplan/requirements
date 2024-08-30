@@ -38,6 +38,9 @@ func initSrv() error {
 			lastID = i.ID
 		}
 	}
+	if err := setLast(); err != nil {
+		svc.Fatal(err)
+	}
 	return nil
 }
 
