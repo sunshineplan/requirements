@@ -56,6 +56,8 @@
       class="form-control"
       bind:value={username}
       id="username"
+      name="username"
+      autocomplete="username"
       maxlength="20"
       placeholder="Username"
       autofocus
@@ -69,6 +71,8 @@
       type="password"
       bind:value={password}
       id="password"
+      name="password"
+      autocomplete="current-password"
       maxlength="20"
       placeholder="Password"
       required
