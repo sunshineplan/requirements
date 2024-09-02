@@ -2,7 +2,11 @@
   import { createEventDispatcher } from "svelte";
   import { confirm } from "../misc";
   import { component, saveScrollTop, goto } from "../stores";
-  import { requirement as current, requirements } from "../requirement";
+  import {
+    requirement as current,
+    requirements,
+    isClosed,
+  } from "../requirement";
 
   const dispatch = createEventDispatcher();
 
@@ -33,7 +37,7 @@
 </script>
 
 <div>
-  {#if requirement.status == "进行中"}
+  {#if !isClosed(requirement)}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <span

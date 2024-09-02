@@ -110,6 +110,7 @@ func edit(c *gin.Context) {
 	defer mu.Unlock()
 	if v := requirementsList[data.Old.ID]; v != data.Old {
 		c.AbortWithStatus(409)
+		return
 	}
 	requirementsList[data.New.ID] = data.New
 	obj := gin.H{"status": 1}
@@ -120,6 +121,48 @@ func edit(c *gin.Context) {
 	go sendMail(
 		fmt.Sprintf("[业务系统]%s编辑了一项业务-%s", username, time.Now().Format("20060102 15:04")),
 		fmt.Sprintf("原始内容:\n%s\n\n修改内容:\n%s\n\nIP: %s", data.Old, data.New, c.ClientIP()),
+		nil,
+	)
+	if err := save(); err != nil {
+		svc.Println(c.ClientIP(), username, err)
+		c.AbortWithStatus(500)
+		return
+	}
+	c.SetCookie("last", last.String(), 856400*365, "", "", false, false)
+	c.JSON(200, obj)
+}
+
+func done(c *gin.Context) {
+	username, _ := c.Get("username")
+	var data requirement
+	if err := c.BindJSON(&data); err != nil {
+		svc.Println(c.ClientIP(), username, err)
+		return
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if v := requirementsList[data.ID]; v != data {
+		c.AbortWithStatus(409)
+		return
+	}
+	obj := gin.H{"status": 1}
+	if !last.Equal(c) {
+		obj["reload"] = 1
+	}
+	if data.Status == *doneValue {
+		c.JSON(200, obj)
+		return
+	} else {
+		data.Status = *doneValue
+		data.Done = now()
+		obj["value"] = data.Status
+		obj["done"] = data.Done
+	}
+	requirementsList[data.ID] = data
+	svc.Printf("%s %v done %s", c.ClientIP(), username, data)
+	go sendMail(
+		fmt.Sprintf("[业务系统]%s完成了一项业务-%s", username, time.Now().Format("20060102 15:04")),
+		fmt.Sprintf("完成内容:\n%s\n\nIP: %s", data, c.ClientIP()),
 		nil,
 	)
 	if err := save(); err != nil {

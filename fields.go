@@ -71,6 +71,11 @@ type Date struct {
 	year, month, day int
 }
 
+func now() Date {
+	y, m, d := time.Now().Date()
+	return Date{y, int(m), d}
+}
+
 func (d *Date) UnmarshalText(text []byte) error {
 	s := strings.Map(func(r rune) rune {
 		if r == '-' || r == '/' || unicode.IsSpace(r) {
@@ -88,7 +93,11 @@ func (d Date) MarshalText() ([]byte, error) {
 	if d.isZero() {
 		return nil, nil
 	}
-	return []byte(fmt.Sprintf("%04d-%02d-%02d", d.year, d.month, d.day)), nil
+	return []byte(d.String()), nil
+}
+
+func (d Date) String() string {
+	return fmt.Sprintf("%04d-%02d-%02d", d.year, d.month, d.day)
 }
 
 func (date Date) isZero() bool {

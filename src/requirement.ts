@@ -26,7 +26,6 @@ const createRequirements = () => {
       else await fire('Fatal', await resp.text(), 'error')
     },
     save: async (r: Requirement) => {
-      if (r.status != '已完成') r.done = ''
       let resp: Response | undefined = undefined
       if (r.id) {
         if (isEqual(get(requirement), r)) return 0
@@ -56,10 +55,28 @@ const createRequirements = () => {
       return 0
     },
     done: async (r: Requirement) => {
-      if (r.status == '已完成') return 0
-      r.done = new Date().toISOString().split('T')[0]
-      r.status = '已完成'
-      return requirements.save(r)
+      const resp = await post('/done', r)
+      if (resp.ok) {
+        const res = await resp.json()
+        if (res.status == 1) {
+          if (res.reload) {
+            await requirements.clear()
+            await requirements.fetch()
+            await requirements.load()
+          } else {
+            if (res.value) {
+              r.status = res.value
+              r.done = res.done
+              await db.table('requirements').update(r.id, r)
+              await requirements.load()
+            }
+          }
+        } else {
+          await fire('Error', res.message, 'error')
+          return <number>res.error
+        }
+      } else await fire('Fatal', await resp.text(), 'error')
+      return 0
     },
     delete: async (requirement: Requirement) => {
       const resp = await post('/delete/' + requirement.id)
@@ -85,6 +102,13 @@ const createRequirements = () => {
 }
 export const requirements = createRequirements()
 
+export const statuses = writable(<Status[]>[])
+
+export const isClosed = (r: Requirement) => {
+  const status = get(statuses).find(e => e.value === r.status)
+  return status ? status.closed : false
+}
+
 export const info = async (load?: Boolean): Promise<Info> => {
   const resp = await fetch('/info')
   if (resp.ok) {
@@ -97,7 +121,14 @@ export const info = async (load?: Boolean): Promise<Info> => {
           await requirements.load()
         }
       }
-      return { username: res.username, participants: res.participants, types: res.types, users: res.users }
+      statuses.set(res.statuses)
+      return {
+        username: res.username,
+        done: res.done,
+        participants: res.participants,
+        types: res.types,
+        users: res.users
+      }
     } else await reset()
   } else if (resp.status == 409) {
     await requirements.clear()

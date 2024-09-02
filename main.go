@@ -59,9 +59,10 @@ func init() {
 }
 
 var (
-	poll    = flag.Duration("poll", 50*time.Second, "Poll interval")
-	prefix  = flag.String("prefix", "[业务系统]数据备份", "Backup mail subject prefix")
-	logPath = flag.String("log", "", "Log file path")
+	doneValue = flag.String("done", "已完成", "Done value")
+	poll      = flag.Duration("poll", 50*time.Second, "Poll interval")
+	prefix    = flag.String("prefix", "[业务系统]数据备份", "Backup mail subject prefix")
+	logPath   = flag.String("log", "", "Log file path")
 )
 
 func main() {

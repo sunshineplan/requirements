@@ -15,7 +15,13 @@ interface Requirement {
 
 interface Info {
   username: string
+  done: string
   participants: string[]
   types: string[]
   users: string[]
+}
+
+interface Status {
+  value: string
+  closed: boolean
 }

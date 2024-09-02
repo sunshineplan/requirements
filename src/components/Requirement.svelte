@@ -3,7 +3,7 @@
   import { onMount, createEventDispatcher } from "svelte";
   import { valid, confirm } from "../misc";
   import { loading, mode, goto, clear } from "../stores";
-  import { requirement, requirements, info } from "../requirement";
+  import { requirement, requirements, statuses, info } from "../requirement";
 
   const dispatch = createEventDispatcher();
 
@@ -12,8 +12,6 @@
     edit: "编辑",
     view: "查看",
   };
-
-  const statuses = ["进行中", "已完成", "已关闭"];
 
   let type = $requirement.type || "";
   let desc = $requirement.desc || "";
@@ -30,6 +28,7 @@
     : [];
   let validated = false;
 
+  let doneValue = "";
   let participants: string[] = [];
   let types: string[] = [];
 
@@ -43,6 +42,7 @@
     loading.end();
     participants = res.participants;
     types = res.types;
+    doneValue = res.done;
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
     acceptors = await requirements.acceptors();
@@ -71,6 +71,7 @@
       const r = current();
       if ($mode == "edit") r.id = $requirement.id;
       try {
+        if (r.status != doneValue) r.done = "";
         const res = await requirements.save(r);
         if (res === 0) {
           if ($mode == "add") clear();
@@ -179,8 +180,8 @@
           <input class="form-control" id="status" value={status} disabled />
         {:else}
           <select class="form-select" id="status" bind:value={status} required>
-            {#each statuses as status (status)}
-              <option value={status}>{status}</option>
+            {#each $statuses as status (status.value)}
+              <option value={status.value}>{status.value}</option>
             {/each}
           </select>
         {/if}
@@ -217,7 +218,7 @@
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
-    {#if status == "已完成"}
+    {#if status === doneValue}
       <div class="col-md-3 col-sm-4">
         <div class="form-floating">
           <input
