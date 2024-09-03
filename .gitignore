@@ -23,9 +23,6 @@
 dist
 node_modules
 
-auth.txt
-participants.txt
 requirements
-requirements.csv
-statuses.txt
-types.txt
+*.csv
+*.txt
