@@ -1,12 +1,16 @@
 package main
 
-import "github.com/sunshineplan/utils/mail"
+import (
+	"fmt"
+
+	"github.com/sunshineplan/utils/mail"
+)
 
 var to mail.Receipts
 
 func sendMail(subject, body string, attachments []*mail.Attachment) {
 	msg := &mail.Message{
-		Subject:     subject,
+		Subject:     fmt.Sprintf("[%s]%s", *prefix, subject),
 		Body:        body,
 		Attachments: attachments,
 	}
