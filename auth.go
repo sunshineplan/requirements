@@ -64,8 +64,7 @@ func getUser(c *gin.Context) (user string, ok bool) {
 
 func authRequired(c *gin.Context) {
 	if username := sessions.Default(c).Get("username"); username == nil {
-		c.Abort()
-		c.Redirect(401, "/")
+		c.AbortWithStatus(401)
 	} else {
 		c.Set("username", username)
 	}

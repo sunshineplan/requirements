@@ -66,6 +66,7 @@ var (
 )
 
 func main() {
+	flag.TextVar(&to, "to", mail.Receipts(nil), "Mail Subscriber")
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
 	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
 	flag.StringVar(&meta.Value, "value", "", "Verify Header Value")

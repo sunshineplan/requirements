@@ -58,7 +58,7 @@
     {/if}
   </div>
 {/await}
-<div class={username ? "loading" : "initializing"} hidden={!$loading}>
+<div class="loading" hidden={!$loading}>
   <div class="sk-wave sk-center">
     <div class="sk-wave-rect" />
     <div class="sk-wave-rect" />
@@ -75,5 +75,14 @@
     padding-top: 60px;
     width: 100%;
     height: 100%;
+  }
+
+  .loading {
+    position: fixed;
+    z-index: 2;
+    top: 60px;
+    height: calc(100% - 60px);
+    width: 100%;
+    display: flex;
   }
 </style>

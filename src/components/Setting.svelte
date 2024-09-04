@@ -18,22 +18,22 @@
     users = res.users;
   };
 
-  const updateParticipants = async () => {
+  const updateTypes = async () => {
     if (valid()) {
       validated = false;
-      const restult = participants.split("\n").filter(Boolean);
-      const resp = await post("/participants", restult);
+      const restult = types.split("\n").filter(Boolean);
+      const resp = await post("/types", restult);
       if (resp.ok) {
         await fire("成功", "保存成功", "success");
       } else await fire("错误", await resp.text(), "error");
     } else validated = true;
   };
 
-  const updateTypes = async () => {
+  const updateParticipants = async () => {
     if (valid()) {
       validated = false;
-      const restult = types.split("\n").filter(Boolean);
-      const resp = await post("/types", restult);
+      const restult = participants.split("\n").filter(Boolean);
+      const resp = await post("/participants", restult);
       if (resp.ok) {
         await fire("成功", "保存成功", "success");
       } else await fire("错误", await resp.text(), "error");
@@ -153,25 +153,6 @@
         <div class="form-floating">
           <textarea
             class="form-control"
-            id="participants"
-            bind:value={participants}
-            placeholder="participants"
-            required
-          />
-          <label for="participants">班组</label>
-          <div class="invalid-feedback">必填字段</div>
-        </div>
-        <button
-          class="btn btn-primary float-end mt-2"
-          on:click={updateParticipants}
-        >
-          保存
-        </button>
-      </div>
-      <div class="col-md-6 col-sm-12">
-        <div class="form-floating">
-          <textarea
-            class="form-control"
             id="types"
             bind:value={types}
             placeholder="types"
@@ -181,7 +162,24 @@
           <div class="invalid-feedback">必填字段</div>
         </div>
         <button class="btn btn-primary float-end mt-2" on:click={updateTypes}>
-          保存
+          保存类型
+        </button>
+      </div>
+      <div class="col-md-6 col-sm-12">
+        <div class="form-floating">
+          <textarea
+            class="form-control"
+            id="participants"
+            bind:value={participants}
+            placeholder="participants"
+          />
+          <label for="participants">班组</label>
+        </div>
+        <button
+          class="btn btn-primary float-end mt-2"
+          on:click={updateParticipants}
+        >
+          保存班组
         </button>
       </div>
       <hr />
@@ -218,7 +216,7 @@
             </li>
           {/each}
         </ol>
-        <button class="btn btn-primary float-end mt-2" on:click={addUser}>
+        <button class="btn btn-primary float-end my-2" on:click={addUser}>
           添加用户
         </button>
       </div>
@@ -246,5 +244,9 @@
     padding: 0 20px;
     overflow: auto;
     max-height: calc(100% - 60px);
+  }
+
+  .invalid-feedback {
+    position: absolute;
   }
 </style>

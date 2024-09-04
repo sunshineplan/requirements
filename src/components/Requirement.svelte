@@ -39,10 +39,10 @@
   onMount(async () => {
     loading.start();
     const res = await info();
-    loading.end();
     participants = res.participants;
     types = res.types;
     doneValue = res.done;
+    loading.end();
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
     acceptors = await requirements.acceptors();
@@ -66,7 +66,7 @@
   };
 
   const save = async () => {
-    if (valid() && participating.length > 0) {
+    if (valid() && (!participants.length || participating.length > 0)) {
       validated = false;
       const r = current();
       if ($mode == "edit") r.id = $requirement.id;
@@ -298,30 +298,47 @@
     <div class="col-md-6">
       <label class="form-label" for="participating">参与班组</label>
       <div id="participating">
-        {#each participants as participant, index (participant)}
-          <div class="form-check form-check-inline">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              class:invalid={validated && participating.length == 0}
-              id={"participant" + index}
-              bind:group={participating}
-              value={participant}
-              disabled={$mode == "view"}
-            />
-            <label
-              class="form-check-label"
-              class:invalid={validated && participating.length == 0}
-              for={"participant" + index}
-            >
-              {participant}
-            </label>
-          </div>
-        {/each}
+        {#if doneValue}
+          {#if participants.length == 0}
+            <div class="form-check form-check-inline">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id={"noparticipant"}
+                disabled
+              />
+              <label class="form-check-label" for={"noparticipant"}>无</label>
+            </div>
+          {/if}
+          {#each participants as participant, index (participant)}
+            <div class="form-check form-check-inline">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                class:invalid={validated && participating.length == 0}
+                id={"participant" + index}
+                bind:group={participating}
+                value={participant}
+                disabled={$mode == "view"}
+              />
+              <label
+                class="form-check-label"
+                class:invalid={validated && participating.length == 0}
+                for={"participant" + index}
+              >
+                {participant}
+              </label>
+            </div>
+          {/each}
+        {:else}
+          <div class="form-check"></div>
+        {/if}
       </div>
       <div
         class="invalid-feedback"
-        class:invalid={validated && participating.length == 0}
+        class:invalid={validated &&
+          participants.length &&
+          participating.length == 0}
       >
         必选字段
       </div>
@@ -339,16 +356,16 @@
       </div>
     </div>
     {#if $mode == "view"}
-      <div class="col-12">
+      <div class="col-12 my-2">
         <button class="btn btn-primary" on:click={back}>返回</button>
       </div>
     {:else}
-      <div class="col-12">
+      <div class="col-12 my-2">
         <button class="btn btn-primary" on:click={save}>保存</button>
         <button class="btn btn-primary" on:click={back}>取消</button>
       </div>
       {#if $mode == "edit"}
-        <div class="col-12">
+        <div class="col-12 mt-0 mb-2">
           <button class="btn btn-danger" on:click={del}>删除</button>
         </div>
       {/if}

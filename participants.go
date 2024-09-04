@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"io/fs"
 	"slices"
 	"strings"
 
@@ -12,12 +13,11 @@ import (
 var participants []string
 
 func loadParticipants() (err error) {
-	participants, err = txt.ReadFile(joinPath(dir(self), "participants.txt"))
-	if err != nil {
-		return
+	if participants, err = txt.ReadFile(joinPath(dir(self), "participants.txt")); participants == nil {
+		participants = []string{}
 	}
-	if len(participants) == 0 {
-		err = errors.New("no participants")
+	if errors.Is(err, fs.ErrNotExist) {
+		err = nil
 	}
 	return
 }
@@ -32,7 +32,11 @@ func updateParticipants(c *gin.Context) {
 	infoMutex.Lock()
 	defer infoMutex.Unlock()
 
-	participants = slices.DeleteFunc(data, func(s string) bool { return strings.TrimSpace(s) == "" })
+	if participants = slices.DeleteFunc(data, func(s string) bool {
+		return strings.TrimSpace(s) == ""
+	}); participants == nil {
+		participants = []string{}
+	}
 	if err := txt.ExportFile(participants, joinPath(dir(self), "participants.txt")); err != nil {
 		svc.Print(err)
 		c.String(500, "内部错误")

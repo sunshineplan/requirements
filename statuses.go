@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io/fs"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -10,7 +11,7 @@ import (
 	"github.com/sunshineplan/utils/txt"
 )
 
-var statuses []status
+var statuses = []status{}
 
 type status struct {
 	Value  string `json:"value"`
@@ -42,6 +43,11 @@ func loadStatuses() error {
 		if s := strings.TrimSpace(i); s != "" && s != ":" {
 			statuses = append(statuses, parseStatus(s))
 		}
+	}
+	if !slices.ContainsFunc(statuses, func(status status) bool {
+		return status.Value == *doneValue
+	}) {
+		statuses = append(statuses, status{*doneValue, true})
 	}
 	return nil
 }

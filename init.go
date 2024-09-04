@@ -11,19 +11,17 @@ import (
 
 func initSrv() error {
 	var data struct {
-		Dialer     mail.Dialer
-		Subscriber mail.Receipts
+		Dialer mail.Dialer
 	}
 	if err := retry.Do(func() error {
 		return meta.Get("requirements", &data)
 	}, 3, 20); err != nil {
 		return err
 	}
-	if data.Subscriber == nil {
+	if data.Dialer.Server == "" {
 		return errors.New("no permission")
 	}
 	dialer = data.Dialer
-	to = data.Subscriber
 
 	var res []requirement
 	if err := csv.DecodeFile(joinPath(dir(self), "requirements.csv"), &res); err != nil {
