@@ -141,6 +141,16 @@
         --margin="10px"
         on:reload
       />
+    {:else if $mode == "edit"}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <span
+        id="del"
+        title="删除"
+        class="material-symbols-outlined link-danger"
+        on:click={del}
+      >
+        delete_outline
+      </span>
     {/if}
   </header>
   <div class="row g-3" class:was-validated={validated}>
@@ -355,21 +365,20 @@
         <label for="note">备注</label>
       </div>
     </div>
-    {#if $mode == "view"}
-      <div class="col-12 my-2">
-        <button class="btn btn-primary" on:click={back}>返回</button>
-      </div>
-    {:else}
-      <div class="col-12 my-2">
-        <button class="btn btn-primary" on:click={save}>保存</button>
-        <button class="btn btn-primary" on:click={back}>取消</button>
-      </div>
-      {#if $mode == "edit"}
-        <div class="col-12 mt-0 mb-2">
-          <button class="btn btn-danger" on:click={del}>删除</button>
-        </div>
+    <div class="col-md-8 col-sm-12">
+      {#if $mode == "view"}
+        <button class="btn btn-primary float-end mb-2" on:click={back}>
+          返回
+        </button>
+      {:else}
+        <button class="btn btn-primary float-end mb-2" on:click={save}>
+          保存
+        </button>
+        <button class="btn btn-primary float-end mx-2 mb-2" on:click={back}>
+          取消
+        </button>
       {/if}
-    {/if}
+    </div>
   </div>
 </div>
 
@@ -382,6 +391,11 @@
 
   header h3 {
     margin: 0;
+  }
+
+  #del {
+    font-size: 22px;
+    margin-left: 10px;
   }
 
   .row {
