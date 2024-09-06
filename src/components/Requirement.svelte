@@ -251,7 +251,6 @@
           list="recipient-list"
           bind:value={recipient}
           placeholder="recipient"
-          required
           disabled={$mode == "view"}
         />
         <datalist id="recipient-list">
@@ -260,7 +259,6 @@
           {/each}
         </datalist>
         <label for="recipient">承接人</label>
-        <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
     <div class="col-md-3 col-sm-4">
