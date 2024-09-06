@@ -56,6 +56,7 @@
       desc,
       date,
       deadline,
+      done,
       submitter,
       recipient,
       acceptor,
