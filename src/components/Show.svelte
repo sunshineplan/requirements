@@ -9,23 +9,43 @@
 
   const dispatch = createEventDispatcher();
 
-  const columns: { [key: string]: keyof Requirement } = {
-    编号: "id",
-    类型: "type",
-    描述: "desc",
-    提请日期: "date",
-    期限日期: "deadline",
-    完成日期: "done",
-    提交人: "submitter",
-    受理人: "acceptor",
-    状态: "status",
-    备注: "note",
-    参与班组: "participating",
+  const headers: { [key: string]: string } = {
+    id: "编号",
+    type: "类型",
+    desc: "描述",
+    date: "提请日期",
+    deadline: "期限日期",
+    done: "完成日期",
+    submitter: "提交人",
+    recipient: "承接人",
+    acceptor: "受理人",
+    status: "状态",
+    note: "备注",
+    participating: "参与班组",
+  };
+
+  const columns: { [key in keyof Requirement]: boolean } = {
+    id: true,
+    type: true,
+    desc: true,
+    date: true,
+    deadline: true,
+    done: true,
+    submitter: true,
+    recipient: false,
+    acceptor: true,
+    status: true,
+    note: true,
+    participating: true,
   };
 
   let output: Requirement[] = [];
 
   $: $search, $sort, $desc, filter();
+
+  const getField = (r: Requirement, key: string) => {
+    return r[key as keyof Requirement];
+  };
 
   const add = () => {
     $requirement = <Requirement>{};
@@ -48,9 +68,9 @@
         stringify(output, {
           bom: true,
           header: true,
-          columns: Object.keys(columns).map((key) => ({
-            key: columns[key],
-            header: key,
+          columns: Object.keys(headers).map((key) => ({
+            key,
+            header: headers[key],
           })),
         }),
       ],
@@ -81,8 +101,8 @@
     if (!$sort) output = array.sort();
     else
       output = array.toSorted((a, b) => {
-        const v1 = a[columns[$sort]],
-          v2 = b[columns[$sort]];
+        const v1 = getField(a, $sort),
+          v2 = getField(b, $sort);
         let res = 0;
         if (v1 < v2) res = 1;
         else if (v1 > v2) res = -1;
@@ -151,22 +171,24 @@
   <table class="table table-hover table-sm">
     <thead>
       <tr>
-        {#each Object.keys(columns) as key (key)}
-          <th
-            class="sortable {$sort == key
-              ? $desc
-                ? 'desc'
-                : 'asc'
-              : 'default'}"
-            on:click={() => {
-              const before = $sort;
-              $sort = key;
-              if (before == $sort) $desc = !$desc;
-              else $desc = true;
-            }}
-          >
-            {key}
-          </th>
+        {#each Object.entries(columns) as [key, show] (key)}
+          {#if show}
+            <th
+              class="sortable {$sort == key
+                ? $desc
+                  ? 'desc'
+                  : 'asc'
+                : 'default'}"
+              on:click={() => {
+                const before = $sort;
+                $sort = key;
+                if (before == $sort) $desc = !$desc;
+                else $desc = true;
+              }}
+            >
+              {headers[key]}
+            </th>
+          {/if}
         {/each}
         <th />
       </tr>
@@ -174,14 +196,18 @@
     <tbody>
       {#each output as requirement (requirement.id)}
         <tr on:click={(e) => view(e, requirement)}>
-          {#each Object.entries(columns) as [key, val] (key)}
-            <td
-              title={/编号|类型|日期|班组/i.test(key) ? "" : requirement[val]}
-            >
-              {val == "participating"
-                ? participants(requirement[val])
-                : requirement[val]}
-            </td>
+          {#each Object.entries(columns) as [key, show] (key)}
+            {#if show}
+              <td
+                title={/编号|类型|日期|班组/i.test(headers[key])
+                  ? ""
+                  : getField(requirement, key)}
+              >
+                {key == "participating"
+                  ? participants(requirement[key])
+                  : getField(requirement, key)}
+              </td>
+            {/if}
           {/each}
           <td style="vertical-align: middle">
             <Action
