@@ -201,11 +201,9 @@
           id="deadline"
           type="date"
           bind:value={deadline}
-          required
           disabled={$mode == "view"}
         />
         <label for="deadline">期限日期</label>
-        <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
     {#if status === doneValue}
