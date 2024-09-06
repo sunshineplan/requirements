@@ -24,19 +24,19 @@
     participating: "参与班组",
   };
 
-  const columns: { [key in keyof Requirement]: boolean } = {
-    id: true,
-    type: true,
-    desc: true,
-    date: true,
-    deadline: true,
-    done: true,
-    submitter: true,
-    recipient: false,
-    acceptor: true,
-    status: true,
-    note: true,
-    participating: true,
+  const columns: { [key in keyof Requirement]: number } = {
+    id: 6,
+    type: 6,
+    desc: -1,
+    date: 8,
+    deadline: 8,
+    done: 8,
+    submitter: 5,
+    recipient: 0,
+    acceptor: 5,
+    status: 5,
+    note: 9,
+    participating: 6,
   };
 
   let output: Requirement[] = [];
@@ -171,14 +171,16 @@
   <table class="table table-hover table-sm">
     <thead>
       <tr>
-        {#each Object.entries(columns) as [key, show] (key)}
-          {#if show}
+        {#each Object.entries(columns) as [key, width] (key)}
+          {#if width}
             <th
               class="sortable {$sort == key
                 ? $desc
                   ? 'desc'
                   : 'asc'
                 : 'default'}"
+              class:auto={width == -1}
+              style:width={width > 0 ? `${width}rem` : ""}
               on:click={() => {
                 const before = $sort;
                 $sort = key;
@@ -278,30 +280,13 @@
     user-select: none;
   }
 
-  th:nth-of-type(1),
-  th:nth-of-type(2),
-  th:nth-of-type(11) {
-    width: 6rem;
-  }
-  th:nth-of-type(7),
-  th:nth-of-type(8),
-  th:nth-of-type(9) {
-    width: 5rem;
-  }
   @media (max-width: 1200px) {
-    th:nth-of-type(3) {
+    .auto {
       width: 10rem;
     }
   }
-  th:nth-of-type(4),
-  th:nth-of-type(5),
-  th:nth-of-type(6) {
-    width: 8rem;
-  }
-  th:nth-of-type(10) {
-    width: 9rem;
-  }
-  th:nth-of-type(12) {
+
+  th:nth-last-of-type(1) {
     width: 3.2rem;
   }
 
