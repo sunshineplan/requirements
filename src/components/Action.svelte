@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { confirm } from "../misc";
-  import { component, saveScrollTop, goto } from "../stores";
+  import { component, saveScrollTop, mode, goto } from "../stores";
   import {
     requirement as current,
     requirements,
@@ -34,6 +34,17 @@
     $current = r;
     goto("edit");
   };
+
+  const del = async (r: Requirement) => {
+    if (await confirm("该条业务将被永久删除。", true)) {
+      try {
+        await requirements.delete(r);
+      } catch {
+        dispatch("reload");
+      }
+      goto("show");
+    }
+  };
 </script>
 
 <div>
@@ -51,15 +62,27 @@
   {:else}
     <span class="material-symbols-outlined hidden">done_outline</span>
   {/if}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <span
-    title="编辑"
-    class="material-symbols-outlined link-primary"
-    on:click={() => edit(requirement)}
-  >
-    edit
-  </span>
+  {#if $component == "requirement" && $mode == "edit"}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <span
+      title="删除"
+      class="material-symbols-outlined link-danger"
+      on:click={() => del(requirement)}
+    >
+      delete_outline
+    </span>
+  {:else}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <span
+      title="编辑"
+      class="material-symbols-outlined link-primary"
+      on:click={() => edit(requirement)}
+    >
+      edit
+    </span>
+  {/if}
 </div>
 
 <style>

@@ -85,17 +85,6 @@
     } else validated = true;
   };
 
-  const del = async () => {
-    if (await confirm("该条业务将被永久删除。", true)) {
-      try {
-        await requirements.delete($requirement);
-      } catch {
-        dispatch("reload");
-      }
-      goto("show");
-    }
-  };
-
   const back = async () => {
     const r = current();
     let edited = false;
@@ -135,23 +124,13 @@
       <span class="material-symbols-outlined" on:click={back}>arrow_back</span>
     </div>
     <h3>{modeList[$mode]}业务</h3>
-    {#if $mode == "view"}
+    {#if $mode != "add"}
       <Action
         requirement={$requirement}
         --icon="22px"
         --margin="10px"
         on:reload
       />
-    {:else if $mode == "edit"}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <span
-        id="del"
-        title="删除"
-        class="material-symbols-outlined link-danger"
-        on:click={del}
-      >
-        delete_outline
-      </span>
     {/if}
   </header>
   <div class="row g-3" class:was-validated={validated}>
@@ -392,11 +371,6 @@
 
   header h3 {
     margin: 0;
-  }
-
-  #del {
-    font-size: 22px;
-    margin-left: 10px;
   }
 
   .row {
