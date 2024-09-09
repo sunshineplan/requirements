@@ -14,6 +14,7 @@ interface Requirement {
 }
 
 interface Info {
+  name: string
   username: string
   done: string
   participants: string[]

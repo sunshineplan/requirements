@@ -4,7 +4,7 @@
   import { onMount, createEventDispatcher } from "svelte";
   import { stringify } from "csv-stringify/browser/esm/sync";
   import { search, sort, desc, goto, scroll, loading } from "../stores";
-  import { requirement, requirements, info } from "../requirement";
+  import { name, requirement, requirements, info } from "../requirement";
   import { poll } from "../misc";
 
   const dispatch = createEventDispatcher();
@@ -150,7 +150,7 @@
   onMount(() => scroll(true));
 </script>
 
-<svelte:head><title>业务系统</title></svelte:head>
+<svelte:head><title>{$name || "业务系统"}</title></svelte:head>
 
 <header>
   <button class="btn btn-primary" on:click={add}>新增业务</button>

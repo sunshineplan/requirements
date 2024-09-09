@@ -3,6 +3,7 @@
   import { createEventDispatcher } from "svelte";
   import { fire, post } from "../misc";
   import { goto } from "../stores";
+  import { name } from "../requirement";
 
   const dispatch = createEventDispatcher();
 
@@ -48,7 +49,7 @@
 <nav class="navbar navbar-light topbar">
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <span class="brand" on:click={() => goto("show")}>业务系统</span>
+  <span class="brand" on:click={() => goto("show")}>{$name || ""}</span>
   <div class="navbar-nav flex-row">
     {#if username}
       <span class="nav-link">{username}</span>

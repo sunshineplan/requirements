@@ -3,7 +3,13 @@
   import { onMount, createEventDispatcher } from "svelte";
   import { valid, confirm } from "../misc";
   import { loading, mode, goto, clear } from "../stores";
-  import { requirement, requirements, statuses, info } from "../requirement";
+  import {
+    name,
+    requirement,
+    requirements,
+    statuses,
+    info,
+  } from "../requirement";
 
   const dispatch = createEventDispatcher();
 
@@ -114,7 +120,9 @@
   };
 </script>
 
-<svelte:head><title>{modeList[$mode]}业务 - 业务系统</title></svelte:head>
+<svelte:head>
+  <title>{modeList[$mode]}业务 - {$name || "业务系统"}</title>
+</svelte:head>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div style="height: 100%;">

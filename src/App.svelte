@@ -6,7 +6,7 @@
   import Show from "./components/Show.svelte";
   import Requirement from "./components/Requirement.svelte";
   import { mode, component, clear, loading } from "./stores";
-  import { info } from "./requirement";
+  import { name, info } from "./requirement";
 
   let username = "";
 
@@ -16,6 +16,7 @@
     const res = await info(true);
     loading.end();
     username = res.username;
+    $name = res.name;
   };
 
   const components: { [component: string]: ComponentType } = {
@@ -44,6 +45,7 @@
   };
 </script>
 
+<svelte:head><title>{$name || "业务系统"}</title></svelte:head>
 <svelte:window on:popstate={handlePopstate} />
 
 <Nav bind:username on:reload={load} />

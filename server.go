@@ -64,6 +64,7 @@ func run() error {
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
 		obj := map[string]any{
+			"name":         *name,
 			"username":     user,
 			"done":         *doneValue,
 			"participants": participants,

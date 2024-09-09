@@ -2,7 +2,7 @@
   import Swal from "sweetalert2";
   import { valid, fire, post, confirm } from "../misc";
   import { loading, goto } from "../stores";
-  import { info } from "../requirement";
+  import { name, info } from "../requirement";
 
   let participants = "";
   let types = "";
@@ -134,7 +134,7 @@
   };
 </script>
 
-<svelte:head><title>设置 - 业务系统</title></svelte:head>
+<svelte:head><title>设置 - {$name || "业务系统"}</title></svelte:head>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div style="height: 100%;">

@@ -2,6 +2,8 @@ import { writable, get } from 'svelte/store'
 import { Dexie } from 'dexie'
 import { fire, post } from './misc'
 
+export const name = writable('')
+
 const db = new Dexie('requirement')
 db.version(1).stores({
   requirements: 'id'
@@ -123,6 +125,7 @@ export const info = async (load?: Boolean): Promise<Info> => {
       }
       statuses.set(res.statuses)
       return {
+        name: res.name,
         username: res.username,
         done: res.done,
         participants: res.participants,
