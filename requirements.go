@@ -221,13 +221,19 @@ func statistics(c *gin.Context) {
 		isNew = true
 	}
 	res := analyzeFull(src, 2022, 8, isNew)
-	fieldnames := append(append([]string{"年份", "月"}, types...), "总计")
+	var s []string
+	for _, i := range types {
+		s = append(s, i)
+		s = append(s, i+*doneValue)
+	}
+	fieldnames := append(append([]string{"年份", "月"}, s...), "总计", "总计"+*doneValue)
 	var data []map[string]int
 	for _, i := range res {
 		m := i.Types
 		m["年份"] = i.Year
 		m["月"] = i.Month
 		m["总计"] = i.Total
+		m["总计"+*doneValue] = i.TotalDone
 		data = append(data, m)
 	}
 	var buf bytes.Buffer
@@ -270,10 +276,11 @@ func backup() {
 }
 
 type summary struct {
-	Year  int
-	Month int
-	Types map[string]int
-	Total int
+	Year      int
+	Month     int
+	Types     map[string]int
+	Total     int
+	TotalDone int
 }
 
 func inRange(date, deadline Date, year, month int) bool {
@@ -307,10 +314,17 @@ func analyze(src []requirement, year, startMonth, endMonth int, isNew bool) (res
 				sum.Types[i.Type]++
 				sum.Total++
 			}
+			if i.Done.year == sum.Year && i.Done.month == sum.Month {
+				sum.Types[i.Type+*doneValue]++
+				sum.TotalDone++
+			}
 		}
 		for _, i := range types {
 			if _, ok := sum.Types[i]; !ok {
 				sum.Types[i] = 0
+			}
+			if _, ok := sum.Types[i+*doneValue]; !ok {
+				sum.Types[i+*doneValue] = 0
 			}
 		}
 		res = append(res, sum)
