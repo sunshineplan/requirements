@@ -39,9 +39,8 @@ func init() {
 	svc.Exec = run
 	svc.TestExec = test
 	svc.Options = service.Options{
-		Dependencies:       []string{"After=network.target"},
-		Environment:        map[string]string{"GIN_MODE": "release"},
-		RemoveBeforeUpdate: []string{"dist/assets"},
+		Dependencies: []string{"After=network.target"},
+		Environment:  map[string]string{"GIN_MODE": "release"},
 	}
 	svc.RegisterCommand("backup", "backup", func(_ ...string) error {
 		if err := initSrv(); err != nil {

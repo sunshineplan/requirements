@@ -62,13 +62,13 @@ jobs:
         run: |
           make build
           mv requirements-linux-amd64 requirements
-          tar cvzf release-linux-amd64.tar.gz dist requirements
+          tar cvzf release-linux-amd64.tar.gz requirements
           mv -f requirements-darwin-arm64 requirements
-          tar cvzf release-darwin-arm64.tar.gz dist requirements
+          tar cvzf release-darwin-arm64.tar.gz requirements
           mv -f requirements-darwin-amd64 requirements
-          tar cvzf release-darwin-amd64.tar.gz dist requirements
+          tar cvzf release-darwin-amd64.tar.gz requirements
           mv requirements-windows-amd64.exe requirements.exe
-          zip -9vr release-windows.zip dist requirements.exe
+          zip -9vr release-windows.zip requirements.exe
           echo "date=$(TZ=PRC date +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
 
       - name: Create Release

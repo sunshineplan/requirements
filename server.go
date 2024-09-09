@@ -2,6 +2,9 @@ package main
 
 import (
 	"crypto/rand"
+	"embed"
+	"html/template"
+	"io/fs"
 	"net/http"
 	"time"
 
@@ -9,6 +12,9 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
+
+//go:embed dist/*
+var dist embed.FS
 
 func run() error {
 	if err := loadUsers(); err != nil {
@@ -38,9 +44,13 @@ func run() error {
 	}
 	router.Use(sessions.Sessions("session", cookie.NewStore(secret)))
 
-	router.StaticFS("/assets", http.Dir(joinPath(dir(self), "dist/assets")))
-	router.StaticFile("favicon.ico", joinPath(dir(self), "dist/favicon.ico"))
-	router.LoadHTMLFiles(joinPath(dir(self), "dist/index.html"))
+	assets, err := fs.Sub(dist, "dist/assets")
+	if err != nil {
+		return err
+	}
+	router.StaticFS("/assets", http.FS(assets))
+	router.StaticFileFS("favicon.ico", "dist/favicon.ico", http.FS(dist))
+	router.SetHTMLTemplate(template.Must(template.New("").ParseFS(dist, "dist/*.html")))
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)
