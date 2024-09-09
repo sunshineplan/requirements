@@ -61,7 +61,6 @@ var (
 	name      = flag.String("name", "业务系统", "Done value")
 	doneValue = flag.String("done", "已完成", "Done value")
 	poll      = flag.Duration("poll", 50*time.Second, "Poll interval")
-	prefix    = flag.String("prefix", "业务系统", "Mail subject prefix")
 	logPath   = flag.String("log", "", "Log file path")
 )
 
