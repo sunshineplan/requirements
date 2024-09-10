@@ -18,7 +18,7 @@ export const scroll = (restore?: Boolean) => {
     sort.set('')
     desc.set(true)
     scrollTop.set(0)
-  } else if (get(sort) == '编号' && get(desc)) {
+  } else if (get(sort) == 'id' && get(desc)) {
     sort.set('')
   }
   const table = document.querySelector('.table-responsive')
@@ -29,21 +29,23 @@ export const scroll = (restore?: Boolean) => {
 }
 
 export const goto = (s: string) => {
-  let url = ''
+  let comp = s
+  let url = s
   switch (s) {
     case 'add':
     case 'edit':
     case 'view':
-      url = s
+      comp = 'requirement'
       mode.set(s)
-      component.set('requirement')
+      saveScrollTop()
       break
     case 'setting':
-      url = s
-    default:
       saveScrollTop()
-      component.set(s)
+      break
+    case 'show':
+      url = ''
   }
+  component.set(comp)
   window.history.pushState({}, '', '/' + url)
 }
 
