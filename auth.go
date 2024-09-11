@@ -1,8 +1,10 @@
 package main
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -15,7 +17,7 @@ import (
 
 var (
 	infoMutex sync.Mutex
-	users     [][2]string
+	users     = make(map[string]string)
 )
 
 func loadUsers() (err error) {
@@ -23,22 +25,50 @@ func loadUsers() (err error) {
 	if err != nil {
 		return
 	}
+	var admin bool
 	for _, i := range s {
 		s := strings.Split(i, ":")
 		if len(s) == 2 {
-			users = append(users, [2]string{strings.TrimSpace(s[0]), strings.TrimSpace(s[1])})
+			username, password := strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
+			if username == "" || password == "" {
+				svc.Printf("bad user info: %q", i)
+				continue
+			}
+			if _, ok := users[username]; ok {
+				continue
+			}
+			if username == "admin" {
+				admin = true
+			}
+			users[username] = password
 		}
 	}
-	if len(users) == 0 {
-		err = errors.New("empty user list")
+	if !admin {
+		users["admin"] = "123456"
 	}
+	return
+}
+
+func usernames() (usernames []string) {
+	for username := range maps.Keys(users) {
+		usernames = append(usernames, username)
+	}
+	slices.SortFunc(usernames, func(a, b string) int {
+		if a == "admin" {
+			return -1
+		}
+		if b == "admin" {
+			return 1
+		}
+		return cmp.Compare(a, b)
+	})
 	return
 }
 
 func saveUsers() error {
 	var s []string
-	for _, i := range users {
-		s = append(s, i[0]+":"+i[1])
+	for _, i := range usernames() {
+		s = append(s, i+":"+users[i])
 	}
 	return txt.ExportFile(s, joinPath(dir(self), "auth.txt"))
 }
@@ -46,10 +76,8 @@ func saveUsers() error {
 func getPassword(username string) (string, error) {
 	infoMutex.Lock()
 	defer infoMutex.Unlock()
-	for _, i := range users {
-		if i[0] == username {
-			return i[1], nil
-		}
+	if password, ok := users[username]; ok {
+		return password, nil
 	}
 	return "", errors.New("user not found")
 }
@@ -148,18 +176,15 @@ func updateUser(c *gin.Context, add bool) {
 	infoMutex.Lock()
 	defer infoMutex.Unlock()
 
-	for i := range users {
-		if data.Username == users[i][0] {
-			if add {
-				c.String(400, "用户已存在")
-				return
-			} else {
-				users[i][1] = data.Password
-			}
+	if _, ok := users[data.Username]; ok {
+		if add {
+			c.String(400, "用户已存在")
+			return
+		} else {
+			users[data.Username] = data.Password
 		}
-	}
-	if add {
-		users = append(users, [2]string{data.Username, data.Password})
+	} else if add {
+		users[data.Username] = data.Password
 	}
 	if err := saveUsers(); err != nil {
 		svc.Print(err)
@@ -172,23 +197,19 @@ func updateUser(c *gin.Context, add bool) {
 func deleteUser(c *gin.Context) {
 	var data struct{ Username string }
 	if err := c.BindJSON(&data); err != nil {
-		c.String(400, "")
+		c.Status(400)
+		return
+	}
+	if data.Username == "admin" {
+		c.String(400, "禁止删除admin")
 		return
 	}
 
 	infoMutex.Lock()
 	defer infoMutex.Unlock()
 
-	var found bool
-	users = slices.DeleteFunc(users, func(s [2]string) bool {
-		res := s[0] == data.Username
-		if res {
-			found = true
-		}
-		return res
-	})
-
-	if found {
+	if _, ok := users[data.Username]; ok {
+		delete(users, data.Username)
 		if err := saveUsers(); err != nil {
 			svc.Print(err)
 			c.String(500, "内部错误")

@@ -5,7 +5,7 @@
 
   const dispatch = createEventDispatcher();
 
-  let username = localStorage.getItem("username")!;
+  let username = localStorage.getItem("username") || "";
   let password = "";
   let rememberme = localStorage.getItem("rememberme") === "true";
 

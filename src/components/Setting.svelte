@@ -1,8 +1,8 @@
 <script lang="ts">
   import Swal from "sweetalert2";
-  import { valid, fire, post, confirm } from "../misc";
-  import { loading, goto } from "../stores";
-  import { name, info } from "../requirement";
+  import { confirm, fire, post, valid } from "../misc";
+  import { info } from "../requirement";
+  import { goto, loading, name } from "../stores";
 
   let participants = "";
   let types = "";

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { confirm } from "../misc";
-  import { component, saveScrollTop, mode, goto } from "../stores";
   import {
     requirement as current,
-    requirements,
     isClosed,
+    requirements,
   } from "../requirement";
+  import { component, goto, mode, saveScrollTop, username } from "../stores";
 
   const dispatch = createEventDispatcher();
 
@@ -63,15 +63,17 @@
     <span class="material-symbols-outlined hidden">done_outline</span>
   {/if}
   {#if $component == "requirement" && $mode == "edit"}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <span
-      title="删除"
-      class="material-symbols-outlined link-danger"
-      on:click={() => del(requirement)}
-    >
-      delete_outline
-    </span>
+    {#if $username == "admin"}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <span
+        title="删除"
+        class="material-symbols-outlined link-danger"
+        on:click={() => del(requirement)}
+      >
+        delete_outline
+      </span>
+    {/if}
   {:else}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->

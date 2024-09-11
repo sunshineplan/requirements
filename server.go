@@ -72,11 +72,7 @@ func run() error {
 			"statuses":     statuses,
 		}
 		if user == "admin" {
-			var s []string
-			for _, i := range users {
-				s = append(s, i[0])
-			}
-			obj["users"] = s
+			obj["users"] = usernames()
 		}
 		if last.Equal(c) {
 			c.JSON(200, obj)
@@ -112,9 +108,9 @@ func run() error {
 	base.POST("/add", add)
 	base.POST("/edit", edit)
 	base.POST("/done", done)
-	base.POST("/delete/:id", del)
 
 	admin := base.Group("/", adminRequired)
+	admin.POST("/delete/:id", del)
 	admin.POST("/participants", updateParticipants)
 	admin.POST("/types", updateTypes)
 	admin.POST("/addUser", func(c *gin.Context) { updateUser(c, true) })

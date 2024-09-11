@@ -1,4 +1,8 @@
-import { writable, get } from 'svelte/store'
+import { get, writable } from 'svelte/store'
+
+export const name = writable('')
+
+export const username = writable('')
 
 export const component = writable('show')
 

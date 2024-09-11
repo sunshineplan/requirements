@@ -1,8 +1,6 @@
-import { writable, get } from 'svelte/store'
 import { Dexie } from 'dexie'
+import { get, writable } from 'svelte/store'
 import { fire, post } from './misc'
-
-export const name = writable('')
 
 const db = new Dexie('requirement')
 db.version(1).stores({

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Cookies from "js-cookie";
-  import Action from "./Action.svelte";
-  import { onMount, createEventDispatcher } from "svelte";
   import { stringify } from "csv-stringify/browser/esm/sync";
-  import { search, sort, desc, goto, scroll, loading } from "../stores";
-  import { name, requirement, requirements, info } from "../requirement";
+  import Cookies from "js-cookie";
+  import { createEventDispatcher, onMount } from "svelte";
   import { poll } from "../misc";
+  import { info, requirement, requirements } from "../requirement";
+  import { desc, goto, loading, name, scroll, search, sort } from "../stores";
+  import Action from "./Action.svelte";
 
   const dispatch = createEventDispatcher();
 

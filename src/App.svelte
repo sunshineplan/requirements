@@ -1,22 +1,20 @@
 <script lang="ts">
   import type { ComponentType } from "svelte";
-  import Nav from "./components/Nav.svelte";
   import Login from "./components/Login.svelte";
+  import Nav from "./components/Nav.svelte";
+  import Requirement from "./components/Requirement.svelte";
   import Setting from "./components/Setting.svelte";
   import Show from "./components/Show.svelte";
-  import Requirement from "./components/Requirement.svelte";
-  import { mode, component, clear, loading } from "./stores";
-  import { name, info } from "./requirement";
-
-  let username = "";
+  import { info } from "./requirement";
+  import { clear, component, loading, mode, name, username } from "./stores";
 
   const load = async () => {
     clear();
     loading.start();
     const res = await info(true);
     loading.end();
-    username = res.username;
     $name = res.name;
+    $username = res.username;
   };
 
   const components: { [component: string]: ComponentType } = {
@@ -26,7 +24,7 @@
   };
 
   const handlePopstate = () => {
-    if (username) {
+    if ($username) {
       switch (window.location.pathname) {
         case "/":
           $component = "show";
@@ -48,10 +46,10 @@
 <svelte:head><title>{$name || "业务系统"}</title></svelte:head>
 <svelte:window on:popstate={handlePopstate} />
 
-<Nav bind:username on:reload={load} />
+<Nav on:reload={load} />
 {#await load() then _}
   <div class="content" style="opacity: {$loading ? 0.5 : 1}">
-    {#if !username}
+    {#if !$username}
       {#if !$loading}
         <Login on:info={load} />
       {/if}

@@ -1,13 +1,10 @@
 <script lang="ts">
-  import Swal from "sweetalert2";
   import { createEventDispatcher } from "svelte";
+  import Swal from "sweetalert2";
   import { fire, post } from "../misc";
-  import { goto } from "../stores";
-  import { name } from "../requirement";
+  import { goto, name, username } from "../stores";
 
   const dispatch = createEventDispatcher();
-
-  export let username: string;
 
   const statistics = async () => {
     let url = "/statistics";
@@ -28,7 +25,6 @@
     const resp = await fetch(url);
     if (resp.ok) {
       const blob = await resp.blob();
-      console.log(blob.type);
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "统计.csv";
@@ -51,12 +47,12 @@
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <span class="brand" on:click={() => goto("show")}>{$name || ""}</span>
   <div class="navbar-nav flex-row">
-    {#if username}
-      <span class="nav-link">{username}</span>
+    {#if $username}
+      <span class="nav-link">{$username}</span>
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span class="nav-link link" on:click={statistics}>统计</span>
-      {#if username == "admin"}
+      {#if $username == "admin"}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <span class="nav-link link" on:click={() => goto("setting")}>设置</span>

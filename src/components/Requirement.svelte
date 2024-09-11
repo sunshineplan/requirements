@@ -1,15 +1,9 @@
 <script lang="ts">
+  import { createEventDispatcher, onMount } from "svelte";
+  import { confirm, valid } from "../misc";
+  import { info, requirement, requirements, statuses } from "../requirement";
+  import { clear, goto, loading, mode, name } from "../stores";
   import Action from "./Action.svelte";
-  import { onMount, createEventDispatcher } from "svelte";
-  import { valid, confirm } from "../misc";
-  import { loading, mode, goto, clear } from "../stores";
-  import {
-    name,
-    requirement,
-    requirements,
-    statuses,
-    info,
-  } from "../requirement";
 
   const dispatch = createEventDispatcher();
 
