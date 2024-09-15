@@ -2,12 +2,50 @@ import { Dexie } from 'dexie'
 import { get, writable } from 'svelte/store'
 import { fire, post } from './misc'
 
+export const headers: { [key: string]: string } = {
+  id: '编号',
+  type: '类型',
+  desc: '描述',
+  date: '提请日期',
+  deadline: '期限日期',
+  done: '完成日期',
+  submitter: '提交人',
+  recipient: '承接人',
+  acceptor: '受理人',
+  status: '状态',
+  note: '备注',
+  participating: '参与班组',
+}
+
+export const columns: { [key in keyof Requirement]: number } = {
+  id: 6,
+  type: 6,
+  desc: -1,
+  date: 8,
+  deadline: 8,
+  done: 8,
+  submitter: 5,
+  recipient: 0,
+  acceptor: 5,
+  status: 5,
+  note: 9,
+  participating: 6,
+}
+
+export const searchable: (keyof Requirement)[] = [
+  'desc',
+  'submitter',
+  'recipient',
+  'acceptor',
+  'note',
+]
+
+export const requirement = writable(<Requirement>{})
+
 const db = new Dexie('requirement')
 db.version(1).stores({
   requirements: 'id'
 })
-
-export const requirement = writable(<Requirement>{})
 
 const createRequirements = () => {
   const { subscribe, set } = writable(<Requirement[]>[])

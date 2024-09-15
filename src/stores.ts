@@ -9,6 +9,7 @@ export const component = writable('show')
 export const mode = writable('')
 
 export const search = writable('')
+export const searchField = writable<keyof Requirement | ''>('')
 export const sort = writable('')
 export const desc = writable(true)
 
@@ -55,6 +56,7 @@ export const goto = (s: string) => {
 
 export const clear = () => {
   search.set('')
+  searchField.set('')
   sort.set('')
   desc.set(true)
   scrollTop.set(0)

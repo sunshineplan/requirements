@@ -3,45 +3,32 @@
   import Cookies from "js-cookie";
   import { createEventDispatcher, onMount } from "svelte";
   import { poll } from "../misc";
-  import { info, requirement, requirements } from "../requirement";
-  import { desc, goto, loading, name, scroll, search, sort } from "../stores";
+  import {
+    columns,
+    headers,
+    info,
+    requirement,
+    requirements,
+    searchable,
+  } from "../requirement";
+  import {
+    desc,
+    goto,
+    loading,
+    name,
+    scroll,
+    search,
+    searchField,
+    sort,
+  } from "../stores";
   import Action from "./Action.svelte";
+  import Search from "./Search.svelte";
 
   const dispatch = createEventDispatcher();
 
-  const headers: { [key: string]: string } = {
-    id: "编号",
-    type: "类型",
-    desc: "描述",
-    date: "提请日期",
-    deadline: "期限日期",
-    done: "完成日期",
-    submitter: "提交人",
-    recipient: "承接人",
-    acceptor: "受理人",
-    status: "状态",
-    note: "备注",
-    participating: "参与班组",
-  };
-
-  const columns: { [key in keyof Requirement]: number } = {
-    id: 6,
-    type: 6,
-    desc: -1,
-    date: 8,
-    deadline: 8,
-    done: 8,
-    submitter: 5,
-    recipient: 0,
-    acceptor: 5,
-    status: 5,
-    note: 9,
-    participating: 6,
-  };
-
   let output: Requirement[] = [];
 
-  $: $search, $sort, $desc, filter();
+  $: $search, $searchField, $sort, $desc, filter();
 
   const getField = (r: Requirement, key: string) => {
     return r[key as keyof Requirement];
@@ -87,17 +74,12 @@
   const filter = () => {
     let array: Requirement[] = [];
     if (!$search) array = $requirements;
+    else if ($searchField)
+      array = $requirements.filter((i) => i[$searchField].includes($search));
     else
-      array = $requirements.filter((i) => {
-        return (
-          i.type.includes($search) ||
-          i.desc.includes($search) ||
-          i.submitter.includes($search) ||
-          i.recipient.includes($search) ||
-          i.acceptor.includes($search) ||
-          i.note.includes($search)
-        );
-      });
+      array = $requirements.filter((i) =>
+        searchable.some((field) => i[field].includes($search)),
+      );
     if (!$sort) output = array.sort();
     else
       output = array.toSorted((a, b) => {
@@ -155,17 +137,7 @@
 <header>
   <button class="btn btn-primary" on:click={add}>新增业务</button>
   <button class="btn btn-primary" on:click={download}>导出</button>
-  <div class="search">
-    <div class="icon">
-      <span class="material-symbols-outlined">search</span>
-    </div>
-    <input
-      bind:value={$search}
-      type="search"
-      placeholder="搜索"
-      on:input={() => scroll()}
-    />
-  </div>
+  <Search />
 </header>
 <div class="table-responsive">
   <table class="table table-hover table-sm">
@@ -229,37 +201,6 @@
 <style>
   header {
     height: 60px;
-  }
-
-  .icon {
-    flex-direction: column;
-    display: flex;
-    justify-content: center;
-    padding-left: 20px;
-  }
-
-  .search {
-    position: relative;
-    width: 250px;
-    display: flex;
-    float: right;
-    margin-bottom: 10px;
-    margin-right: 0;
-    background-color: #e6ecf0;
-    border-radius: 9999px;
-  }
-  .search:hover {
-    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
-  }
-
-  .search > input {
-    background-color: transparent;
-    padding: 10px;
-    border: 0;
-    width: 100%;
-  }
-  .search > input:focus {
-    outline: none;
   }
 
   table {
