@@ -13,6 +13,16 @@ interface Requirement {
   participating: string
 }
 
+interface Field {
+  name: string
+  size: number
+  searchable: boolean
+}
+
+type FieldMap = {
+  [key in keyof Requirement]: Field
+}
+
 interface Info {
   name: string
   username: string
@@ -26,3 +36,4 @@ interface Status {
   value: string
   closed: boolean
 }
+

@@ -3,14 +3,7 @@
   import Cookies from "js-cookie";
   import { createEventDispatcher, onMount } from "svelte";
   import { poll } from "../misc";
-  import {
-    columns,
-    headers,
-    info,
-    requirement,
-    requirements,
-    searchable,
-  } from "../requirement";
+  import { fields, info, requirement, requirements } from "../requirement";
   import {
     desc,
     goto,
@@ -29,10 +22,6 @@
   let output: Requirement[] = [];
 
   $: $search, $searchField, $sort, $desc, filter();
-
-  const getField = (r: Requirement, key: string) => {
-    return r[key as keyof Requirement];
-  };
 
   const add = () => {
     $requirement = <Requirement>{};
@@ -55,9 +44,9 @@
         stringify(output, {
           bom: true,
           header: true,
-          columns: Object.keys(headers).map((key) => ({
+          columns: fields.columns(true).map((key) => ({
             key,
-            header: headers[key],
+            header: fields.name(key as keyof Requirement),
           })),
         }),
       ],
@@ -78,19 +67,19 @@
       array = $requirements.filter((i) => i[$searchField].includes($search));
     else
       array = $requirements.filter((i) =>
-        searchable.some((field) => i[field].includes($search)),
+        fields.searchable().some((field) => i[field].includes($search)),
       );
-    if (!$sort) output = array.sort();
-    else
+    if ($sort)
       output = array.toSorted((a, b) => {
-        const v1 = getField(a, $sort),
-          v2 = getField(b, $sort);
+        const v1 = a[$sort as keyof Requirement],
+          v2 = b[$sort as keyof Requirement];
         let res = 0;
         if (v1 < v2) res = 1;
         else if (v1 > v2) res = -1;
         if ($desc) return res;
         else return -res;
       });
+    else output = array.sort();
   };
 
   const restore = () => {
@@ -143,24 +132,25 @@
   <table class="table table-hover table-sm">
     <thead>
       <tr>
-        {#each Object.entries(columns) as [key, width] (key)}
-          {#if width}
+        {#each fields.columns() as field (field)}
+          {@const size = fields.size(field)}
+          {#if size}
             <th
-              class="sortable {$sort == key
+              class="sortable {$sort == field
                 ? $desc
                   ? 'desc'
                   : 'asc'
                 : 'default'}"
-              class:auto={width == -1}
-              style:width={width > 0 ? `${width}rem` : ""}
+              class:auto={size == -1}
+              style:width={size > 0 ? `${size}rem` : ""}
               on:click={() => {
                 const before = $sort;
-                $sort = key;
+                $sort = field;
                 if (before == $sort) $desc = !$desc;
                 else $desc = true;
               }}
             >
-              {headers[key]}
+              {fields.name(field)}
             </th>
           {/if}
         {/each}
@@ -170,16 +160,16 @@
     <tbody>
       {#each output as requirement (requirement.id)}
         <tr on:click={(e) => view(e, requirement)}>
-          {#each Object.entries(columns) as [key, show] (key)}
-            {#if show}
+          {#each fields.columns() as field (field)}
+            {#if fields.size(field)}
               <td
-                title={/编号|类型|日期|班组/i.test(headers[key])
+                title={/编号|类型|日期|班组/i.test(fields.name(field))
                   ? ""
-                  : getField(requirement, key)}
+                  : requirement[field]}
               >
-                {key == "participating"
-                  ? participants(requirement[key])
-                  : getField(requirement, key)}
+                {field == "participating"
+                  ? participants(requirement[field])
+                  : requirement[field]}
               </td>
             {/if}
           {/each}

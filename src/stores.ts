@@ -10,7 +10,7 @@ export const mode = writable('')
 
 export const search = writable('')
 export const searchField = writable<keyof Requirement | ''>('')
-export const sort = writable('')
+export const sort = writable<keyof Requirement | ''>('')
 export const desc = writable(true)
 
 const scrollTop = writable(0)

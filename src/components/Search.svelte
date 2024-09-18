@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { headers, searchable } from "../requirement";
+  import { fields } from "../requirement";
   import { clear, scroll, search, searchField } from "../stores";
 
   let hover = false;
@@ -30,7 +30,7 @@
   </div>
   <input
     bind:value={$search}
-    placeholder={$searchField ? headers[$searchField] + "搜索" : "搜索"}
+    placeholder={$searchField ? fields.name($searchField) + "搜索" : "搜索"}
     on:input={() => scroll()}
   />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -40,7 +40,7 @@
     class:show={showOption}
     style:color={$searchField ? "#1a73e8" : ""}
     on:click={() => {
-      showOption = true;
+      showOption = !showOption;
     }}
   >
     <span class="material-symbols-outlined">tune</span>
@@ -49,9 +49,8 @@
   <div
     class="icon reset"
     style:display={hover && ($search || $searchField) ? "flex" : "none"}
-    on:click={clear}
   >
-    <span class="material-symbols-outlined">close_small</span>
+    <span class="material-symbols-outlined" on:click={clear}>close_small</span>
   </div>
 </div>
 <div
@@ -63,8 +62,8 @@
     <label class="input-group-text" for="option">检索字段</label>
     <select class="form-select" id="option" bind:value={$searchField}>
       <option value="">所有</option>
-      {#each searchable as field (field)}
-        <option value={field}>{headers[field]}</option>
+      {#each fields.searchable() as field (field)}
+        <option value={field}>{fields.name(field)}</option>
       {/each}
     </select>
   </div>
@@ -89,6 +88,7 @@
     display: flex;
     padding: 10px;
     cursor: default;
+    user-select: none;
   }
 
   input {
