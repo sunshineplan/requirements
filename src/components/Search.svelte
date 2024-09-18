@@ -1,7 +1,8 @@
 <script lang="ts">
   import { headers, searchable } from "../requirement";
-  import { scroll, search, searchField } from "../stores";
+  import { clear, scroll, search, searchField } from "../stores";
 
+  let hover = false;
   let showOption = false;
   let tune: HTMLElement;
   let option: HTMLElement;
@@ -18,27 +19,39 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-<div class="search">
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div
+  class="search"
+  on:mouseenter={() => (hover = true)}
+  on:mouseleave={() => (hover = false)}
+>
   <div class="icon">
     <span class="material-symbols-outlined">search</span>
   </div>
   <input
     bind:value={$search}
-    type="search"
     placeholder={$searchField ? headers[$searchField] + "搜索" : "搜索"}
     on:input={() => scroll()}
   />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
-    class="tune"
     bind:this={tune}
-    style:display={showOption ? "none" : "flex"}
+    class="icon tune"
+    class:show={showOption}
+    style:color={$searchField ? "#1a73e8" : ""}
     on:click={() => {
       showOption = true;
     }}
   >
-    <span class="material-symbols-outlined"> tune </span>
+    <span class="material-symbols-outlined">tune</span>
+  </div>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div
+    class="icon reset"
+    style:display={hover && ($search || $searchField) ? "flex" : "none"}
+    on:click={clear}
+  >
+    <span class="material-symbols-outlined">close_small</span>
   </div>
 </div>
 <div
@@ -58,20 +71,12 @@
 </div>
 
 <style>
-  .icon {
-    flex-direction: column;
-    display: flex;
-    justify-content: center;
-    padding-left: 20px;
-  }
-
   .search {
     position: relative;
     width: 250px;
     display: flex;
     float: right;
     margin-bottom: 10px;
-    margin-right: 0;
     background-color: #e6ecf0;
     border-radius: 9999px;
   }
@@ -79,29 +84,41 @@
     box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
   }
 
-  .search > input {
-    background-color: transparent;
+  .icon {
+    position: absolute;
+    display: flex;
     padding: 10px;
+    cursor: default;
+  }
+
+  input {
+    margin-left: 40px;
+    margin-right: 74px;
+    background-color: transparent;
+    padding: 10px 0;
     border: 0;
     width: 100%;
   }
-  .search > input:focus {
+  input:focus {
     outline: none;
   }
 
   .tune {
-    position: absolute;
     right: 30px;
-    top: 3px;
-    width: 2.4rem;
-    height: 2.4rem;
-    justify-content: center;
-    align-items: center;
+    cursor: pointer;
   }
-
+  .show,
   .tune:hover {
     background-color: #ddd;
     border-radius: 50%;
+  }
+
+  .reset {
+    right: 0;
+    cursor: pointer;
+  }
+  .reset > span:hover {
+    text-shadow: 0 0 4px;
   }
 
   .option {

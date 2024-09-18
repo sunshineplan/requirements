@@ -49,10 +49,6 @@ button+button {
   visibility: hidden;
 }
 
-.material-symbols-outlined {
-  cursor: pointer;
-}
-
 @media (max-width: 900px) {
   .content {
     padding-left: 0 !important;
