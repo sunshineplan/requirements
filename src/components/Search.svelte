@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { slide } from "svelte/transition";
   import { fields } from "../requirement";
   import { clear, scroll, search, searchField } from "../stores";
 
@@ -53,21 +54,19 @@
     <span class="material-symbols-outlined" on:click={clear}>close_small</span>
   </div>
 </div>
-<div
-  class="option"
-  bind:this={option}
-  style:display={showOption ? "flex" : "none"}
->
-  <div class="input-group px-5 py-3">
-    <label class="input-group-text" for="option">检索字段</label>
-    <select class="form-select" id="option" bind:value={$searchField}>
-      <option value="">所有</option>
-      {#each fields.searchable() as field (field)}
-        <option value={field}>{fields.name(field)}</option>
-      {/each}
-    </select>
+{#if showOption}
+  <div class="option" bind:this={option}>
+    <div class="input-group px-5 py-3" transition:slide={{ duration: 50 }}>
+      <label class="input-group-text" for="option">检索字段</label>
+      <select class="form-select" id="option" bind:value={$searchField}>
+        <option value="">所有</option>
+        {#each fields.searchable() as field (field)}
+          <option value={field}>{fields.name(field)}</option>
+        {/each}
+      </select>
+    </div>
   </div>
-</div>
+{/if}
 
 <style>
   .search {
@@ -122,12 +121,14 @@
   }
 
   .option {
+    position: absolute;
+    right: 20px;
+    margin-top: 10px;
+  }
+  .option > .input-group {
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(0, 0, 0, 0.2);
     z-index: 1;
-    position: absolute;
-    right: 20px;
-    margin-top: 10px;
   }
 </style>
