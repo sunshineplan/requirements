@@ -3,49 +3,25 @@
   import Cookies from "js-cookie";
   import { createEventDispatcher, onMount } from "svelte";
   import { poll } from "../misc";
-  import { info, requirement, requirements } from "../requirement";
-  import { desc, goto, loading, name, scroll, search, sort } from "../stores";
+  import { fields, info, requirement, requirements } from "../requirement";
+  import {
+    desc,
+    goto,
+    loading,
+    name,
+    scroll,
+    search,
+    searchField,
+    sort,
+  } from "../stores";
   import Action from "./Action.svelte";
+  import Search from "./Search.svelte";
 
   const dispatch = createEventDispatcher();
 
-  const headers: { [key: string]: string } = {
-    id: "编号",
-    type: "类型",
-    desc: "描述",
-    date: "提请日期",
-    deadline: "期限日期",
-    done: "完成日期",
-    submitter: "提交人",
-    recipient: "承接人",
-    acceptor: "受理人",
-    status: "状态",
-    note: "备注",
-    participating: "参与班组",
-  };
-
-  const columns: { [key in keyof Requirement]: number } = {
-    id: 6,
-    type: 6,
-    desc: -1,
-    date: 8,
-    deadline: 8,
-    done: 8,
-    submitter: 5,
-    recipient: 0,
-    acceptor: 5,
-    status: 5,
-    note: 9,
-    participating: 6,
-  };
-
   let output: Requirement[] = [];
 
-  $: $search, $sort, $desc, filter();
-
-  const getField = (r: Requirement, key: string) => {
-    return r[key as keyof Requirement];
-  };
+  $: $search, $searchField, $sort, $desc, filter();
 
   const add = () => {
     $requirement = <Requirement>{};
@@ -68,9 +44,9 @@
         stringify(output, {
           bom: true,
           header: true,
-          columns: Object.keys(headers).map((key) => ({
+          columns: fields.columns(true).map((key) => ({
             key,
-            header: headers[key],
+            header: fields.name(key as keyof Requirement),
           })),
         }),
       ],
@@ -87,28 +63,23 @@
   const filter = () => {
     let array: Requirement[] = [];
     if (!$search) array = $requirements;
+    else if ($searchField)
+      array = $requirements.filter((i) => i[$searchField].includes($search));
     else
-      array = $requirements.filter((i) => {
-        return (
-          i.type.includes($search) ||
-          i.desc.includes($search) ||
-          i.submitter.includes($search) ||
-          i.recipient.includes($search) ||
-          i.acceptor.includes($search) ||
-          i.note.includes($search)
-        );
-      });
-    if (!$sort) output = array.sort();
-    else
+      array = $requirements.filter((i) =>
+        fields.searchable().some((field) => i[field].includes($search)),
+      );
+    if ($sort)
       output = array.toSorted((a, b) => {
-        const v1 = getField(a, $sort),
-          v2 = getField(b, $sort);
+        const v1 = a[$sort as keyof Requirement],
+          v2 = b[$sort as keyof Requirement];
         let res = 0;
         if (v1 < v2) res = 1;
         else if (v1 > v2) res = -1;
         if ($desc) return res;
         else return -res;
       });
+    else output = array.sort();
   };
 
   const restore = () => {
@@ -155,40 +126,31 @@
 <header>
   <button class="btn btn-primary" on:click={add}>新增业务</button>
   <button class="btn btn-primary" on:click={download}>导出</button>
-  <div class="search">
-    <div class="icon">
-      <span class="material-symbols-outlined">search</span>
-    </div>
-    <input
-      bind:value={$search}
-      type="search"
-      placeholder="搜索"
-      on:input={() => scroll()}
-    />
-  </div>
+  <Search />
 </header>
 <div class="table-responsive">
   <table class="table table-hover table-sm">
     <thead>
       <tr>
-        {#each Object.entries(columns) as [key, width] (key)}
-          {#if width}
+        {#each fields.columns() as field (field)}
+          {@const size = fields.size(field)}
+          {#if size}
             <th
-              class="sortable {$sort == key
+              class="sortable {$sort == field
                 ? $desc
                   ? 'desc'
                   : 'asc'
                 : 'default'}"
-              class:auto={width == -1}
-              style:width={width > 0 ? `${width}rem` : ""}
+              class:auto={size == -1}
+              style:width={size > 0 ? `${size}rem` : ""}
               on:click={() => {
                 const before = $sort;
-                $sort = key;
+                $sort = field;
                 if (before == $sort) $desc = !$desc;
                 else $desc = true;
               }}
             >
-              {headers[key]}
+              {fields.name(field)}
             </th>
           {/if}
         {/each}
@@ -198,16 +160,16 @@
     <tbody>
       {#each output as requirement (requirement.id)}
         <tr on:click={(e) => view(e, requirement)}>
-          {#each Object.entries(columns) as [key, show] (key)}
-            {#if show}
+          {#each fields.columns() as field (field)}
+            {#if fields.size(field)}
               <td
-                title={/编号|类型|日期|班组/i.test(headers[key])
+                title={/编号|类型|日期|班组/i.test(fields.name(field))
                   ? ""
-                  : getField(requirement, key)}
+                  : requirement[field]}
               >
-                {key == "participating"
-                  ? participants(requirement[key])
-                  : getField(requirement, key)}
+                {field == "participating"
+                  ? participants(requirement[field])
+                  : requirement[field]}
               </td>
             {/if}
           {/each}
@@ -229,37 +191,6 @@
 <style>
   header {
     height: 60px;
-  }
-
-  .icon {
-    flex-direction: column;
-    display: flex;
-    justify-content: center;
-    padding-left: 20px;
-  }
-
-  .search {
-    position: relative;
-    width: 250px;
-    display: flex;
-    float: right;
-    margin-bottom: 10px;
-    margin-right: 0;
-    background-color: #e6ecf0;
-    border-radius: 9999px;
-  }
-  .search:hover {
-    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
-  }
-
-  .search > input {
-    background-color: transparent;
-    padding: 10px;
-    border: 0;
-    width: 100%;
-  }
-  .search > input:focus {
-    outline: none;
   }
 
   table {
