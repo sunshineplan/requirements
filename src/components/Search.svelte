@@ -56,9 +56,14 @@
 </div>
 {#if showOption}
   <div class="option" bind:this={option}>
-    <div class="input-group px-5 py-3" transition:slide={{ duration: 50 }}>
+    <div class="input-group px-5 py-3" transition:slide={{ duration: 200 }}>
       <label class="input-group-text" for="option">检索字段</label>
-      <select class="form-select" id="option" bind:value={$searchField}>
+      <select
+        class="form-select"
+        id="option"
+        bind:value={$searchField}
+        on:change={() => (showOption = false)}
+      >
         <option value="">所有</option>
         {#each fields.searchable() as field (field)}
           <option value={field}>{fields.name(field)}</option>

@@ -18,6 +18,10 @@ small {
   padding-left: 5px;
 }
 
+label {
+  user-select: none;
+}
+
 button+button {
   margin-left: 0.3em;
 }

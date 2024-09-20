@@ -369,6 +369,8 @@
 
   header h3 {
     margin: 0;
+    user-select: none;
+    cursor: default;
   }
 
   .row {
