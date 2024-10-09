@@ -56,21 +56,19 @@ func run() error {
 		c.HTML(200, "index.html", nil)
 	})
 	router.GET("/info", func(c *gin.Context) {
+		obj := map[string]any{"name": *name}
 		user, _ := getUser(c)
 		if user == "" {
-			c.JSON(200, struct{}{})
+			c.JSON(200, obj)
 			return
 		}
+		obj["username"] = user
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
-		obj := map[string]any{
-			"name":         *name,
-			"username":     user,
-			"done":         *doneValue,
-			"participants": participants,
-			"types":        types,
-			"statuses":     statuses,
-		}
+		obj["done"] = *doneValue
+		obj["participants"] = participants
+		obj["types"] = types
+		obj["statuses"] = statuses
 		if user == "admin" {
 			obj["users"] = usernames()
 		}

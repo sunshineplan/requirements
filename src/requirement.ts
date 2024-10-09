@@ -221,12 +221,15 @@ export const info = async (load?: Boolean): Promise<Info> => {
         types: res.types,
         users: res.users
       }
-    } else await reset()
+    } else {
+      await reset()
+      return <Info>{ name: res.name }
+    }
   } else if (resp.status == 409) {
     await requirements.clear()
     return await info(load)
   } else await reset()
-  return <Info>{ username: '' }
+  return <Info>{}
 }
 
 const reset = async () => {

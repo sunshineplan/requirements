@@ -45,7 +45,7 @@
 <nav class="navbar navbar-light topbar">
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <span class="brand" on:click={() => goto("show")}>{$name || ""}</span>
+  <span class="brand" on:click={() => goto("show")}>{$name || "业务系统"}</span>
   <div class="navbar-nav flex-row">
     {#if $username}
       <span class="nav-link">{$username}</span>
