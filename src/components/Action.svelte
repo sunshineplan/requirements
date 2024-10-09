@@ -96,6 +96,5 @@
     font-size: var(--icon);
     margin-left: var(--margin);
     cursor: pointer;
-    user-select: none;
   }
 </style>

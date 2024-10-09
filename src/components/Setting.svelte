@@ -150,31 +150,20 @@
   {#await load() then _}
     <div class="row g-3" class:was-validated={validated}>
       <div class="col-md-6 col-sm-12">
-        <div class="form-floating">
-          <textarea
-            class="form-control"
-            id="types"
-            bind:value={types}
-            placeholder="types"
-            required
-          />
-          <label for="types">类型</label>
-          <div class="invalid-feedback">必填字段</div>
-        </div>
+        <label for="types" class="form-label">类型</label>
+        <textarea class="form-control" id="types" bind:value={types} required />
+        <div class="invalid-feedback">必填字段</div>
         <button class="btn btn-primary float-end mt-2" on:click={updateTypes}>
           保存类型
         </button>
       </div>
       <div class="col-md-6 col-sm-12">
-        <div class="form-floating">
-          <textarea
-            class="form-control"
-            id="participants"
-            bind:value={participants}
-            placeholder="participants"
-          />
-          <label for="participants">班组</label>
-        </div>
+        <label for="participants" class="form-label">班组</label>
+        <textarea
+          class="form-control"
+          id="participants"
+          bind:value={participants}
+        />
         <button
           class="btn btn-primary float-end mt-2"
           on:click={updateParticipants}
@@ -228,7 +217,6 @@
   header {
     display: flex;
     align-items: center;
-    height: 70px;
   }
 
   header h3 {
@@ -243,6 +231,7 @@
   .row {
     padding: 0 20px;
     overflow: auto;
+    margin-top: 0;
     max-height: calc(100% - 60px);
   }
 

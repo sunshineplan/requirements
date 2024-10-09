@@ -11,6 +11,7 @@ body {
 
 header {
   padding: 10px 20px;
+  height: 60px;
 }
 
 small {
@@ -18,7 +19,9 @@ small {
   padding-left: 5px;
 }
 
-label {
+h3,
+label,
+.material-symbols-outlined {
   user-select: none;
 }
 

@@ -189,10 +189,6 @@
 </div>
 
 <style>
-  header {
-    height: 60px;
-  }
-
   table {
     table-layout: fixed;
   }

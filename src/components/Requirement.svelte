@@ -137,18 +137,15 @@
   </header>
   <div class="row g-3" class:was-validated={validated}>
     <div class="col-md-8 col-sm-12">
-      <div class="form-floating">
-        <textarea
-          class="form-control"
-          id="desc"
-          bind:value={desc}
-          placeholder="desc"
-          required
-          disabled={$mode == "view"}
-        />
-        <label for="desc">描述</label>
-        <div class="invalid-feedback">必填字段</div>
-      </div>
+      <label for="desc" class="form-label">描述</label>
+      <textarea
+        class="form-control"
+        id="desc"
+        bind:value={desc}
+        required
+        disabled={$mode == "view"}
+      />
+      <div class="invalid-feedback">必填字段</div>
     </div>
     <div class="w-100 m-0" />
     <div class="col-md-3 col-sm-4">
@@ -332,16 +329,13 @@
       </div>
     </div>
     <div class="col-md-8 col-sm-12">
-      <div class="form-floating">
-        <textarea
-          class="form-control"
-          id="note"
-          bind:value={note}
-          placeholder="note"
-          disabled={$mode == "view"}
-        />
-        <label for="note">备注</label>
-      </div>
+      <label for="note" class="form-label">备注</label>
+      <textarea
+        class="form-control"
+        id="note"
+        bind:value={note}
+        disabled={$mode == "view"}
+      />
     </div>
     <div class="col-md-8 col-sm-12">
       {#if $mode == "view"}
@@ -364,18 +358,17 @@
   header {
     display: flex;
     align-items: center;
-    height: 70px;
   }
 
   header h3 {
     margin: 0;
-    user-select: none;
     cursor: default;
   }
 
   .row {
     padding: 0 20px;
     overflow: auto;
+    margin-top: 0;
     max-height: calc(100% - 60px);
   }
 

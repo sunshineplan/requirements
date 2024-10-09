@@ -92,7 +92,6 @@
     display: flex;
     padding: 10px;
     cursor: default;
-    user-select: none;
   }
 
   input {
