@@ -1,18 +1,15 @@
 <script lang="ts">
   import Swal from "sweetalert2";
-  import { confirm, fire, post, valid } from "../misc";
-  import { info } from "../requirement";
-  import { goto, loading, name } from "../stores";
+  import { confirm, fire, post, valid } from "../misc.svelte";
+  import { requirements } from "../requirement.svelte";
 
-  let participants = "";
-  let types = "";
-  let users: string[] = [];
-  let validated = false;
+  let participants = $state("");
+  let types = $state("");
+  let users: string[] = $state([]);
+  let validated = $state(false);
 
   const load = async () => {
-    loading.start();
-    const res = await info();
-    loading.end();
+    const res = await requirements.init();
     participants = res.participants.join("\n");
     types = res.types.join("\n");
     users = res.users;
@@ -47,12 +44,12 @@
 <div id="addUser">
   <div class="mx-5 mb-3">
     <label for="username" class="form-label">用户名</label>
-    <input class="form-control" id="username" placeholder="Username" required autofocus />
+    <input class="form-control" id="newUser" placeholder="Username" required autofocus />
     <div class="invalid-feedback">不能为空</div>
   </div>
   <div class="mx-5 mb-1">
     <label for="password" class="form-label">密码</label>
-    <input class="form-control" type="password" id="password" placeholder="Password" required />
+    <input class="form-control" type="password" id="newPwd" placeholder="Password" required />
     <div class="invalid-feedback">不能为空</div>
   </div>
 </div>`,
@@ -70,11 +67,11 @@
         if (valid())
           return {
             username:
-              document.querySelector<HTMLInputElement>("#username")!.value,
+              document.querySelector<HTMLInputElement>("#newUser")!.value,
             password:
-              document.querySelector<HTMLInputElement>("#password")!.value,
+              document.querySelector<HTMLInputElement>("#newPwd")!.value,
           };
-        document.getElementById("addUser")?.classList.add("was-validated");
+        document.getElementById("addUser")!.classList.add("was-validated");
         return false;
       },
     });
@@ -134,14 +131,19 @@
   };
 </script>
 
-<svelte:head><title>设置 - {$name || "业务系统"}</title></svelte:head>
+<svelte:head>
+  <title>设置 - {requirements.brand || "业务系统"}</title>
+</svelte:head>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div style="height: 100%;">
   <header>
     <div class="back">
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <span class="material-symbols-outlined" on:click={() => goto("show")}>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <span
+        class="material-symbols-outlined"
+        onclick={() => requirements.goto("show")}
+      >
         arrow_back
       </span>
     </div>
@@ -151,9 +153,10 @@
     <div class="row g-3" class:was-validated={validated}>
       <div class="col-md-6 col-sm-12">
         <label for="types" class="form-label">类型</label>
-        <textarea class="form-control" id="types" bind:value={types} required />
+        <textarea class="form-control" id="types" bind:value={types} required
+        ></textarea>
         <div class="invalid-feedback">必填字段</div>
-        <button class="btn btn-primary float-end mt-2" on:click={updateTypes}>
+        <button class="btn btn-primary float-end mt-2" onclick={updateTypes}>
           保存类型
         </button>
       </div>
@@ -163,10 +166,10 @@
           class="form-control"
           id="participants"
           bind:value={participants}
-        />
+        ></textarea>
         <button
           class="btn btn-primary float-end mt-2"
-          on:click={updateParticipants}
+          onclick={updateParticipants}
         >
           保存班组
         </button>
@@ -179,22 +182,22 @@
             <li class="list-group-item d-flex justify-content-between">
               {user}
               <div class="d-flex">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <span
                   title="重置"
                   class="material-symbols-outlined link-primary"
-                  on:click={async () => reset(user)}
+                  onclick={async () => reset(user)}
                 >
                   lock_reset
                 </span>
                 {#if user != "admin"}
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <!-- svelte-ignore a11y-no-static-element-interactions -->
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
                   <span
                     title="删除"
                     class="material-symbols-outlined link-danger"
-                    on:click={async () => del(user)}
+                    onclick={async () => del(user)}
                   >
                     delete
                   </span>
@@ -205,7 +208,7 @@
             </li>
           {/each}
         </ol>
-        <button class="btn btn-primary float-end my-2" on:click={addUser}>
+        <button class="btn btn-primary float-end my-2" onclick={addUser}>
           添加用户
         </button>
       </div>

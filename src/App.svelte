@@ -1,70 +1,68 @@
 <script lang="ts">
-  import type { ComponentType } from "svelte";
+  import type { Component } from "svelte";
   import Login from "./components/Login.svelte";
   import Nav from "./components/Nav.svelte";
   import Requirement from "./components/Requirement.svelte";
   import Setting from "./components/Setting.svelte";
   import Show from "./components/Show.svelte";
-  import { info } from "./requirement";
-  import { clear, component, loading, mode, name, username } from "./stores";
+  import { loading } from "./misc.svelte";
+  import { requirements } from "./requirement.svelte";
 
-  const load = async () => {
-    clear();
-    loading.start();
-    const res = await info(true);
-    loading.end();
-    $name = res.name;
-    $username = res.username;
+  const promise = async () => {
+    requirements.clearSearch();
+    await requirements.init(true);
   };
 
-  const components: { [component: string]: ComponentType } = {
+  const components: { [component: string]: Component } = {
     setting: Setting,
     show: Show,
     requirement: Requirement,
   };
 
+  const Content = $derived(components[requirements.component]);
+
   const handlePopstate = () => {
-    if ($username) {
+    if (requirements.username) {
       switch (window.location.pathname) {
         case "/":
-          $component = "show";
+          requirements.component = "show";
           return;
         case "/add":
-          $mode = "add";
+          requirements.mode = "add";
           break;
         case "/edit":
-          $mode = "edit";
+          requirements.mode = "edit";
           break;
         default:
-          $mode = "view";
+          requirements.mode = "view";
       }
-      $component = "requirement";
+      requirements.component = "requirement";
     }
   };
 </script>
 
-<svelte:head><title>{$name || "业务系统"}</title></svelte:head>
-<svelte:window on:popstate={handlePopstate} />
+<svelte:head><title>{requirements.brand || "业务系统"}</title></svelte:head>
+<svelte:window onpopstate={handlePopstate} />
 
-<Nav on:reload={load} />
-{#await load() then _}
-  <div class="content" style="opacity: {$loading ? 0.5 : 1}">
-    {#if !$username}
-      {#if !$loading}
-        <Login on:info={load} />
+<Nav />
+{#await promise() then _}
+  <div class="content" style="opacity: {loading.show ? 0.5 : 1}">
+    {#if !requirements.username}
+      {#if !loading.show}
+        <Login />
       {/if}
     {:else}
-      <svelte:component this={components[$component]} on:reload={load} />
+      <Content />
     {/if}
   </div>
 {/await}
-<div class="loading" hidden={!$loading}>
+<div class="loading" hidden={!loading.show}>
   <div class="sk-wave sk-center">
-    <div class="sk-wave-rect" />
-    <div class="sk-wave-rect" />
-    <div class="sk-wave-rect" />
-    <div class="sk-wave-rect" />
-    <div class="sk-wave-rect" />
+    <div class="sk-wave-rect"></div>
+    <div class="sk-wave-rect"></div>
+    <div class="sk-wave-rect"></div>
+    <div class="sk-wave-rect"></div>
+    <div class="sk-wave-rect"></div>
   </div>
 </div>
 

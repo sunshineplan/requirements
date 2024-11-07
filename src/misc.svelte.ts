@@ -1,5 +1,12 @@
 import Swal, { type SweetAlertIcon } from 'sweetalert2'
-import { loading } from './stores'
+
+class Loading {
+  #n = $state(0)
+  show = $derived(this.#n > 0)
+  start() { this.#n += 1 }
+  end() { this.#n -= 1 }
+}
+export const loading = new Loading
 
 export const fire = async (title?: string, html?: string, icon?: SweetAlertIcon) => {
   const swal = Swal.mixin({

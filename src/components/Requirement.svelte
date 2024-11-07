@@ -1,11 +1,8 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
-  import { confirm, valid } from "../misc";
-  import { info, requirement, requirements, statuses } from "../requirement";
-  import { clear, goto, loading, mode, name } from "../stores";
+  import { onMount } from "svelte";
+  import { confirm, valid } from "../misc.svelte";
+  import { requirements } from "../requirement.svelte";
   import Action from "./Action.svelte";
-
-  const dispatch = createEventDispatcher();
 
   const modeList: { [key: string]: string } = {
     add: "新增",
@@ -13,45 +10,48 @@
     view: "查看",
   };
 
-  let type = $requirement.type || "";
-  let desc = $requirement.desc || "";
-  let date = $requirement.date || "";
-  let deadline = $requirement.deadline || "";
-  let done = $requirement.done || "";
-  let submitter = $requirement.submitter || "";
-  let recipient = $requirement.recipient || "";
-  let acceptor = $requirement.acceptor || "";
-  let status = $requirement.status || "";
-  let note = $requirement.note || "";
-  let participating = $requirement.participating
-    ? $requirement.participating.split(",")
-    : [];
-  let validated = false;
+  let type = $state(requirements.requirement.type || "");
+  let desc = $state(requirements.requirement.desc || "");
+  let date = $state(requirements.requirement.date || "");
+  let deadline = $state(requirements.requirement.deadline || "");
+  let done = $state(requirements.requirement.done || "");
+  let submitter = $state(requirements.requirement.submitter || "");
+  let recipient = $state(requirements.requirement.recipient || "");
+  let acceptor = $state(requirements.requirement.acceptor || "");
+  let status = $state(requirements.requirement.status || "");
+  let note = $state(requirements.requirement.note || "");
+  let participating = $state(
+    requirements.requirement.participating
+      ? requirements.requirement.participating.split(",")
+      : [],
+  );
+  let validated = $state(false);
 
-  let doneValue = "";
-  let participants: string[] = [];
-  let types: string[] = [];
+  let doneValue = $state("");
+  let participants: string[] = $state([]);
+  let types: string[] = $state([]);
 
-  let submitters: string[] = [];
-  let recipients: string[] = [];
-  let acceptors: string[] = [];
+  let submitters: string[] = $state([]);
+  let recipients: string[] = $state([]);
+  let acceptors: string[] = $state([]);
+
+  let descElement: HTMLElement;
+  let noteElement: HTMLElement;
 
   onMount(async () => {
-    loading.start();
-    const res = await info();
+    const res = await requirements.init();
     participants = res.participants;
     types = res.types;
     doneValue = res.done;
-    loading.end();
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
     acceptors = await requirements.acceptors();
-    document.getElementById("desc")!.scrollTop = 0;
-    document.getElementById("note")!.scrollTop = 0;
+    descElement.scrollTop = 0;
+    noteElement.scrollTop = 0;
   });
 
   const current = () => {
-    return <Requirement>{
+    return {
       type,
       desc,
       date,
@@ -63,24 +63,24 @@
       status,
       note,
       participating: participating.join(","),
-    };
+    } as Requirement;
   };
 
   const save = async () => {
     if (valid() && (!participants.length || participating.length > 0)) {
       validated = false;
       const r = current();
-      if ($mode == "edit") r.id = $requirement.id;
+      if (requirements.mode == "edit") r.id = requirements.requirement.id;
       try {
         if (r.status != doneValue) r.done = "";
         const res = await requirements.save(r);
         if (res === 0) {
-          if ($mode == "add") clear();
-          goto("show");
+          if (requirements.mode == "add") requirements.clearSearch();
+          requirements.goto("show");
         }
       } catch {
-        dispatch("reload");
-        goto("show");
+        await requirements.init();
+        requirements.goto("show");
       }
     } else validated = true;
   };
@@ -88,7 +88,7 @@
   const back = async () => {
     const r = current();
     let edited = false;
-    switch ($mode) {
+    switch (requirements.mode) {
       case "view":
         break;
       case "add":
@@ -102,7 +102,7 @@
       case "edit":
         for (const k in r) {
           const key = k as keyof Requirement;
-          if (r[key] != $requirement[key]) {
+          if (r[key] != requirements.requirement[key]) {
             edited = true;
             break;
           }
@@ -110,28 +110,29 @@
     }
     if (edited && !(await confirm("数据未保存，确定将放弃保存并返回。", true)))
       return;
-    goto("show");
+    requirements.goto("show");
   };
 </script>
 
 <svelte:head>
-  <title>{modeList[$mode]}业务 - {$name || "业务系统"}</title>
+  <title>
+    {modeList[requirements.mode]}业务 - {requirements.brand || "业务系统"}
+  </title>
 </svelte:head>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div style="height: 100%;">
   <header>
     <div class="back">
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <span class="material-symbols-outlined" on:click={back}>arrow_back</span>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <span class="material-symbols-outlined" onclick={back}>arrow_back</span>
     </div>
-    <h3>{modeList[$mode]}业务</h3>
-    {#if $mode != "add"}
+    <h3>{modeList[requirements.mode]}业务</h3>
+    {#if requirements.mode != "add"}
       <Action
-        requirement={$requirement}
+        requirement={requirements.requirement}
         --icon="22px"
         --margin="10px"
-        on:reload
       />
     {/if}
   </header>
@@ -141,16 +142,17 @@
       <textarea
         class="form-control"
         id="desc"
+        bind:this={descElement}
         bind:value={desc}
         required
-        disabled={$mode == "view"}
-      />
+        disabled={requirements.mode == "view"}
+      ></textarea>
       <div class="invalid-feedback">必填字段</div>
     </div>
-    <div class="w-100 m-0" />
+    <div class="w-100 m-0"></div>
     <div class="col-md-3 col-sm-4">
       <div class="form-floating">
-        {#if $mode == "view"}
+        {#if requirements.mode == "view"}
           <input class="form-control" id="type" value={type} disabled />
         {:else}
           <select class="form-select" id="type" bind:value={type} required>
@@ -165,11 +167,11 @@
     </div>
     <div class="col-md-3 col-sm-4">
       <div class="form-floating">
-        {#if $mode == "view"}
+        {#if requirements.mode == "view"}
           <input class="form-control" id="status" value={status} disabled />
         {:else}
           <select class="form-select" id="status" bind:value={status} required>
-            {#each $statuses as status (status.value)}
+            {#each requirements.statuses as status (status.value)}
               <option value={status.value}>{status.value}</option>
             {/each}
           </select>
@@ -178,7 +180,7 @@
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
-    <div class="w-100 m-0" />
+    <div class="w-100 m-0"></div>
     <div class="col-md-3 col-sm-4">
       <div class="form-floating">
         <input
@@ -187,7 +189,7 @@
           type="date"
           bind:value={date}
           required
-          disabled={$mode == "view"}
+          disabled={requirements.mode == "view"}
         />
         <label for="date">提请日期</label>
         <div class="invalid-feedback">必填字段</div>
@@ -200,7 +202,7 @@
           id="deadline"
           type="date"
           bind:value={deadline}
-          disabled={$mode == "view"}
+          disabled={requirements.mode == "view"}
         />
         <label for="deadline">期限日期</label>
       </div>
@@ -214,14 +216,14 @@
             type="date"
             bind:value={done}
             required
-            disabled={$mode == "view"}
+            disabled={requirements.mode == "view"}
           />
           <label for="deadline">完成日期</label>
           <div class="invalid-feedback">必填字段</div>
         </div>
       </div>
     {/if}
-    <div class="w-100 m-0" />
+    <div class="w-100 m-0"></div>
     <div class="col-md-3 col-sm-4">
       <div class="form-floating">
         <input
@@ -231,7 +233,7 @@
           bind:value={submitter}
           placeholder="submitter"
           required
-          disabled={$mode == "view"}
+          disabled={requirements.mode == "view"}
         />
         <datalist id="submitter-list">
           {#each submitters as submitter (submitter)}
@@ -250,7 +252,7 @@
           list="recipient-list"
           bind:value={recipient}
           placeholder="recipient"
-          disabled={$mode == "view"}
+          disabled={requirements.mode == "view"}
         />
         <datalist id="recipient-list">
           {#each recipients as recipient (recipient)}
@@ -269,7 +271,7 @@
           bind:value={acceptor}
           placeholder="acceptor"
           required
-          disabled={$mode == "view"}
+          disabled={requirements.mode == "view"}
         />
         <datalist id="acceptor-list">
           {#each acceptors as acceptor (acceptor)}
@@ -304,7 +306,7 @@
                 id={"participant" + index}
                 bind:group={participating}
                 value={participant}
-                disabled={$mode == "view"}
+                disabled={requirements.mode == "view"}
               />
               <label
                 class="form-check-label"
@@ -333,20 +335,21 @@
       <textarea
         class="form-control"
         id="note"
+        bind:this={noteElement}
         bind:value={note}
-        disabled={$mode == "view"}
-      />
+        disabled={requirements.mode == "view"}
+      ></textarea>
     </div>
     <div class="col-md-8 col-sm-12">
-      {#if $mode == "view"}
-        <button class="btn btn-primary float-end mb-2" on:click={back}>
+      {#if requirements.mode == "view"}
+        <button class="btn btn-primary float-end mb-2" onclick={back}>
           返回
         </button>
       {:else}
-        <button class="btn btn-primary float-end mb-2" on:click={save}>
+        <button class="btn btn-primary float-end mb-2" onclick={save}>
           保存
         </button>
-        <button class="btn btn-primary float-end mx-2 mb-2" on:click={back}>
+        <button class="btn btn-primary float-end mx-2 mb-2" onclick={back}>
           取消
         </button>
       {/if}

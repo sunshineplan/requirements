@@ -1,38 +1,36 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-  import { confirm } from "../misc";
-  import {
-    requirement as current,
-    isClosed,
-    requirements,
-  } from "../requirement";
-  import { component, goto, mode, saveScrollTop, username } from "../stores";
+  import { confirm } from "../misc.svelte";
+  import { requirements } from "../requirement.svelte";
 
-  const dispatch = createEventDispatcher();
-
-  export let requirement: Requirement;
+  let {
+    requirement,
+  }: {
+    requirement: Requirement;
+  } = $props();
 
   const done = async (r: Requirement) => {
     if (await confirm("该条业务将被标记为已完成。")) {
-      $current = r;
+      requirements.requirement = r;
       try {
         const res = await requirements.done({ ...r });
         if (res === 0)
-          if ($component == "requirement") goto("show");
+          if (requirements.component == "requirement")
+            requirements.goto("show");
           else {
-            saveScrollTop();
-            dispatch("refresh");
+            requirements.saveScrollTop();
+            await requirements.init();
+            requirements.scroll(true);
           }
       } catch {
-        dispatch("reload");
-        goto("show");
+        await requirements.init();
+        requirements.goto("show");
       }
     }
   };
 
   const edit = (r: Requirement) => {
-    $current = r;
-    goto("edit");
+    requirements.requirement;
+    requirements.goto("edit");
   };
 
   const del = async (r: Requirement) => {
@@ -40,47 +38,47 @@
       try {
         await requirements.delete(r);
       } catch {
-        dispatch("reload");
+        await requirements.init();
       }
-      goto("show");
+      requirements.goto("show");
     }
   };
 </script>
 
 <div>
-  {#if !isClosed(requirement)}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
+  {#if !requirements.isClosed(requirement)}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <span
       data-action="done"
       title="完成"
       class="material-symbols-outlined link-success"
-      on:click={() => done(requirement)}
+      onclick={() => done(requirement)}
     >
       done_outline
     </span>
   {:else}
     <span class="material-symbols-outlined hidden">done_outline</span>
   {/if}
-  {#if $component == "requirement" && $mode == "edit"}
-    {#if $username == "admin"}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
+  {#if requirements.component == "requirement" && requirements.mode == "edit"}
+    {#if requirements.username == "admin"}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
         title="删除"
         class="material-symbols-outlined link-danger"
-        on:click={() => del(requirement)}
+        onclick={() => del(requirement)}
       >
         delete_outline
       </span>
     {/if}
   {:else}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <span
       title="编辑"
       class="material-symbols-outlined link-primary"
-      on:click={() => edit(requirement)}
+      onclick={() => edit(requirement)}
     >
       edit
     </span>

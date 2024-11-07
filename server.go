@@ -56,7 +56,7 @@ func run() error {
 		c.HTML(200, "index.html", nil)
 	})
 	router.GET("/info", func(c *gin.Context) {
-		obj := map[string]any{"name": *name}
+		obj := map[string]any{"brand": *brand}
 		user, _ := getUser(c)
 		if user == "" {
 			c.JSON(200, obj)

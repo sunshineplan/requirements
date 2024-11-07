@@ -1,10 +1,10 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
-  import { fields } from "../requirement";
-  import { clear, scroll, search, searchField } from "../stores";
+  import { fields } from "../fields";
+  import { requirements } from "../requirement.svelte";
 
-  let hover = false;
-  let showOption = false;
+  let hover = $state(false);
+  let showOption = $state(false);
   let tune: HTMLElement;
   let option: HTMLElement;
 
@@ -18,60 +18,66 @@
   };
 </script>
 
-<svelte:window on:click={handleClickOutside} />
+<svelte:window onclick={handleClickOutside} />
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   class="search"
-  on:mouseenter={() => (hover = true)}
-  on:mouseleave={() => (hover = false)}
+  onmouseenter={() => (hover = true)}
+  onmouseleave={() => (hover = false)}
 >
   <div class="icon">
     <span class="material-symbols-outlined">search</span>
   </div>
   <input
-    bind:value={$search}
-    placeholder={$searchField ? fields.name($searchField) + "搜索" : "搜索"}
-    on:input={() => scroll()}
+    bind:value={requirements.search.search}
+    placeholder={requirements.search.field
+      ? fields.name(requirements.search.field) + "搜索"
+      : "搜索"}
+    oninput={() => scroll()}
   />
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div
     bind:this={tune}
     class="icon tune"
     class:show={showOption}
-    style:color={$searchField ? "#1a73e8" : ""}
-    on:click={() => {
+    style:color={requirements.search.field ? "#1a73e8" : ""}
+    onclick={() => {
       showOption = !showOption;
     }}
   >
     <span class="material-symbols-outlined">tune</span>
   </div>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div
     class="icon reset"
-    style:display={hover && ($search || $searchField) ? "flex" : "none"}
+    style:display={hover &&
+    (requirements.search.search || requirements.search.field)
+      ? "flex"
+      : "none"}
   >
-    <span class="material-symbols-outlined" on:click={clear}>close_small</span>
+    <span
+      class="material-symbols-outlined"
+      onclick={() => requirements.clearSearch()}>close_small</span
+    >
   </div>
 </div>
-{#if showOption}
-  <div class="option" bind:this={option}>
-    <div class="input-group px-5 py-3" transition:slide={{ duration: 200 }}>
-      <label class="input-group-text" for="option">检索字段</label>
-      <select
-        class="form-select"
-        id="option"
-        bind:value={$searchField}
-        on:change={() => (showOption = false)}
-      >
-        <option value="">所有</option>
-        {#each fields.searchable() as field (field)}
-          <option value={field}>{fields.name(field)}</option>
-        {/each}
-      </select>
-    </div>
+<div class="option" bind:this={option} style:display={showOption ? "" : "none"}>
+  <div class="input-group px-5 py-3" transition:slide={{ duration: 200 }}>
+    <label class="input-group-text" for="option">检索字段</label>
+    <select
+      class="form-select"
+      id="option"
+      bind:value={requirements.search.field}
+      onchange={() => (showOption = false)}
+    >
+      <option value="">所有</option>
+      {#each fields.searchable() as field (field)}
+        <option value={field}>{fields.name(field)}</option>
+      {/each}
+    </select>
   </div>
-{/if}
+</div>
 
 <style>
   .search {

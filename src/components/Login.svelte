@@ -1,22 +1,17 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-  import { fire, post } from "../misc";
-  import { goto } from "../stores";
+  import { fire, post } from "../misc.svelte";
+  import { requirements } from "../requirement.svelte";
 
-  const dispatch = createEventDispatcher();
-
-  let username = localStorage.getItem("username") || "";
-  let password = "";
-  let rememberme = localStorage.getItem("rememberme") === "true";
+  let username = $state(localStorage.getItem("username") || "");
+  let password = $state("");
+  let rememberme = $state(localStorage.getItem("rememberme") === "true");
+  let usernameInput: HTMLInputElement;
+  let passwordInput: HTMLInputElement;
 
   const login = async () => {
-    if (
-      !document.querySelector<HTMLSelectElement>("#username")!.checkValidity()
-    )
+    if (!usernameInput!.checkValidity())
       await fire("错误", "用户名不能为空", "error");
-    else if (
-      !document.querySelector<HTMLSelectElement>("#password")!.checkValidity()
-    )
+    else if (!passwordInput.checkValidity())
       await fire("错误", "密码不能为空", "error");
     else {
       const resp = await post("/login", { username, password, rememberme });
@@ -26,8 +21,8 @@
           localStorage.setItem("username", username);
           if (rememberme) localStorage.setItem("rememberme", "true");
           else localStorage.removeItem("rememberme");
-          dispatch("info");
-          goto("show");
+          await requirements.init();
+          requirements.goto("show");
         } else await fire("错误", json.message, "error");
       } else await fire("错误", await resp.text(), "error");
     }
@@ -48,12 +43,13 @@
     登录
   </h3>
 </header>
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="login" on:keyup={handleEnter}>
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="login" onkeyup={handleEnter}>
   <div class="form-floating mb-3">
-    <!-- svelte-ignore a11y-autofocus -->
+    <!-- svelte-ignore a11y_autofocus -->
     <input
       class="form-control"
+      bind:this={usernameInput}
       bind:value={username}
       id="username"
       name="username"
@@ -69,6 +65,7 @@
     <input
       class="form-control"
       type="password"
+      bind:this={passwordInput}
       bind:value={password}
       id="password"
       name="password"
@@ -89,7 +86,7 @@
     <label class="form-check-label" for="rememberme">记住我</label>
   </div>
   <hr />
-  <button class="btn btn-primary login" on:click={login}>登录</button>
+  <button class="btn btn-primary login" onclick={login}>登录</button>
 </div>
 
 <style>

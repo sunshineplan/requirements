@@ -10,7 +10,7 @@ var to mail.Receipts
 
 func sendMail(subject, body string, attachments []*mail.Attachment) {
 	msg := &mail.Message{
-		Subject:     fmt.Sprintf("[%s]%s", *name, subject),
+		Subject:     fmt.Sprintf("[%s]%s", *brand, subject),
 		Body:        body,
 		Attachments: attachments,
 	}

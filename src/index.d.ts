@@ -24,7 +24,7 @@ type FieldMap = {
 }
 
 interface Info {
-  name: string
+  brand: string
   username: string
   done: string
   participants: string[]
@@ -37,3 +37,9 @@ interface Status {
   closed: boolean
 }
 
+interface Search {
+  search: string
+  field: keyof Requirement | ''
+  sort: keyof Requirement | ''
+  desc: boolean
+}

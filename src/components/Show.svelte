@@ -1,39 +1,22 @@
 <script lang="ts">
   import { stringify } from "csv-stringify/browser/esm/sync";
-  import Cookies from "js-cookie";
-  import { createEventDispatcher, onMount } from "svelte";
-  import { poll } from "../misc";
-  import { fields, info, requirement, requirements } from "../requirement";
-  import {
-    desc,
-    goto,
-    loading,
-    name,
-    scroll,
-    search,
-    searchField,
-    sort,
-  } from "../stores";
+  import { onMount } from "svelte";
+  import { fields } from "../fields";
+  import { requirements } from "../requirement.svelte";
   import Action from "./Action.svelte";
   import Search from "./Search.svelte";
 
-  const dispatch = createEventDispatcher();
-
-  let output: Requirement[] = [];
-
-  $: $search, $searchField, $sort, $desc, filter();
-
   const add = () => {
-    $requirement = <Requirement>{};
-    goto("add");
+    requirements.requirement = {} as Requirement;
+    requirements.goto("add");
   };
 
   const view = async (e: MouseEvent, r: Requirement) => {
     await new Promise((sleep) => setTimeout(sleep, 50));
     if (window.getSelection()?.toString() !== "") return;
     if ((e.target as HTMLElement).dataset["action"] != "done") {
-      $requirement = r;
-      goto("view");
+      requirements.requirement = r;
+      requirements.goto("view");
     }
   };
 
@@ -41,7 +24,7 @@
     const link = document.createElement("a");
     const file = new Blob(
       [
-        stringify(output, {
+        stringify(requirements.results, {
           bom: true,
           header: true,
           columns: fields.columns(true).map((key) => ({
@@ -60,31 +43,8 @@
     URL.revokeObjectURL(link.href);
   };
 
-  const filter = () => {
-    let array: Requirement[] = [];
-    if (!$search) array = $requirements;
-    else if ($searchField)
-      array = $requirements.filter((i) => i[$searchField].includes($search));
-    else
-      array = $requirements.filter((i) =>
-        fields.searchable().some((field) => i[field].includes($search)),
-      );
-    if ($sort)
-      output = array.toSorted((a, b) => {
-        const v1 = a[$sort as keyof Requirement],
-          v2 = b[$sort as keyof Requirement];
-        let res = 0;
-        if (v1 < v2) res = 1;
-        else if (v1 > v2) res = -1;
-        if ($desc) return res;
-        else return -res;
-      });
-    else output = array.sort();
-  };
-
   const restore = () => {
-    filter();
-    scroll(true);
+    requirements.scroll(true);
   };
 
   const participants = (s: string) => {
@@ -95,37 +55,19 @@
     return s;
   };
 
-  const subscribe = async (signal: AbortSignal) => {
-    const resp = await poll(signal);
-    if (resp.ok) {
-      if (Cookies.get("last") != (await resp.text())) {
-        loading.start();
-        await info(true);
-        filter();
-        loading.end();
-      }
-      await subscribe(signal);
-    } else if (resp.status == 401) {
-      dispatch("reload");
-    } else {
-      await new Promise((sleep) => setTimeout(sleep, 30000));
-      await subscribe(signal);
-    }
-  };
   onMount(() => {
-    const controller = new AbortController();
-    subscribe(controller.signal);
-    return () => controller.abort();
+    requirements.subscribe(true);
+    return () => requirements.controller.abort();
   });
 
-  onMount(() => scroll(true));
+  onMount(() => requirements.scroll(true));
 </script>
 
-<svelte:head><title>{$name || "业务系统"}</title></svelte:head>
+<svelte:head><title>{requirements.brand || "业务系统"}</title></svelte:head>
 
 <header>
-  <button class="btn btn-primary" on:click={add}>新增业务</button>
-  <button class="btn btn-primary" on:click={download}>导出</button>
+  <button class="btn btn-primary" onclick={add}>新增业务</button>
+  <button class="btn btn-primary" onclick={download}>导出</button>
   <Search />
 </header>
 <div class="table-responsive">
@@ -136,30 +78,31 @@
           {@const size = fields.size(field)}
           {#if size}
             <th
-              class="sortable {$sort == field
-                ? $desc
+              class="sortable {requirements.search.sort == field
+                ? requirements.search.desc
                   ? 'desc'
                   : 'asc'
                 : 'default'}"
               class:auto={size == -1}
               style:width={size > 0 ? `${size}rem` : ""}
-              on:click={() => {
-                const before = $sort;
-                $sort = field;
-                if (before == $sort) $desc = !$desc;
-                else $desc = true;
+              onclick={() => {
+                const before = requirements.search.sort;
+                requirements.search.sort = field;
+                if (before == requirements.search.sort)
+                  requirements.search.desc = !requirements.search.desc;
+                else requirements.search.desc = true;
               }}
             >
               {fields.name(field)}
             </th>
           {/if}
         {/each}
-        <th />
+        <th></th>
       </tr>
     </thead>
     <tbody>
-      {#each output as requirement (requirement.id)}
-        <tr on:click={(e) => view(e, requirement)}>
+      {#each requirements.results as requirement (requirement.id)}
+        <tr onclick={(e) => view(e, requirement)}>
           {#each fields.columns() as field (field)}
             {#if fields.size(field)}
               <td
@@ -174,13 +117,7 @@
             {/if}
           {/each}
           <td style="vertical-align: middle">
-            <Action
-              {requirement}
-              --icon="18px"
-              --margin="2px"
-              on:reload
-              on:refresh={restore}
-            />
+            <Action {requirement} --icon="18px" --margin="2px" />
           </td>
         </tr>
       {/each}

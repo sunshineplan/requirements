@@ -1,10 +1,7 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import Swal from "sweetalert2";
-  import { fire, post } from "../misc";
-  import { goto, name, username } from "../stores";
-
-  const dispatch = createEventDispatcher();
+  import { fire, post } from "../misc.svelte";
+  import { requirements } from "../requirement.svelte";
 
   const statistics = async () => {
     let url = "/statistics";
@@ -34,35 +31,37 @@
   };
 
   const logout = async () => {
-    const resp = await post("/logout", undefined);
+    const resp = await post("/logout");
     if (resp.ok) {
-      dispatch("reload");
-      goto("show");
+      await requirements.init();
+      requirements.goto("show");
     } else await fire("错误", "未知错误", "error");
   };
 </script>
 
 <nav class="navbar navbar-light topbar">
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <span class="brand" on:click={() => goto("show")}>{$name || "业务系统"}</span>
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <span class="brand" onclick={() => requirements.goto("show")}>
+    {requirements.brand || "业务系统"}
+  </span>
   <div class="navbar-nav flex-row">
-    {#if $username}
-      <span class="nav-link">{$username}</span>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <span class="nav-link link" on:click={statistics}>统计</span>
-      {#if $username == "admin"}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <span class="nav-link link" on:click={() => goto("setting")}>设置</span>
+    {#if requirements.username}
+      <span class="nav-link">{requirements.username}</span>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span class="nav-link link" onclick={statistics}>统计</span>
+      {#if requirements.username == "admin"}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <span class="nav-link link" onclick={() => requirements.goto("setting")}
+          >设置</span
+        >
       {/if}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <span class="nav-link link" on:click={logout}>退出</span>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span class="nav-link link" onclick={logout}>退出</span>
     {:else}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span class="nav-link">登录</span>
     {/if}
   </div>
