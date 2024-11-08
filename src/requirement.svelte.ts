@@ -47,6 +47,7 @@ class Requirements {
   })
   async clear() { await table.clear() }
   async reset() {
+    this.username = ''
     this.requirement = {} as Requirement
     this.requirements = []
     await this.clear()
@@ -64,8 +65,9 @@ class Requirements {
     if (resp.ok) {
       const res = await resp.json()
       this.brand = res.brand
-      this.username = res.username || ''
-      if (this.username) {
+      if (res.username) {
+        this.username = res.username
+        this.statuses = res.statuses
         if (load) {
           const n = await this.load()
           if (!n) {
@@ -73,7 +75,6 @@ class Requirements {
             await this.load()
           }
         }
-        this.statuses = res.statuses
         return {
           done: res.done,
           participants: res.participants,
