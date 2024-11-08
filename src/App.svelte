@@ -8,10 +8,7 @@
   import { loading } from "./misc.svelte";
   import { requirements } from "./requirement.svelte";
 
-  const promise = async () => {
-    requirements.clearSearch();
-    await requirements.init(true);
-  };
+  const promise = requirements.init(true);
 
   const components: { [component: string]: Component } = {
     setting: Setting,
@@ -45,7 +42,7 @@
 <svelte:window onpopstate={handlePopstate} />
 
 <Nav />
-{#await promise() then _}
+{#await promise then _}
   <div class="content" style="opacity: {loading.show ? 0.5 : 1}">
     {#if !requirements.username}
       {#if !loading.show}

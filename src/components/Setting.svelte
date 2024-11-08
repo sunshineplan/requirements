@@ -14,6 +14,7 @@
     types = res.types.join("\n");
     users = res.users;
   };
+  const promise = load();
 
   const updateTypes = async () => {
     if (valid()) {
@@ -149,7 +150,7 @@
     </div>
     <h3>设置</h3>
   </header>
-  {#await load() then _}
+  {#await promise then _}
     <div class="row g-3" class:was-validated={validated}>
       <div class="col-md-6 col-sm-12">
         <label for="types" class="form-label">类型</label>

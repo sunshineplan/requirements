@@ -12,9 +12,8 @@
   };
 
   const view = async (e: MouseEvent, r: Requirement) => {
-    await new Promise((sleep) => setTimeout(sleep, 50));
     if (window.getSelection()?.toString() !== "") return;
-    if ((e.target as HTMLElement).dataset["action"] != "done") {
+    if (!(e.target as HTMLElement).dataset["action"] ) {
       requirements.requirement = r;
       requirements.goto("view");
     }
@@ -43,10 +42,6 @@
     URL.revokeObjectURL(link.href);
   };
 
-  const restore = () => {
-    requirements.scroll(true);
-  };
-
   const participants = (s: string) => {
     const res = s.split(",");
     if (res.length > 1) {
@@ -56,11 +51,10 @@
   };
 
   onMount(() => {
+    requirements.scroll(true);
     requirements.subscribe(true);
     return () => requirements.controller.abort();
   });
-
-  onMount(() => requirements.scroll(true));
 </script>
 
 <svelte:head><title>{requirements.brand || "业务系统"}</title></svelte:head>
@@ -104,17 +98,11 @@
       {#each requirements.results as requirement (requirement.id)}
         <tr onclick={(e) => view(e, requirement)}>
           {#each fields.columns() as field (field)}
-            {#if fields.size(field)}
-              <td
-                title={/编号|类型|日期|班组/i.test(fields.name(field))
-                  ? ""
-                  : requirement[field]}
-              >
-                {field == "participating"
-                  ? participants(requirement[field])
-                  : requirement[field]}
-              </td>
-            {/if}
+            <td title={fields.title(field) ? "" : requirement[field]}>
+              {field == "participating"
+                ? participants(requirement[field])
+                : requirement[field]}
+            </td>
           {/each}
           <td style="vertical-align: middle">
             <Action {requirement} --icon="18px" --margin="2px" />

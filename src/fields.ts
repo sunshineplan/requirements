@@ -9,6 +9,9 @@ class Fields {
   size(key: keyof Requirement) {
     return this.#fields[key].size
   }
+  title(key: keyof Requirement) {
+    return /编号|类型|日期|班组/i.test(fields.name(key))
+  }
   columns(all?: boolean) {
     const columns = <(keyof Requirement)[]>[]
     for (const key in this.#fields)

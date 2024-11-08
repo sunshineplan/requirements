@@ -15,8 +15,8 @@ class Requirements {
   component = $state('show')
   mode = $state('')
   requirement = $state({} as Requirement)
-  requirements = $state<Requirement[]>([])
-  statuses = $state<Status[]>([])
+  requirements = $state.raw<Requirement[]>([])
+  statuses = $state.raw<Status[]>([])
   search = $state<Search>({ search: '', field: '', sort: '', desc: true })
   scrollTop = $state(0)
   controller = $state(new AbortController())
@@ -64,8 +64,8 @@ class Requirements {
     if (resp.ok) {
       const res = await resp.json()
       this.brand = res.brand
-      if (res.username) {
-        this.username = res.username
+      this.username = res.username || ''
+      if (this.username) {
         if (load) {
           const n = await this.load()
           if (!n) {
@@ -190,8 +190,6 @@ class Requirements {
       case 'view':
         comp = 'requirement'
         this.mode = s
-        this.saveScrollTop()
-        break
       case 'setting':
         this.saveScrollTop()
         break
@@ -220,10 +218,7 @@ class Requirements {
     if (table) this.scrollTop = table.scrollTop
   }
   clearSearch() {
-    this.search.search = ''
-    this.search.field = ''
-    this.search.sort = ''
-    this.search.desc = true
+    this.search = { search: '', field: '', sort: '', desc: true }
     this.scrollTop = 0
   }
   async subscribe(reset?: boolean) {
@@ -239,10 +234,7 @@ class Requirements {
     }
     if (resp.ok) {
       const last = await resp.text()
-      if (last && getCookie('last') != last) {
-        await this.init()
-        //filter()
-      }
+      if (last && getCookie('last') != last) await this.init()
       await this.subscribe()
     } else if (resp.status == 401) {
       await this.init()

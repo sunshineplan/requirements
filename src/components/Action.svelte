@@ -11,16 +11,19 @@
   const done = async (r: Requirement) => {
     if (await confirm("该条业务将被标记为已完成。")) {
       requirements.requirement = r;
+      if (requirements.component == "show") requirements.controller.abort();
       try {
         const res = await requirements.done({ ...r });
         if (res === 0)
-          if (requirements.component == "requirement")
+          if (requirements.component == "requirement") {
             requirements.goto("show");
-          else {
+            return;
+          } else {
             requirements.saveScrollTop();
             await requirements.init();
             requirements.scroll(true);
           }
+        requirements.subscribe(true);
       } catch {
         await requirements.init();
         requirements.goto("show");
@@ -29,7 +32,7 @@
   };
 
   const edit = (r: Requirement) => {
-    requirements.requirement;
+    requirements.requirement = r;
     requirements.goto("edit");
   };
 
@@ -76,6 +79,7 @@
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <span
+      data-action="edit"
       title="编辑"
       class="material-symbols-outlined link-primary"
       onclick={() => edit(requirement)}

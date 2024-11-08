@@ -34,7 +34,7 @@
     placeholder={requirements.search.field
       ? fields.name(requirements.search.field) + "搜索"
       : "搜索"}
-    oninput={() => scroll()}
+    oninput={() => requirements.scroll()}
   />
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div

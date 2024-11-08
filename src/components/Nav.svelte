@@ -31,6 +31,7 @@
   };
 
   const logout = async () => {
+    requirements.controller.abort();
     const resp = await post("/logout");
     if (resp.ok) {
       await requirements.init();

@@ -21,7 +21,7 @@
           localStorage.setItem("username", username);
           if (rememberme) localStorage.setItem("rememberme", "true");
           else localStorage.removeItem("rememberme");
-          await requirements.init();
+          await requirements.init(true);
           requirements.goto("show");
         } else await fire("错误", json.message, "error");
       } else await fire("错误", await resp.text(), "error");
