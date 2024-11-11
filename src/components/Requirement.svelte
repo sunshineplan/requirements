@@ -29,7 +29,6 @@
 
   let doneValue = $state("");
   let participants: string[] = $state([]);
-  let types: string[] = $state([]);
 
   let submitters: string[] = $state([]);
   let recipients: string[] = $state([]);
@@ -41,7 +40,6 @@
   onMount(async () => {
     const res = await requirements.init();
     participants = res.participants;
-    types = res.types;
     doneValue = res.done;
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
@@ -156,7 +154,7 @@
           <input class="form-control" id="type" value={type} disabled />
         {:else}
           <select class="form-select" id="type" bind:value={type} required>
-            {#each types as type (type)}
+            {#each requirements.types as type (type)}
               <option value={type}>{type}</option>
             {/each}
           </select>

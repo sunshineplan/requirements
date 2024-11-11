@@ -16,8 +16,9 @@ class Requirements {
   mode = $state('')
   requirement = $state({} as Requirement)
   requirements = $state.raw<Requirement[]>([])
+  types = $state<string[]>([])
   statuses = $state.raw<Status[]>([])
-  search = $state<Search>({ search: '', field: '', sort: '', desc: true })
+  search = $state<Search>({ search: '', field: '', sort: '', desc: true, filter: '', value: '' })
   scrollTop = $state(0)
   controller = $state(new AbortController())
   results = $derived.by(() => {
@@ -32,6 +33,10 @@ class Requirements {
         fields
           .searchable()
           .some((field) => i[field].includes(this.search.search)),
+      )
+    if (this.search.filter && this.search.value)
+      array = array.filter((i) =>
+        i[this.search.filter as keyof Requirement] === this.search.value,
       )
     if (this.search.sort)
       return array.toSorted((a, b) => {
@@ -67,6 +72,7 @@ class Requirements {
       this.brand = res.brand
       if (res.username) {
         this.username = res.username
+        this.types = res.types
         this.statuses = res.statuses
         if (load) {
           const n = await this.load()
@@ -78,7 +84,6 @@ class Requirements {
         return {
           done: res.done,
           participants: res.participants,
-          types: res.types,
           users: res.users
         } as Info
       } else await this.reset()
@@ -219,7 +224,7 @@ class Requirements {
     if (table) this.scrollTop = table.scrollTop
   }
   clearSearch() {
-    this.search = { search: '', field: '', sort: '', desc: true }
+    this.search = { search: '', field: '', sort: '', desc: true, filter: '', value: '' }
     this.scrollTop = 0
   }
   async subscribe(reset?: boolean) {

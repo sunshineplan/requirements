@@ -46,17 +46,17 @@ export const fields = new Fields({
   date: {
     name: '提请日期',
     size: 8,
-    searchable: false
+    searchable: true
   },
   deadline: {
     name: '期限日期',
     size: 8,
-    searchable: false
+    searchable: true
   },
   done: {
     name: '完成日期',
     size: 8,
-    searchable: false
+    searchable: true
   },
   submitter: {
     name: '提交人',
@@ -86,6 +86,6 @@ export const fields = new Fields({
   participating: {
     name: '参与班组',
     size: 6,
-    searchable: false
+    searchable: true
   },
 })

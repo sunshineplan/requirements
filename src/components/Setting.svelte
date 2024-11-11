@@ -10,8 +10,8 @@
 
   const load = async () => {
     const res = await requirements.init();
+    types = requirements.types.join("\n");
     participants = res.participants.join("\n");
-    types = res.types.join("\n");
     users = res.users;
   };
   const promise = load();

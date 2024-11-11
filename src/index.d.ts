@@ -42,4 +42,6 @@ interface Search {
   field: keyof Requirement | ''
   sort: keyof Requirement | ''
   desc: boolean
+  filter: '' | 'type' | 'status'
+  value: string
 }

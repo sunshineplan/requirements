@@ -41,7 +41,11 @@
     bind:this={tune}
     class="icon tune"
     class:show={showOption}
-    style:color={requirements.search.field ? "#1a73e8" : ""}
+    style:color={requirements.search.field ||
+    requirements.search.filter ||
+    requirements.search.value
+      ? "#1a73e8"
+      : ""}
     onclick={() => {
       showOption = !showOption;
     }}
@@ -58,24 +62,115 @@
   >
     <span
       class="material-symbols-outlined"
-      onclick={() => requirements.clearSearch()}>close_small</span
+      onclick={() => requirements.clearSearch()}
     >
+      close_small
+    </span>
   </div>
 </div>
 <div class="option" bind:this={option} style:display={showOption ? "" : "none"}>
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <span
+    class="material-symbols-outlined close"
+    onclick={() => (showOption = false)}
+  >
+    collapse_content
+  </span>
   <div class="input-group px-5 py-3" transition:slide={{ duration: 200 }}>
-    <label class="input-group-text" for="option">检索字段</label>
-    <select
-      class="form-select"
-      id="option"
-      bind:value={requirements.search.field}
-      onchange={() => (showOption = false)}
+    <div class="d-flex w-100">
+      <div class="input-group">
+        <label class="input-group-text" for="search">检索字段</label>
+        <select
+          class="form-select"
+          id="search"
+          bind:value={requirements.search.field}
+          onchange={() => (showOption = false)}
+        >
+          <option value="">所有</option>
+          {#each fields.searchable() as field (field)}
+            <option value={field}>{fields.name(field)}</option>
+          {/each}
+        </select>
+      </div>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        class="remove text-danger"
+        style:display={requirements.search.field ? "" : "none"}
+        onclick={() => {
+          requirements.search.field = "";
+          showOption = false;
+        }}
+      >
+        <span class="material-symbols-outlined">do_not_disturb_on</span>
+      </div>
+    </div>
+    <div class="d-flex w-100">
+      <div class="input-group">
+        <label class="input-group-text" for="filter">筛选字段</label>
+        <select
+          class="form-select"
+          id="filter"
+          bind:value={requirements.search.filter}
+          onchange={() => (requirements.search.value = "")}
+        >
+          <option value="">无</option>
+          <option value="type">{fields.name("type")}</option>
+          <option value="status">{fields.name("status")}</option>
+        </select>
+      </div>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        class="remove text-danger"
+        style:display={requirements.search.filter ? "" : "none"}
+        onclick={() => {
+          requirements.search.filter = "";
+          showOption = false;
+        }}
+      >
+        <span class="material-symbols-outlined">do_not_disturb_on</span>
+      </div>
+    </div>
+    <div
+      class="d-flex w-100"
+      style:display|important={requirements.search.filter ? "" : "none"}
     >
-      <option value="">所有</option>
-      {#each fields.searchable() as field (field)}
-        <option value={field}>{fields.name(field)}</option>
-      {/each}
-    </select>
+      <div class="input-group">
+        <label class="input-group-text" for="value">筛选内容</label>
+        <select
+          class="form-select"
+          id="value"
+          bind:value={requirements.search.value}
+          onchange={() => (showOption = false)}
+        >
+          {#if requirements.search.filter === "status"}
+            <option value="">所有</option>
+            {#each requirements.statuses as status (status.value)}
+              <option value={status.value}>{status.value}</option>
+            {/each}
+          {:else if requirements.search.filter === "type"}
+            <option value="">所有</option>
+            {#each requirements.types as type (type)}
+              <option value={type}>{type}</option>
+            {/each}
+          {/if}
+        </select>
+      </div>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        class="remove text-danger"
+        style:display={requirements.search.value ? "" : "none"}
+        onclick={() => {
+          requirements.search.value = "";
+          showOption = false;
+        }}
+      >
+        <span class="material-symbols-outlined">do_not_disturb_on</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -134,11 +229,32 @@
     position: absolute;
     right: 20px;
     margin-top: 10px;
+    width: 320px;
   }
   .option > .input-group {
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.375rem;
     z-index: 1;
+  }
+
+  .close {
+    position: absolute;
+    cursor: pointer;
+    right: 0;
+    z-index: 100;
+  }
+
+  .d-flex + .d-flex {
+    margin-top: 1rem;
+  }
+
+  .remove {
+    display: flex;
+    position: absolute;
+    padding: 7px;
+    right: 12px;
+    cursor: pointer;
   }
 </style>
