@@ -132,8 +132,8 @@ class Requirements {
     } else await fire('Fatal', await resp.text(), 'error')
     return 0
   }
-  async done(r: Requirement) {
-    const resp = await post('/done', r)
+  async done(r: Requirement, date: string) {
+    const resp = await post(`/done?date=${date}`, r)
     if (resp.ok) {
       const res = await resp.json()
       if (res.status == 1) {

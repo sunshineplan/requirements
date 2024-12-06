@@ -199,6 +199,7 @@
           class="form-control"
           id="deadline"
           type="date"
+          min={date}
           bind:value={deadline}
           disabled={requirements.mode == "view"}
         />
@@ -212,6 +213,7 @@
             class="form-control"
             id="done"
             type="date"
+            min={date}
             bind:value={done}
             required
             disabled={requirements.mode == "view"}

@@ -71,21 +71,27 @@ type Date struct {
 	year, month, day int
 }
 
+func parseDate(s string) (Date, error) {
+	s = strings.Map(func(r rune) rune {
+		if r == '-' || r == '/' || unicode.IsSpace(r) {
+			return -1
+		}
+		return r
+	}, s)
+	t, err := time.Parse("20060102", s)
+	if err != nil {
+		return Date{}, err
+	}
+	return Date{t.Year(), int(t.Month()), t.Day()}, nil
+}
+
 func now() Date {
 	y, m, d := time.Now().Date()
 	return Date{y, int(m), d}
 }
 
 func (d *Date) UnmarshalText(text []byte) error {
-	s := strings.Map(func(r rune) rune {
-		if r == '-' || r == '/' || unicode.IsSpace(r) {
-			return -1
-		}
-		return r
-	}, string(text))
-	if t, err := time.Parse("20060102", s); err == nil {
-		*d = Date{t.Year(), int(t.Month()), t.Day()}
-	}
+	*d, _ = parseDate(string(text))
 	return nil
 }
 

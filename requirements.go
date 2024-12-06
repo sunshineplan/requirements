@@ -145,6 +145,10 @@ func done(c *gin.Context) {
 		c.AbortWithStatus(409)
 		return
 	}
+	date, err := parseDate(c.Query("date"))
+	if err != nil {
+		date = now()
+	}
 	obj := gin.H{"status": 1}
 	if !last.Equal(c) {
 		obj["reload"] = 1
@@ -154,7 +158,7 @@ func done(c *gin.Context) {
 		return
 	} else {
 		data.Status = *doneValue
-		data.Done = now()
+		data.Done = date
 		obj["value"] = data.Status
 		obj["done"] = data.Done
 	}

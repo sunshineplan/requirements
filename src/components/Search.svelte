@@ -127,7 +127,10 @@
         style:display={requirements.search.filter ? "" : "none"}
         onclick={() => {
           requirements.search.filter = "";
+          requirements.search.value = "";
           showOption = false;
+          requirements.scrollTop = 0;
+          requirements.scroll(true);
         }}
       >
         <span class="material-symbols-outlined">do_not_disturb_on</span>
@@ -143,7 +146,11 @@
           class="form-select"
           id="value"
           bind:value={requirements.search.value}
-          onchange={() => (showOption = false)}
+          onchange={() => {
+            showOption = false;
+            requirements.scrollTop = 0;
+            requirements.scroll(true);
+          }}
         >
           {#if requirements.search.filter === "status"}
             <option value="">所有</option>
@@ -166,6 +173,8 @@
         onclick={() => {
           requirements.search.value = "";
           showOption = false;
+          requirements.scrollTop = 0;
+          requirements.scroll(true);
         }}
       >
         <span class="material-symbols-outlined">do_not_disturb_on</span>
