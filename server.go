@@ -20,7 +20,7 @@ func run() error {
 	if err := loadUsers(); err != nil {
 		return err
 	}
-	if err := loadParticipants(); err != nil {
+	if err := loadGroups(); err != nil {
 		return err
 	}
 	if err := loadTypes(); err != nil {
@@ -66,7 +66,7 @@ func run() error {
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
 		obj["done"] = *doneValue
-		obj["participants"] = participants
+		obj["groups"] = groups
 		obj["types"] = types
 		obj["statuses"] = statuses
 		if user == "admin" {
@@ -109,7 +109,7 @@ func run() error {
 
 	admin := base.Group("/", adminRequired)
 	admin.POST("/delete/:id", del)
-	admin.POST("/participants", updateParticipants)
+	admin.POST("/groups", updateGroups)
 	admin.POST("/types", updateTypes)
 	admin.POST("/addUser", func(c *gin.Context) { updateUser(c, true) })
 	admin.POST("/chgpwd", func(c *gin.Context) { updateUser(c, false) })

@@ -1,9 +1,10 @@
 <script lang="ts">
   import Swal from "sweetalert2";
+  import { fields } from "../fields";
   import { confirm, fire, post, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
 
-  let participants = $state("");
+  let groups = $state("");
   let types = $state("");
   let users: string[] = $state([]);
   let validated = $state(false);
@@ -11,7 +12,7 @@
   const load = async () => {
     const res = await requirements.init();
     types = requirements.types.join("\n");
-    participants = res.participants.join("\n");
+    groups = res.groups.join("\n");
     users = res.users;
   };
   const promise = load();
@@ -27,11 +28,11 @@
     } else validated = true;
   };
 
-  const updateParticipants = async () => {
+  const updateGroups = async () => {
     if (valid()) {
       validated = false;
-      const restult = participants.split("\n").filter(Boolean);
-      const resp = await post("/participants", restult);
+      const restult = groups.split("\n").filter(Boolean);
+      const resp = await post("/groups", restult);
       if (resp.ok) {
         await fire("成功", "保存成功", "success");
       } else await fire("错误", await resp.text(), "error");
@@ -153,26 +154,20 @@
   {#await promise then _}
     <div class="row g-3" class:was-validated={validated}>
       <div class="col-md-6 col-sm-12">
-        <label for="types" class="form-label">类型</label>
+        <label for="types" class="form-label">{fields.name("type")}</label>
         <textarea class="form-control" id="types" bind:value={types} required
         ></textarea>
         <div class="invalid-feedback">必填字段</div>
         <button class="btn btn-primary float-end mt-2" onclick={updateTypes}>
-          保存类型
+          保存{fields.name("type")}
         </button>
       </div>
       <div class="col-md-6 col-sm-12">
-        <label for="participants" class="form-label">班组</label>
-        <textarea
-          class="form-control"
-          id="participants"
-          bind:value={participants}
+        <label for="groups" class="form-label">{fields.name("group")}</label>
+        <textarea class="form-control" id="groups" bind:value={groups}
         ></textarea>
-        <button
-          class="btn btn-primary float-end mt-2"
-          onclick={updateParticipants}
-        >
-          保存班组
+        <button class="btn btn-primary float-end mt-2" onclick={updateGroups}>
+          保存{fields.name("group")}
         </button>
       </div>
       <hr />
@@ -227,7 +222,7 @@
     margin: 0;
   }
 
-  #participants,
+  #groups,
   #types {
     height: 9rem;
   }

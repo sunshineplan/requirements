@@ -10,7 +10,7 @@ class Fields {
     return this.#fields[key].size
   }
   title(key: keyof Requirement) {
-    return /编号|类型|日期|班组/i.test(fields.name(key))
+    return !(<(keyof Requirement)[]>['id', 'type', 'date', 'deadline', 'done']).includes(key)
   }
   columns(all?: boolean) {
     const columns = <(keyof Requirement)[]>[]

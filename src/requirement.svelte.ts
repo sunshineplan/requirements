@@ -83,7 +83,7 @@ class Requirements {
         }
         return {
           done: res.done,
-          participants: res.participants,
+          groups: res.groups,
           users: res.users
         } as Info
       } else await this.reset()

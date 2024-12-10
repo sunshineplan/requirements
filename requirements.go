@@ -23,18 +23,18 @@ var (
 )
 
 type requirement struct {
-	ID            ID     `csv:"编号" json:"id"`
-	Type          string `csv:"类型" json:"type"`
-	Desc          string `csv:"描述" json:"desc"`
-	Date          Date   `csv:"提请日期" json:"date"`
-	Deadline      Date   `csv:"期限日期" json:"deadline"`
-	Done          Date   `csv:"完成日期" json:"done"`
-	Submitter     string `csv:"提交人" json:"submitter"`
-	Recipient     string `csv:"承接人" json:"recipient"`
-	Acceptor      string `csv:"受理人" json:"acceptor"`
-	Status        string `csv:"状态" json:"status"`
-	Note          string `csv:"备注" json:"note"`
-	Participating string `csv:"参与班组" json:"participating"`
+	ID        ID     `csv:"id" json:"id"`
+	Type      string `csv:"type" json:"type"`
+	Title     string `csv:"title" json:"title"`
+	Date      Date   `csv:"date" json:"date"`
+	Deadline  Date   `csv:"deadline" json:"deadline"`
+	Done      Date   `csv:"done" json:"done"`
+	Submitter string `csv:"submitter" json:"submitter"`
+	Recipient string `csv:"recipient" json:"recipient"`
+	Acceptor  string `csv:"acceptor" json:"acceptor"`
+	Status    string `csv:"status" json:"status"`
+	Note      string `csv:"note" json:"note"`
+	Group     string `csv:"group" json:"group"`
 }
 
 func (r requirement) String() string {
@@ -62,8 +62,8 @@ func add(c *gin.Context) {
 		return
 	}
 
-	if data.Desc == "" {
-		c.JSON(200, gin.H{"status": 0, "message": "Requirement describe is empty.", "error": 1})
+	if data.Title == "" {
+		c.JSON(200, gin.H{"status": 0, "message": "标题为空。", "error": 1})
 		return
 	}
 
@@ -78,7 +78,7 @@ func add(c *gin.Context) {
 	}
 	svc.Printf("%s %v add %s", c.ClientIP(), username, data)
 	go sendMail(
-		fmt.Sprintf("%s新增了一项业务-%s", username, time.Now().Format("20060102 15:04")),
+		fmt.Sprintf("%s新增了一项记录-%s", username, time.Now().Format("20060102 15:04")),
 		fmt.Sprintf("%s\n\nIP: %s", data, c.ClientIP()),
 		nil,
 	)
@@ -101,8 +101,8 @@ func edit(c *gin.Context) {
 		return
 	}
 
-	if data.New.Desc == "" {
-		c.JSON(200, gin.H{"status": 0, "message": "业务描述为空。", "error": 1})
+	if data.New.Title == "" {
+		c.JSON(200, gin.H{"status": 0, "message": "标题为空。", "error": 1})
 		return
 	}
 
@@ -119,7 +119,7 @@ func edit(c *gin.Context) {
 	}
 	svc.Printf("%s %v edit %s", c.ClientIP(), username, data.New)
 	go sendMail(
-		fmt.Sprintf("%s编辑了一项业务-%s", username, time.Now().Format("20060102 15:04")),
+		fmt.Sprintf("%s编辑了一项记录-%s", username, time.Now().Format("20060102 15:04")),
 		fmt.Sprintf("原始内容:\n%s\n\n修改内容:\n%s\n\nIP: %s", data.Old, data.New, c.ClientIP()),
 		nil,
 	)
@@ -165,7 +165,7 @@ func done(c *gin.Context) {
 	requirementsList[data.ID] = data
 	svc.Printf("%s %v done %s", c.ClientIP(), username, data)
 	go sendMail(
-		fmt.Sprintf("%s完成了一项业务-%s", username, time.Now().Format("20060102 15:04")),
+		fmt.Sprintf("%s完成了一项记录-%s", username, time.Now().Format("20060102 15:04")),
 		fmt.Sprintf("完成内容:\n%s\n\nIP: %s", data, c.ClientIP()),
 		nil,
 	)
@@ -195,7 +195,7 @@ func del(c *gin.Context) {
 	if v, ok := requirementsList[id]; ok {
 		svc.Printf("%s %v delete %s", c.ClientIP(), username, v)
 		go sendMail(
-			fmt.Sprintf("%s删除了一项业务-%s", username, time.Now().Format("20060102 15:04")),
+			fmt.Sprintf("%s删除了一项记录-%s", username, time.Now().Format("20060102 15:04")),
 			fmt.Sprintf("%s\n\nIP: %s", v, c.ClientIP()),
 			nil,
 		)

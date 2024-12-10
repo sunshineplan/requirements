@@ -13,7 +13,7 @@
 
   const view = async (e: MouseEvent, r: Requirement) => {
     if (window.getSelection()?.toString() !== "") return;
-    if (!(e.target as HTMLElement).dataset["action"] ) {
+    if (!(e.target as HTMLElement).dataset["action"]) {
       requirements.requirement = r;
       requirements.goto("view");
     }
@@ -42,7 +42,7 @@
     URL.revokeObjectURL(link.href);
   };
 
-  const participants = (s: string) => {
+  const groups = (s: string) => {
     const res = s.split(",");
     if (res.length > 1) {
       return res.map((i) => i.charAt(0)).join(" | ");
@@ -60,7 +60,7 @@
 <svelte:head><title>{requirements.brand || "业务系统"}</title></svelte:head>
 
 <header>
-  <button class="btn btn-primary" onclick={add}>新增业务</button>
+  <button class="btn btn-primary" onclick={add}>新增</button>
   <button class="btn btn-primary" onclick={download}>导出</button>
   <Search />
 </header>
@@ -98,9 +98,9 @@
       {#each requirements.results as requirement (requirement.id)}
         <tr onclick={(e) => view(e, requirement)}>
           {#each fields.columns() as field (field)}
-            <td title={fields.title(field) ? "" : requirement[field]}>
-              {field == "participating"
-                ? participants(requirement[field])
+            <td title={fields.title(field) ? requirement[field] : ""}>
+              {field == "group"
+                ? groups(requirement[field])
                 : requirement[field]}
             </td>
           {/each}

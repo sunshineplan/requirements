@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { fields } from "../fields";
   import { confirm, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
   import Action from "./Action.svelte";
@@ -11,7 +12,7 @@
   };
 
   let type = $state(requirements.requirement.type || "");
-  let desc = $state(requirements.requirement.desc || "");
+  let title = $state(requirements.requirement.title || "");
   let date = $state(requirements.requirement.date || "");
   let deadline = $state(requirements.requirement.deadline || "");
   let done = $state(requirements.requirement.done || "");
@@ -20,38 +21,38 @@
   let acceptor = $state(requirements.requirement.acceptor || "");
   let status = $state(requirements.requirement.status || "");
   let note = $state(requirements.requirement.note || "");
-  let participating = $state(
-    requirements.requirement.participating
-      ? requirements.requirement.participating.split(",")
+  let group = $state(
+    requirements.requirement.group
+      ? requirements.requirement.group.split(",")
       : [],
   );
   let validated = $state(false);
 
   let doneValue = $state("");
-  let participants: string[] = $state([]);
+  let groups: string[] = $state([]);
 
   let submitters: string[] = $state([]);
   let recipients: string[] = $state([]);
   let acceptors: string[] = $state([]);
 
-  let descElement: HTMLElement;
+  let titleElement: HTMLElement;
   let noteElement: HTMLElement;
 
   onMount(async () => {
     const res = await requirements.init();
-    participants = res.participants;
+    groups = res.groups;
     doneValue = res.done;
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
     acceptors = await requirements.acceptors();
-    descElement.scrollTop = 0;
+    titleElement.scrollTop = 0;
     noteElement.scrollTop = 0;
   });
 
   const current = () => {
     return {
       type,
-      desc,
+      title,
       date,
       deadline,
       done,
@@ -60,12 +61,12 @@
       acceptor,
       status,
       note,
-      participating: participating.join(","),
+      group: group.join(","),
     } as Requirement;
   };
 
   const save = async () => {
-    if (valid() && (!participants.length || participating.length > 0)) {
+    if (valid() && (!groups.length || group.length > 0)) {
       validated = false;
       const r = current();
       if (requirements.mode == "edit") r.id = requirements.requirement.id;
@@ -114,7 +115,7 @@
 
 <svelte:head>
   <title>
-    {modeList[requirements.mode]}业务 - {requirements.brand || "业务系统"}
+    {modeList[requirements.mode]} - {requirements.brand || "业务系统"}
   </title>
 </svelte:head>
 
@@ -125,7 +126,7 @@
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <span class="material-symbols-outlined" onclick={back}>arrow_back</span>
     </div>
-    <h3>{modeList[requirements.mode]}业务</h3>
+    <h3>{modeList[requirements.mode]}</h3>
     {#if requirements.mode != "add"}
       <Action
         requirement={requirements.requirement}
@@ -136,12 +137,12 @@
   </header>
   <div class="row g-3" class:was-validated={validated}>
     <div class="col-md-8 col-sm-12">
-      <label for="desc" class="form-label">描述</label>
+      <label for="title" class="form-label">{fields.name("title")}</label>
       <textarea
         class="form-control"
-        id="desc"
-        bind:this={descElement}
-        bind:value={desc}
+        id="title"
+        bind:this={titleElement}
+        bind:value={title}
         required
         disabled={requirements.mode == "view"}
       ></textarea>
@@ -159,7 +160,7 @@
             {/each}
           </select>
         {/if}
-        <label for="type">类型</label>
+        <label for="type">{fields.name("type")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
@@ -174,7 +175,7 @@
             {/each}
           </select>
         {/if}
-        <label for="status">状态</label>
+        <label for="status">{fields.name("status")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
@@ -189,7 +190,7 @@
           required
           disabled={requirements.mode == "view"}
         />
-        <label for="date">提请日期</label>
+        <label for="date">{fields.name("date")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
@@ -203,7 +204,7 @@
           bind:value={deadline}
           disabled={requirements.mode == "view"}
         />
-        <label for="deadline">期限日期</label>
+        <label for="deadline">{fields.name("deadline")}</label>
       </div>
     </div>
     {#if status === doneValue}
@@ -218,7 +219,7 @@
             required
             disabled={requirements.mode == "view"}
           />
-          <label for="deadline">完成日期</label>
+          <label for="deadline">{fields.name("done")}</label>
           <div class="invalid-feedback">必填字段</div>
         </div>
       </div>
@@ -240,7 +241,7 @@
             <option>{submitter}</option>
           {/each}
         </datalist>
-        <label for="submitter">提交人</label>
+        <label for="submitter">{fields.name("submitter")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
@@ -259,7 +260,7 @@
             <option>{recipient}</option>
           {/each}
         </datalist>
-        <label for="recipient">承接人</label>
+        <label for="recipient">{fields.name("recipient")}</label>
       </div>
     </div>
     <div class="col-md-3 col-sm-4">
@@ -278,42 +279,42 @@
             <option>{acceptor}</option>
           {/each}
         </datalist>
-        <label for="acceptor">受理人</label>
+        <label for="acceptor">{fields.name("acceptor")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
     <div class="col-md-6">
-      <label class="form-label" for="participating">参与班组</label>
-      <div id="participating">
+      <label class="form-label" for="group">{fields.name("group")}</label>
+      <div id="group">
         {#if doneValue}
-          {#if participants.length == 0}
+          {#if groups.length == 0}
             <div class="form-check form-check-inline">
               <input
                 type="checkbox"
                 class="form-check-input"
-                id={"noparticipant"}
+                id={"nogroup"}
                 disabled
               />
-              <label class="form-check-label" for={"noparticipant"}>无</label>
+              <label class="form-check-label" for={"nogroup"}>无</label>
             </div>
           {/if}
-          {#each participants as participant, index (participant)}
+          {#each groups as g, index (g)}
             <div class="form-check form-check-inline">
               <input
                 type="checkbox"
                 class="form-check-input"
-                class:invalid={validated && participating.length == 0}
-                id={"participant" + index}
-                bind:group={participating}
-                value={participant}
+                class:invalid={validated && group.length == 0}
+                id={"group" + index}
+                bind:group
+                value={g}
                 disabled={requirements.mode == "view"}
               />
               <label
                 class="form-check-label"
-                class:invalid={validated && participating.length == 0}
-                for={"participant" + index}
+                class:invalid={validated && group.length == 0}
+                for={"group" + index}
               >
-                {participant}
+                {g}
               </label>
             </div>
           {/each}
@@ -323,15 +324,13 @@
       </div>
       <div
         class="invalid-feedback"
-        class:invalid={validated &&
-          participants.length &&
-          participating.length == 0}
+        class:invalid={validated && groups.length && group.length == 0}
       >
         必选字段
       </div>
     </div>
     <div class="col-md-8 col-sm-12">
-      <label for="note" class="form-label">备注</label>
+      <label for="note" class="form-label">{fields.name("note")}</label>
       <textarea
         class="form-control"
         id="note"
@@ -375,11 +374,11 @@
     max-height: calc(100% - 60px);
   }
 
-  #desc {
+  #title {
     height: 5rem;
   }
 
-  #participating {
+  #group {
     display: flex;
   }
 

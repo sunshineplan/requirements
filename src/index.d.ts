@@ -1,7 +1,7 @@
 interface Requirement {
   id: string
   type: string
-  desc: string
+  title: string
   date: string
   deadline: string
   done: string
@@ -10,7 +10,7 @@ interface Requirement {
   acceptor: string
   status: string
   note: string
-  participating: string
+  group: string
 }
 
 interface Field {
@@ -27,7 +27,7 @@ interface Info {
   brand: string
   username: string
   done: string
-  participants: string[]
+  groups: string[]
   types: string[]
   users: string[]
 }

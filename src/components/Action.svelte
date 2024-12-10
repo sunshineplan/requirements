@@ -1,5 +1,6 @@
 <script lang="ts">
   import Swal from "sweetalert2";
+  import { fields } from "../fields";
   import { confirm } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
 
@@ -12,14 +13,14 @@
   const done = async (r: Requirement) => {
     const today = new Date().toISOString().split("T")[0];
     const { value: date } = await Swal.fire({
-      title: "选择完成日期",
+      title: `选择${fields.name("done")}`,
       html: `
 <div class="container text-start">
   <div class="row row-cols-2">
-    <div class="col-12">该条业务将被标记为已完成。</div>
-    <div class="col-5">提请日期:</div>
+    <div class="col-12">该条记录将被标记为已完成。</div>
+    <div class="col-5">${fields.name("date")}:</div>
     <div class="col">${r.date}</div>
-    <div class="col-5">期限日期:</div>
+    <div class="col-5">${fields.name("deadline")}:</div>
     <div class="col">${r.deadline}</div>
   </div>
 </div>`,
@@ -70,7 +71,7 @@
   };
 
   const del = async (r: Requirement) => {
-    if (await confirm("该条业务将被永久删除。", true)) {
+    if (await confirm("该条记录将被永久删除。", true)) {
       try {
         await requirements.delete(r);
       } catch {

@@ -10,11 +10,11 @@ import (
 	"github.com/sunshineplan/utils/txt"
 )
 
-var participants []string
+var groups []string
 
-func loadParticipants() (err error) {
-	if participants, err = txt.ReadFile(joinPath(dir(self), "participants.txt")); participants == nil {
-		participants = []string{}
+func loadGroups() (err error) {
+	if groups, err = txt.ReadFile(joinPath(dir(self), "groups.txt")); groups == nil {
+		groups = []string{}
 	}
 	if errors.Is(err, fs.ErrNotExist) {
 		err = nil
@@ -22,7 +22,7 @@ func loadParticipants() (err error) {
 	return
 }
 
-func updateParticipants(c *gin.Context) {
+func updateGroups(c *gin.Context) {
 	var data []string
 	if err := c.BindJSON(&data); err != nil {
 		c.String(400, "")
@@ -32,12 +32,12 @@ func updateParticipants(c *gin.Context) {
 	infoMutex.Lock()
 	defer infoMutex.Unlock()
 
-	if participants = slices.DeleteFunc(data, func(s string) bool {
+	if groups = slices.DeleteFunc(data, func(s string) bool {
 		return strings.TrimSpace(s) == ""
-	}); participants == nil {
-		participants = []string{}
+	}); groups == nil {
+		groups = []string{}
 	}
-	if err := txt.ExportFile(participants, joinPath(dir(self), "participants.txt")); err != nil {
+	if err := txt.ExportFile(groups, joinPath(dir(self), "groups.txt")); err != nil {
 		svc.Print(err)
 		c.String(500, "内部错误")
 		return
