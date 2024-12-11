@@ -14,6 +14,7 @@ interface Requirement {
 }
 
 interface Field {
+  key?: keyof Requirement
   name: string
   size: number
   searchable: boolean

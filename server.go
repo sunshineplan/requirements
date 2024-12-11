@@ -3,9 +3,11 @@ package main
 import (
 	"crypto/rand"
 	"embed"
+	"encoding/json"
 	"html/template"
 	"io/fs"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -63,6 +65,13 @@ func run() error {
 			return
 		}
 		obj["username"] = user
+		b, err := os.ReadFile(joinPath(dir(self), "fields.json"))
+		if err != nil {
+			svc.Print(err)
+			c.String(500, "")
+			return
+		}
+		obj["fields"] = json.RawMessage(b)
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
 		obj["done"] = *doneValue

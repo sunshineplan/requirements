@@ -34,7 +34,6 @@ func init() {
 	if err != nil {
 		svc.Fatalln("Failed to get self path:", err)
 	}
-	svc.Name = "Requirements"
 	svc.Desc = "Instance to serve Requirements"
 	svc.Exec = run
 	svc.TestExec = test
@@ -65,6 +64,7 @@ var (
 )
 
 func main() {
+	flag.StringVar(&svc.Name, "name", "Requirements", "Service Name")
 	flag.TextVar(&to, "to", mail.Receipts(nil), "Mail Subscriber")
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
 	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
@@ -73,7 +73,7 @@ func main() {
 	flag.StringVar(&server.Host, "host", "0.0.0.0", "Server Host")
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
 	flag.StringVar(&svc.Options.UpdateURL, "update", "", "Update URL")
-	flag.StringVar(&svc.Options.PIDFile, "pid", "/var/run/requirements.pid", "PID file path")
+	flag.StringVar(&svc.Options.PIDFile, "pid", "", "PID file path")
 	flags.SetConfigFile(joinPath(dir(self), "config.ini"))
 	flags.Parse()
 

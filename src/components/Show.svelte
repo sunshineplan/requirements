@@ -1,7 +1,6 @@
 <script lang="ts">
   import { stringify } from "csv-stringify/browser/esm/sync";
   import { onMount } from "svelte";
-  import { fields } from "../fields";
   import { requirements } from "../requirement.svelte";
   import Action from "./Action.svelte";
   import Search from "./Search.svelte";
@@ -26,9 +25,9 @@
         stringify(requirements.results, {
           bom: true,
           header: true,
-          columns: fields.columns(true).map((key) => ({
+          columns: requirements.fields.columns(true).map((key) => ({
             key,
-            header: fields.name(key as keyof Requirement),
+            header: requirements.fields.name(key as keyof Requirement),
           })),
         }),
       ],
@@ -68,8 +67,8 @@
   <table class="table table-hover table-sm">
     <thead>
       <tr>
-        {#each fields.columns() as field (field)}
-          {@const size = fields.size(field)}
+        {#each requirements.fields.columns() as field (field)}
+          {@const size = requirements.fields.size(field)}
           {#if size}
             <th
               class="sortable {requirements.search.sort == field
@@ -87,7 +86,7 @@
                 else requirements.search.desc = true;
               }}
             >
-              {fields.name(field)}
+              {requirements.fields.name(field)}
             </th>
           {/if}
         {/each}
@@ -97,8 +96,10 @@
     <tbody>
       {#each requirements.results as requirement (requirement.id)}
         <tr onclick={(e) => view(e, requirement)}>
-          {#each fields.columns() as field (field)}
-            <td title={fields.title(field) ? requirement[field] : ""}>
+          {#each requirements.fields.columns() as field (field)}
+            <td
+              title={requirements.fields.title(field) ? requirement[field] : ""}
+            >
               {field == "group"
                 ? groups(requirement[field])
                 : requirement[field]}

@@ -1,0 +1,74 @@
+[
+  {
+    "key": "id",
+    "name": "编号",
+    "size": 6,
+    "searchable": true
+  },
+  {
+    "key": "type",
+    "name": "需求类型",
+    "size": 11,
+    "searchable": false
+  },
+  {
+    "key": "title",
+    "name": "需求描述",
+    "size": -1,
+    "searchable": true
+  },
+  {
+    "key": "date",
+    "name": "提请日期",
+    "size": 8,
+    "searchable": true
+  },
+  {
+    "key": "deadline",
+    "name": "期限日期",
+    "size": 8,
+    "searchable": true
+  },
+  {
+    "key": "done",
+    "name": "完成日期",
+    "size": 8,
+    "searchable": true
+  },
+  {
+    "key": "submitter",
+    "name": "提交人",
+    "size": 5,
+    "searchable": true
+  },
+  {
+    "key": "recipient",
+    "name": "承接人",
+    "size": 0,
+    "searchable": true
+  },
+  {
+    "key": "acceptor",
+    "name": "受理人",
+    "size": 5,
+    "searchable": true
+  },
+  {
+    "key": "status",
+    "name": "状态",
+    "size": 5,
+    "searchable": false
+  },
+  {
+    "key": "note",
+    "name": "备注",
+    "size": 9,
+    "searchable": true
+  },
+  {
+    "key": "group",
+    "name": "标签",
+    "size": 5,
+    "searchable": true
+  }
+]

@@ -1,6 +1,5 @@
 import { Dexie } from 'dexie'
 import { getCookie } from 'typescript-cookie'
-import { fields } from './fields'
 import { fire, loading, post } from './misc.svelte'
 
 const db = new Dexie('requirement')
@@ -9,10 +8,44 @@ db.version(1).stores({
 })
 const table = db.table<Requirement>('requirements')
 
+class Fields {
+  #fields: FieldMap
+  constructor(fields: Field[]) {
+    this.#fields = fields.reduce((m, field) => {
+      if (field.key) { m[field.key] = field }
+      return m
+    }, {} as FieldMap)
+  }
+  name(key: keyof Requirement) {
+    return this.#fields[key].name
+  }
+  size(key: keyof Requirement) {
+    return this.#fields[key].size
+  }
+  title(key: keyof Requirement) {
+    return !(<(keyof Requirement)[]>['id', 'type', 'date', 'deadline', 'done']).includes(key)
+  }
+  columns(all?: boolean) {
+    const columns = <(keyof Requirement)[]>[]
+    for (const key in this.#fields)
+      if (all || this.#fields[key as keyof Requirement].size)
+        columns.push(key as keyof Requirement)
+    return columns
+  }
+  searchable() {
+    const fields = <(keyof Requirement)[]>[]
+    for (const key in this.#fields)
+      if (this.#fields[key as keyof Requirement].searchable)
+        fields.push(key as keyof Requirement)
+    return fields
+  }
+}
+
 class Requirements {
   brand = $state('')
   username = $state('')
   component = $state('show')
+  fields = new Fields([])
   mode = $state('')
   requirement = $state({} as Requirement)
   requirements = $state.raw<Requirement[]>([])
@@ -30,7 +63,7 @@ class Requirements {
       )
     else
       array = this.requirements.filter((i) =>
-        fields
+        this.fields
           .searchable()
           .some((field) => i[field].includes(this.search.search)),
       )
@@ -72,6 +105,7 @@ class Requirements {
       this.brand = res.brand
       if (res.username) {
         this.username = res.username
+        this.fields = new Fields(res.fields)
         this.types = res.types
         this.statuses = res.statuses
         if (load) {

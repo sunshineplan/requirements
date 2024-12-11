@@ -1,6 +1,5 @@
 <script lang="ts">
   import Swal from "sweetalert2";
-  import { fields } from "../fields";
   import { fire, post } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
 
@@ -8,8 +7,8 @@
     let url = "/statistics";
     const select = await Swal.fire({
       title: "请选择统计方法",
-      confirmButtonText: `${fields.name("date")}至${fields.name("deadline")}`,
-      denyButtonText: `仅${fields.name("date")}`,
+      confirmButtonText: `${requirements.fields.name("date")}至${requirements.fields.name("deadline")}`,
+      denyButtonText: `仅${requirements.fields.name("date")}`,
       showDenyButton: true,
       showCloseButton: true,
       customClass: {

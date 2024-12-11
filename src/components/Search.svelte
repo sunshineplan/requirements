@@ -1,6 +1,5 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
-  import { fields } from "../fields";
   import { requirements } from "../requirement.svelte";
 
   let hover = $state(false);
@@ -32,7 +31,7 @@
   <input
     bind:value={requirements.search.search}
     placeholder={requirements.search.field
-      ? fields.name(requirements.search.field) + "搜索"
+      ? requirements.fields.name(requirements.search.field) + "搜索"
       : "搜索"}
     oninput={() => requirements.scroll()}
   />
@@ -88,8 +87,8 @@
           onchange={() => (showOption = false)}
         >
           <option value="">所有</option>
-          {#each fields.searchable() as field (field)}
-            <option value={field}>{fields.name(field)}</option>
+          {#each requirements.fields.searchable() as field (field)}
+            <option value={field}>{requirements.fields.name(field)}</option>
           {/each}
         </select>
       </div>
@@ -116,8 +115,8 @@
           onchange={() => (requirements.search.value = "")}
         >
           <option value="">无</option>
-          <option value="type">{fields.name("type")}</option>
-          <option value="status">{fields.name("status")}</option>
+          <option value="type">{requirements.fields.name("type")}</option>
+          <option value="status">{requirements.fields.name("status")}</option>
         </select>
       </div>
       <!-- svelte-ignore a11y_click_events_have_key_events -->

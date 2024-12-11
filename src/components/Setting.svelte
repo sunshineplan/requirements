@@ -1,6 +1,5 @@
 <script lang="ts">
   import Swal from "sweetalert2";
-  import { fields } from "../fields";
   import { confirm, fire, post, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
 
@@ -154,20 +153,24 @@
   {#await promise then _}
     <div class="row g-3" class:was-validated={validated}>
       <div class="col-md-6 col-sm-12">
-        <label for="types" class="form-label">{fields.name("type")}</label>
+        <label for="types" class="form-label">
+          {requirements.fields.name("type")}
+        </label>
         <textarea class="form-control" id="types" bind:value={types} required
         ></textarea>
         <div class="invalid-feedback">必填字段</div>
         <button class="btn btn-primary float-end mt-2" onclick={updateTypes}>
-          保存{fields.name("type")}
+          保存{requirements.fields.name("type")}
         </button>
       </div>
       <div class="col-md-6 col-sm-12">
-        <label for="groups" class="form-label">{fields.name("group")}</label>
+        <label for="groups" class="form-label">
+          {requirements.fields.name("group")}
+        </label>
         <textarea class="form-control" id="groups" bind:value={groups}
         ></textarea>
         <button class="btn btn-primary float-end mt-2" onclick={updateGroups}>
-          保存{fields.name("group")}
+          保存{requirements.fields.name("group")}
         </button>
       </div>
       <hr />

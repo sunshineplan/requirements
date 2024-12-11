@@ -24,5 +24,6 @@ dist
 node_modules
 
 requirements
+fields.json
 *.csv
 *.txt

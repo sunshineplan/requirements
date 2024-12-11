@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { fields } from "../fields";
   import { confirm, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
   import Action from "./Action.svelte";
@@ -137,7 +136,9 @@
   </header>
   <div class="row g-3" class:was-validated={validated}>
     <div class="col-md-8 col-sm-12">
-      <label for="title" class="form-label">{fields.name("title")}</label>
+      <label for="title" class="form-label">
+        {requirements.fields.name("title")}
+      </label>
       <textarea
         class="form-control"
         id="title"
@@ -160,7 +161,7 @@
             {/each}
           </select>
         {/if}
-        <label for="type">{fields.name("type")}</label>
+        <label for="type">{requirements.fields.name("type")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
@@ -175,7 +176,7 @@
             {/each}
           </select>
         {/if}
-        <label for="status">{fields.name("status")}</label>
+        <label for="status">{requirements.fields.name("status")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
@@ -190,7 +191,7 @@
           required
           disabled={requirements.mode == "view"}
         />
-        <label for="date">{fields.name("date")}</label>
+        <label for="date">{requirements.fields.name("date")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
@@ -204,7 +205,7 @@
           bind:value={deadline}
           disabled={requirements.mode == "view"}
         />
-        <label for="deadline">{fields.name("deadline")}</label>
+        <label for="deadline">{requirements.fields.name("deadline")}</label>
       </div>
     </div>
     {#if status === doneValue}
@@ -219,7 +220,7 @@
             required
             disabled={requirements.mode == "view"}
           />
-          <label for="deadline">{fields.name("done")}</label>
+          <label for="deadline">{requirements.fields.name("done")}</label>
           <div class="invalid-feedback">必填字段</div>
         </div>
       </div>
@@ -241,7 +242,7 @@
             <option>{submitter}</option>
           {/each}
         </datalist>
-        <label for="submitter">{fields.name("submitter")}</label>
+        <label for="submitter">{requirements.fields.name("submitter")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
@@ -260,7 +261,7 @@
             <option>{recipient}</option>
           {/each}
         </datalist>
-        <label for="recipient">{fields.name("recipient")}</label>
+        <label for="recipient">{requirements.fields.name("recipient")}</label>
       </div>
     </div>
     <div class="col-md-3 col-sm-4">
@@ -279,12 +280,14 @@
             <option>{acceptor}</option>
           {/each}
         </datalist>
-        <label for="acceptor">{fields.name("acceptor")}</label>
+        <label for="acceptor">{requirements.fields.name("acceptor")}</label>
         <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
     <div class="col-md-6">
-      <label class="form-label" for="group">{fields.name("group")}</label>
+      <label class="form-label" for="group">
+        {requirements.fields.name("group")}
+      </label>
       <div id="group">
         {#if doneValue}
           {#if groups.length == 0}
@@ -330,7 +333,9 @@
       </div>
     </div>
     <div class="col-md-8 col-sm-12">
-      <label for="note" class="form-label">{fields.name("note")}</label>
+      <label for="note" class="form-label">
+        {requirements.fields.name("note")}
+      </label>
       <textarea
         class="form-control"
         id="note"
