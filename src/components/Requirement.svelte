@@ -3,6 +3,9 @@
   import { confirm, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
   import Action from "./Action.svelte";
+  import Date from "./form-control/Date.svelte";
+  import Input from "./form-control/Input.svelte";
+  import Select from "./form-control/Select.svelte";
 
   const modeList: { [key: string]: string } = {
     add: "新增",
@@ -151,138 +154,85 @@
     </div>
     <div class="w-100 m-0"></div>
     <div class="col-md-3 col-sm-4">
-      <div class="form-floating">
-        {#if requirements.mode == "view"}
-          <input class="form-control" id="type" value={type} disabled />
-        {:else}
-          <select class="form-select" id="type" bind:value={type} required>
-            {#each requirements.types as type (type)}
-              <option value={type}>{type}</option>
-            {/each}
-          </select>
-        {/if}
-        <label for="type">{requirements.fields.name("type")}</label>
-        <div class="invalid-feedback">必填字段</div>
-      </div>
+      <Select
+        id="type"
+        bind:value={type}
+        options={requirements.types}
+        required={true}
+        disabled={requirements.mode == "view"}
+        label={requirements.fields.name("type")}
+      />
     </div>
     <div class="col-md-3 col-sm-4">
-      <div class="form-floating">
-        {#if requirements.mode == "view"}
-          <input class="form-control" id="status" value={status} disabled />
-        {:else}
-          <select class="form-select" id="status" bind:value={status} required>
-            {#each requirements.statuses as status (status.value)}
-              <option value={status.value}>{status.value}</option>
-            {/each}
-          </select>
-        {/if}
-        <label for="status">{requirements.fields.name("status")}</label>
-        <div class="invalid-feedback">必填字段</div>
-      </div>
+      <Select
+        id="status"
+        bind:value={status}
+        options={requirements.statuses.map((status) => status.value)}
+        required={true}
+        disabled={requirements.mode == "view"}
+        label={requirements.fields.name("status")}
+      />
     </div>
     <div class="w-100 m-0"></div>
     <div class="col-md-3 col-sm-4">
-      <div class="form-floating">
-        <input
-          class="form-control"
-          id="date"
-          type="date"
-          bind:value={date}
-          required
-          disabled={requirements.mode == "view"}
-        />
-        <label for="date">{requirements.fields.name("date")}</label>
-        <div class="invalid-feedback">必填字段</div>
-      </div>
+      <Date
+        id="date"
+        bind:value={date}
+        required={true}
+        disabled={requirements.mode == "view"}
+        label={requirements.fields.name("date")}
+      />
     </div>
     <div class="col-md-3 col-sm-4">
-      <div class="form-floating">
-        <input
-          class="form-control"
-          id="deadline"
-          type="date"
-          min={date}
-          bind:value={deadline}
-          disabled={requirements.mode == "view"}
-        />
-        <label for="deadline">{requirements.fields.name("deadline")}</label>
-      </div>
+      <Date
+        id="deadline"
+        bind:value={deadline}
+        min={date}
+        disabled={requirements.mode == "view"}
+        label={requirements.fields.name("deadline")}
+      />
     </div>
     {#if status === doneValue}
       <div class="col-md-3 col-sm-4">
-        <div class="form-floating">
-          <input
-            class="form-control"
-            id="done"
-            type="date"
-            min={date}
-            bind:value={done}
-            required
-            disabled={requirements.mode == "view"}
-          />
-          <label for="deadline">{requirements.fields.name("done")}</label>
-          <div class="invalid-feedback">必填字段</div>
-        </div>
+        <Date
+          id="done"
+          bind:value={done}
+          min={date}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("done")}
+        />
       </div>
     {/if}
     <div class="w-100 m-0"></div>
     <div class="col-md-3 col-sm-4">
-      <div class="form-floating">
-        <input
-          class="form-control"
-          id="submitter"
-          list="submitter-list"
-          bind:value={submitter}
-          placeholder="submitter"
-          required
-          disabled={requirements.mode == "view"}
-        />
-        <datalist id="submitter-list">
-          {#each submitters as submitter (submitter)}
-            <option>{submitter}</option>
-          {/each}
-        </datalist>
-        <label for="submitter">{requirements.fields.name("submitter")}</label>
-        <div class="invalid-feedback">必填字段</div>
-      </div>
+      <Input
+        id="submitter"
+        bind:value={submitter}
+        required={true}
+        disabled={requirements.mode == "view"}
+        label={requirements.fields.name("submitter")}
+        bind:list={submitters}
+      />
     </div>
     <div class="col-md-3 col-sm-4">
-      <div class="form-floating">
-        <input
-          class="form-control"
-          id="recipient"
-          list="recipient-list"
-          bind:value={recipient}
-          placeholder="recipient"
-          disabled={requirements.mode == "view"}
-        />
-        <datalist id="recipient-list">
-          {#each recipients as recipient (recipient)}
-            <option>{recipient}</option>
-          {/each}
-        </datalist>
-        <label for="recipient">{requirements.fields.name("recipient")}</label>
-      </div>
+      <Input
+        id="recipient"
+        bind:value={recipient}
+        disabled={requirements.mode == "view"}
+        label={requirements.fields.name("recipient")}
+        bind:list={recipients}
+      />
     </div>
     <div class="col-md-3 col-sm-4">
-      <div class="form-floating">
-        <input
-          class="form-control"
-          id="acceptor"
-          list="acceptor-list"
-          bind:value={acceptor}
-          placeholder="acceptor"
-          required
-          disabled={requirements.mode == "view"}
-        />
-        <datalist id="acceptor-list">
-          {#each acceptors as acceptor (acceptor)}
-            <option>{acceptor}</option>
-          {/each}
-        </datalist>
-        <label for="acceptor">{requirements.fields.name("acceptor")}</label>
-        <div class="invalid-feedback">必填字段</div>
-      </div>
+      <Input
+        id="acceptor"
+        bind:value={acceptor}
+        required={true}
+        disabled={requirements.mode == "view"}
+        label={requirements.fields.name("acceptor")}
+        bind:list={acceptors}
+      />
     </div>
     <div class="col-md-6">
       <label class="form-label" for="group">
