@@ -8,6 +8,23 @@ db.version(1).stores({
 })
 const table = db.table<Requirement>('requirements')
 
+const defaultFieldNames: {
+  [key in keyof Requirement]: string
+} = {
+  id: "编号",
+  type: "类型",
+  title: "标题",
+  date: "日期",
+  deadline: "截止日期",
+  done: "完成日期",
+  submitter: "提交人",
+  recipient: "承接人",
+  acceptor: "受理人",
+  status: "状态",
+  label: "标签",
+  note: "备注"
+}
+
 class Fields {
   #fields: FieldMap
   constructor(fields: Field[]) {
@@ -16,14 +33,17 @@ class Fields {
       return m
     }, {} as FieldMap)
   }
+  enable(key: keyof Requirement) {
+    return this.#fields[key] != undefined
+  }
   name(key: keyof Requirement) {
-    return this.#fields[key].name
+    return this.#fields[key]?.name || defaultFieldNames[key]
   }
   size(key: keyof Requirement) {
-    return this.#fields[key].size
+    return this.#fields[key]?.size || 0
   }
   title(key: keyof Requirement) {
-    return !(<(keyof Requirement)[]>['id', 'type', 'date', 'deadline', 'done']).includes(key)
+    return this.#fields[key]?.title
   }
   columns(all?: boolean) {
     const columns = <(keyof Requirement)[]>[]

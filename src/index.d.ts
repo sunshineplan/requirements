@@ -14,11 +14,12 @@ interface Requirement {
 }
 
 interface Field {
-  key?: keyof Requirement
+  key: keyof Requirement
   name: string
   size?: number
   title?: boolean
   searchable?: boolean
+  enum?: string[]
 }
 
 type FieldMap = {

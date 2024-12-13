@@ -136,56 +136,66 @@
   </header>
   {#await promise then _}
     <div class="row g-3" class:was-validated={validated}>
-      <div class="col-md-8 col-sm-12">
-        <Textarea
-          id="title"
-          bind:value={title}
-          required={true}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("title")}
-        />
-      </div>
+      {#if requirements.fields.enable("title")}
+        <div class="col-md-8 col-sm-12">
+          <Textarea
+            id="title"
+            bind:value={title}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("title")}
+          />
+        </div>
+      {/if}
       <div class="w-100 m-0"></div>
-      <div class="col-md-3 col-sm-4">
-        <Select
-          id="type"
-          bind:value={type}
-          options={requirements.types}
-          required={true}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("type")}
-        />
-      </div>
-      <div class="col-md-3 col-sm-4">
-        <Select
-          id="status"
-          bind:value={status}
-          options={requirements.statuses.map((status) => status.value)}
-          required={true}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("status")}
-        />
-      </div>
+      {#if requirements.fields.enable("type")}
+        <div class="col-md-3 col-sm-4">
+          <Select
+            id="type"
+            bind:value={type}
+            options={requirements.types}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("type")}
+          />
+        </div>
+      {/if}
+      {#if requirements.fields.enable("status")}
+        <div class="col-md-3 col-sm-4">
+          <Select
+            id="status"
+            bind:value={status}
+            options={requirements.statuses.map((status) => status.value)}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("status")}
+          />
+        </div>
+      {/if}
       <div class="w-100 m-0"></div>
-      <div class="col-md-3 col-sm-4">
-        <Date
-          id="date"
-          bind:value={date}
-          required={true}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("date")}
-        />
-      </div>
-      <div class="col-md-3 col-sm-4">
-        <Date
-          id="deadline"
-          bind:value={deadline}
-          min={date}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("deadline")}
-        />
-      </div>
-      {#if status === doneValue}
+      {#if requirements.fields.enable("date")}
+        <div class="col-md-3 col-sm-4">
+          <Date
+            id="date"
+            bind:value={date}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("date")}
+          />
+        </div>
+      {/if}
+      {#if requirements.fields.enable("deadline")}
+        <div class="col-md-3 col-sm-4">
+          <Date
+            id="deadline"
+            bind:value={deadline}
+            min={date}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("deadline")}
+          />
+        </div>
+      {/if}
+      {#if requirements.fields.enable("done") && status === doneValue}
         <div class="col-md-3 col-sm-4">
           <Date
             id="done"
@@ -198,56 +208,68 @@
         </div>
       {/if}
       <div class="w-100 m-0"></div>
-      <div class="col-md-3 col-sm-4">
-        <Input
-          id="submitter"
-          bind:value={submitter}
-          required={true}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("submitter")}
-          list={submitters}
-        />
-      </div>
-      <div class="col-md-3 col-sm-4">
-        <Input
-          id="recipient"
-          bind:value={recipient}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("recipient")}
-          list={recipients}
-        />
-      </div>
-      <div class="col-md-3 col-sm-4">
-        <Input
-          id="acceptor"
-          bind:value={acceptor}
-          required={true}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("acceptor")}
-          list={acceptors}
-        />
-      </div>
-      <div class="col-md-6">
-        <Checkbox
-          id="label"
-          bind:value={label}
-          required={true}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("label")}
-          options={labels}
-          {validated}
-        />
-      </div>
-      <div class="col-md-8 col-sm-12">
-        <Textarea
-          id="note"
-          height="7rem"
-          bind:value={note}
-          required={true}
-          disabled={requirements.mode == "view"}
-          label={requirements.fields.name("note")}
-        />
-      </div>
+      {#if requirements.fields.enable("submitter")}
+        <div class="col-md-3 col-sm-4">
+          <Input
+            id="submitter"
+            bind:value={submitter}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("submitter")}
+            list={submitters}
+          />
+        </div>
+      {/if}
+      {#if requirements.fields.enable("recipient")}
+        <div class="col-md-3 col-sm-4">
+          <Input
+            id="recipient"
+            bind:value={recipient}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("recipient")}
+            list={recipients}
+          />
+        </div>
+      {/if}
+      {#if requirements.fields.enable("acceptor")}
+        <div class="col-md-3 col-sm-4">
+          <Input
+            id="acceptor"
+            bind:value={acceptor}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("acceptor")}
+            list={acceptors}
+          />
+        </div>
+      {/if}
+      <div class="w-100 m-0"></div>
+      {#if requirements.fields.enable("label")}
+        <div class="col-md-6">
+          <Checkbox
+            id="label"
+            bind:value={label}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("label")}
+            options={labels}
+            {validated}
+          />
+        </div>
+      {/if}
+      <div class="w-100 m-0"></div>
+      {#if requirements.fields.enable("note")}
+        <div class="col-md-8 col-sm-12">
+          <Textarea
+            id="note"
+            height="7rem"
+            bind:value={note}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("note")}
+          />
+        </div>
+      {/if}
       <div class="col-md-8 col-sm-12">
         {#if requirements.mode == "view"}
           <button class="btn btn-primary float-end mb-2" onclick={back}>
