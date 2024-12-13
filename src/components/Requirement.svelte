@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { confirm, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
   import Action from "./Action.svelte";
+  import Checkbox from "./form-control/Checkbox.svelte";
   import Date from "./form-control/Date.svelte";
   import Input from "./form-control/Input.svelte";
   import Select from "./form-control/Select.svelte";
+  import Textarea from "./form-control/Textarea.svelte";
 
   const modeList: { [key: string]: string } = {
     add: "新增",
@@ -37,19 +38,15 @@
   let recipients: string[] = $state([]);
   let acceptors: string[] = $state([]);
 
-  let titleElement: HTMLElement;
-  let noteElement: HTMLElement;
-
-  onMount(async () => {
+  const init = async () => {
     const res = await requirements.init();
     groups = res.groups;
     doneValue = res.done;
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
     acceptors = await requirements.acceptors();
-    titleElement.scrollTop = 0;
-    noteElement.scrollTop = 0;
-  });
+  };
+  const promise = init();
 
   const current = () => {
     return {
@@ -137,178 +134,136 @@
       />
     {/if}
   </header>
-  <div class="row g-3" class:was-validated={validated}>
-    <div class="col-md-8 col-sm-12">
-      <label for="title" class="form-label">
-        {requirements.fields.name("title")}
-      </label>
-      <textarea
-        class="form-control"
-        id="title"
-        bind:this={titleElement}
-        bind:value={title}
-        required
-        disabled={requirements.mode == "view"}
-      ></textarea>
-      <div class="invalid-feedback">必填字段</div>
-    </div>
-    <div class="w-100 m-0"></div>
-    <div class="col-md-3 col-sm-4">
-      <Select
-        id="type"
-        bind:value={type}
-        options={requirements.types}
-        required={true}
-        disabled={requirements.mode == "view"}
-        label={requirements.fields.name("type")}
-      />
-    </div>
-    <div class="col-md-3 col-sm-4">
-      <Select
-        id="status"
-        bind:value={status}
-        options={requirements.statuses.map((status) => status.value)}
-        required={true}
-        disabled={requirements.mode == "view"}
-        label={requirements.fields.name("status")}
-      />
-    </div>
-    <div class="w-100 m-0"></div>
-    <div class="col-md-3 col-sm-4">
-      <Date
-        id="date"
-        bind:value={date}
-        required={true}
-        disabled={requirements.mode == "view"}
-        label={requirements.fields.name("date")}
-      />
-    </div>
-    <div class="col-md-3 col-sm-4">
-      <Date
-        id="deadline"
-        bind:value={deadline}
-        min={date}
-        disabled={requirements.mode == "view"}
-        label={requirements.fields.name("deadline")}
-      />
-    </div>
-    {#if status === doneValue}
-      <div class="col-md-3 col-sm-4">
-        <Date
-          id="done"
-          bind:value={done}
-          min={date}
+  {#await promise then _}
+    <div class="row g-3" class:was-validated={validated}>
+      <div class="col-md-8 col-sm-12">
+        <Textarea
+          id="title"
+          bind:value={title}
           required={true}
           disabled={requirements.mode == "view"}
-          label={requirements.fields.name("done")}
+          label={requirements.fields.name("title")}
         />
       </div>
-    {/if}
-    <div class="w-100 m-0"></div>
-    <div class="col-md-3 col-sm-4">
-      <Input
-        id="submitter"
-        bind:value={submitter}
-        required={true}
-        disabled={requirements.mode == "view"}
-        label={requirements.fields.name("submitter")}
-        bind:list={submitters}
-      />
-    </div>
-    <div class="col-md-3 col-sm-4">
-      <Input
-        id="recipient"
-        bind:value={recipient}
-        disabled={requirements.mode == "view"}
-        label={requirements.fields.name("recipient")}
-        bind:list={recipients}
-      />
-    </div>
-    <div class="col-md-3 col-sm-4">
-      <Input
-        id="acceptor"
-        bind:value={acceptor}
-        required={true}
-        disabled={requirements.mode == "view"}
-        label={requirements.fields.name("acceptor")}
-        bind:list={acceptors}
-      />
-    </div>
-    <div class="col-md-6">
-      <label class="form-label" for="group">
-        {requirements.fields.name("group")}
-      </label>
-      <div id="group">
-        {#if doneValue}
-          {#if groups.length == 0}
-            <div class="form-check form-check-inline">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id={"nogroup"}
-                disabled
-              />
-              <label class="form-check-label" for={"nogroup"}>无</label>
-            </div>
-          {/if}
-          {#each groups as g, index (g)}
-            <div class="form-check form-check-inline">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                class:invalid={validated && group.length == 0}
-                id={"group" + index}
-                bind:group
-                value={g}
-                disabled={requirements.mode == "view"}
-              />
-              <label
-                class="form-check-label"
-                class:invalid={validated && group.length == 0}
-                for={"group" + index}
-              >
-                {g}
-              </label>
-            </div>
-          {/each}
+      <div class="w-100 m-0"></div>
+      <div class="col-md-3 col-sm-4">
+        <Select
+          id="type"
+          bind:value={type}
+          options={requirements.types}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("type")}
+        />
+      </div>
+      <div class="col-md-3 col-sm-4">
+        <Select
+          id="status"
+          bind:value={status}
+          options={requirements.statuses.map((status) => status.value)}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("status")}
+        />
+      </div>
+      <div class="w-100 m-0"></div>
+      <div class="col-md-3 col-sm-4">
+        <Date
+          id="date"
+          bind:value={date}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("date")}
+        />
+      </div>
+      <div class="col-md-3 col-sm-4">
+        <Date
+          id="deadline"
+          bind:value={deadline}
+          min={date}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("deadline")}
+        />
+      </div>
+      {#if status === doneValue}
+        <div class="col-md-3 col-sm-4">
+          <Date
+            id="done"
+            bind:value={done}
+            min={date}
+            required={true}
+            disabled={requirements.mode == "view"}
+            label={requirements.fields.name("done")}
+          />
+        </div>
+      {/if}
+      <div class="w-100 m-0"></div>
+      <div class="col-md-3 col-sm-4">
+        <Input
+          id="submitter"
+          bind:value={submitter}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("submitter")}
+          list={submitters}
+        />
+      </div>
+      <div class="col-md-3 col-sm-4">
+        <Input
+          id="recipient"
+          bind:value={recipient}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("recipient")}
+          list={recipients}
+        />
+      </div>
+      <div class="col-md-3 col-sm-4">
+        <Input
+          id="acceptor"
+          bind:value={acceptor}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("acceptor")}
+          list={acceptors}
+        />
+      </div>
+      <div class="col-md-6">
+        <Checkbox
+          id="group"
+          bind:value={group}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("group")}
+          options={groups}
+          {validated}
+        />
+      </div>
+      <div class="col-md-8 col-sm-12">
+        <Textarea
+          id="note"
+          height="7rem"
+          bind:value={note}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("note")}
+        />
+      </div>
+      <div class="col-md-8 col-sm-12">
+        {#if requirements.mode == "view"}
+          <button class="btn btn-primary float-end mb-2" onclick={back}>
+            返回
+          </button>
         {:else}
-          <div class="form-check"></div>
+          <button class="btn btn-primary float-end mb-2" onclick={save}>
+            保存
+          </button>
+          <button class="btn btn-primary float-end mx-2 mb-2" onclick={back}>
+            取消
+          </button>
         {/if}
       </div>
-      <div
-        class="invalid-feedback"
-        class:invalid={validated && groups.length && group.length == 0}
-      >
-        必选字段
-      </div>
     </div>
-    <div class="col-md-8 col-sm-12">
-      <label for="note" class="form-label">
-        {requirements.fields.name("note")}
-      </label>
-      <textarea
-        class="form-control"
-        id="note"
-        bind:this={noteElement}
-        bind:value={note}
-        disabled={requirements.mode == "view"}
-      ></textarea>
-    </div>
-    <div class="col-md-8 col-sm-12">
-      {#if requirements.mode == "view"}
-        <button class="btn btn-primary float-end mb-2" onclick={back}>
-          返回
-        </button>
-      {:else}
-        <button class="btn btn-primary float-end mb-2" onclick={save}>
-          保存
-        </button>
-        <button class="btn btn-primary float-end mx-2 mb-2" onclick={back}>
-          取消
-        </button>
-      {/if}
-    </div>
-  </div>
+  {/await}
 </div>
 
 <style>
@@ -327,23 +282,5 @@
     overflow: auto;
     margin-top: 0;
     max-height: calc(100% - 60px);
-  }
-
-  #title {
-    height: 5rem;
-  }
-
-  #group {
-    display: flex;
-  }
-
-  #note {
-    height: 7rem;
-  }
-
-  .invalid {
-    display: block;
-    color: var(--bs-form-invalid-color) !important;
-    border-color: var(--bs-form-invalid-border-color) !important;
   }
 </style>

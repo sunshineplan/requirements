@@ -3,7 +3,7 @@
     id,
     label,
     value = $bindable(),
-    list = $bindable(),
+    list,
     required,
     disabled,
   }: {
