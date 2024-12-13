@@ -33,8 +33,8 @@ type requirement struct {
 	Recipient string `csv:"recipient" json:"recipient"`
 	Acceptor  string `csv:"acceptor" json:"acceptor"`
 	Status    string `csv:"status" json:"status"`
+	Label     string `csv:"label" json:"label"`
 	Note      string `csv:"note" json:"note"`
-	Group     string `csv:"group" json:"group"`
 }
 
 func (r requirement) String() string {

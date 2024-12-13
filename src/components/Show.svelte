@@ -41,7 +41,7 @@
     URL.revokeObjectURL(link.href);
   };
 
-  const groups = (s: string) => {
+  const labels = (s: string) => {
     const res = s.split(",");
     if (res.length > 1) {
       return res.map((i) => i.charAt(0)).join(" | ");
@@ -100,8 +100,8 @@
             <td
               title={requirements.fields.title(field) ? requirement[field] : ""}
             >
-              {field == "group"
-                ? groups(requirement[field])
+              {field == "label"
+                ? labels(requirement[field])
                 : requirement[field]}
             </td>
           {/each}

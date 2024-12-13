@@ -117,7 +117,7 @@ class Requirements {
         }
         return {
           done: res.done,
-          groups: res.groups,
+          labels: res.labels,
           users: res.users
         } as Info
       } else await this.reset()

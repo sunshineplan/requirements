@@ -3,7 +3,7 @@
   import { confirm, fire, post, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
 
-  let groups = $state("");
+  let labels = $state("");
   let types = $state("");
   let users: string[] = $state([]);
   let validated = $state(false);
@@ -11,7 +11,7 @@
   const load = async () => {
     const res = await requirements.init();
     types = requirements.types.join("\n");
-    groups = res.groups.join("\n");
+    labels = res.labels.join("\n");
     users = res.users;
   };
   const promise = load();
@@ -27,11 +27,11 @@
     } else validated = true;
   };
 
-  const updateGroups = async () => {
+  const updateLabels = async () => {
     if (valid()) {
       validated = false;
-      const restult = groups.split("\n").filter(Boolean);
-      const resp = await post("/groups", restult);
+      const restult = labels.split("\n").filter(Boolean);
+      const resp = await post("/labels", restult);
       if (resp.ok) {
         await fire("成功", "保存成功", "success");
       } else await fire("错误", await resp.text(), "error");
@@ -164,13 +164,13 @@
         </button>
       </div>
       <div class="col-md-6 col-sm-12">
-        <label for="groups" class="form-label">
-          {requirements.fields.name("group")}
+        <label for="labels" class="form-label">
+          {requirements.fields.name("label")}
         </label>
-        <textarea class="form-control" id="groups" bind:value={groups}
+        <textarea class="form-control" id="labels" bind:value={labels}
         ></textarea>
-        <button class="btn btn-primary float-end mt-2" onclick={updateGroups}>
-          保存{requirements.fields.name("group")}
+        <button class="btn btn-primary float-end mt-2" onclick={updateLabels}>
+          保存{requirements.fields.name("label")}
         </button>
       </div>
       <hr />
@@ -225,7 +225,7 @@
     margin: 0;
   }
 
-  #groups,
+  #labels,
   #types {
     height: 9rem;
   }

@@ -9,15 +9,16 @@ interface Requirement {
   recipient: string
   acceptor: string
   status: string
+  label: string
   note: string
-  group: string
 }
 
 interface Field {
   key?: keyof Requirement
   name: string
-  size: number
-  searchable: boolean
+  size?: number
+  title?: boolean
+  searchable?: boolean
 }
 
 type FieldMap = {
@@ -28,7 +29,7 @@ interface Info {
   brand: string
   username: string
   done: string
-  groups: string[]
+  labels: string[]
   types: string[]
   users: string[]
 }

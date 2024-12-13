@@ -24,15 +24,15 @@
   let acceptor = $state(requirements.requirement.acceptor || "");
   let status = $state(requirements.requirement.status || "");
   let note = $state(requirements.requirement.note || "");
-  let group = $state(
-    requirements.requirement.group
-      ? requirements.requirement.group.split(",")
+  let label = $state(
+    requirements.requirement.label
+      ? requirements.requirement.label.split(",")
       : [],
   );
   let validated = $state(false);
 
   let doneValue = $state("");
-  let groups: string[] = $state([]);
+  let labels: string[] = $state([]);
 
   let submitters: string[] = $state([]);
   let recipients: string[] = $state([]);
@@ -40,7 +40,7 @@
 
   const init = async () => {
     const res = await requirements.init();
-    groups = res.groups;
+    labels = res.labels;
     doneValue = res.done;
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
@@ -60,12 +60,12 @@
       acceptor,
       status,
       note,
-      group: group.join(","),
+      label: label.join(","),
     } as Requirement;
   };
 
   const save = async () => {
-    if (valid() && (!groups.length || group.length > 0)) {
+    if (valid() && (!labels.length || label.length > 0)) {
       validated = false;
       const r = current();
       if (requirements.mode == "edit") r.id = requirements.requirement.id;
@@ -229,12 +229,12 @@
       </div>
       <div class="col-md-6">
         <Checkbox
-          id="group"
-          bind:value={group}
+          id="label"
+          bind:value={label}
           required={true}
           disabled={requirements.mode == "view"}
-          label={requirements.fields.name("group")}
-          options={groups}
+          label={requirements.fields.name("label")}
+          options={labels}
           {validated}
         />
       </div>
