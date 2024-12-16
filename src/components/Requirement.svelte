@@ -24,24 +24,31 @@
   let acceptor = $state(requirements.requirement.acceptor || "");
   let status = $state(requirements.requirement.status || "");
   let note = $state(requirements.requirement.note || "");
-  let label = $state(
+  let labelValue = $state(
     requirements.requirement.label
       ? requirements.requirement.label.split(",")
       : [],
   );
-  let validated = $state(false);
+  const label = $derived(labelValue.join(","));
 
-  let doneValue = $state("");
-  let labels: string[] = $state([]);
+  let extendValue = $state<{ [key: string]: string | string[] }>({});
+  const extend = $derived(
+    Object.fromEntries(
+      Object.entries(extendValue).map(([k, v]) => [
+        k,
+        Array.isArray(v) ? v.join(",") : v,
+      ]),
+    ),
+  );
+
+  let validated = $state(false);
 
   let submitters: string[] = $state([]);
   let recipients: string[] = $state([]);
   let acceptors: string[] = $state([]);
 
   const init = async () => {
-    const res = await requirements.init();
-    labels = res.labels;
-    doneValue = res.done;
+    await requirements.init();
     submitters = await requirements.submitters();
     recipients = await requirements.recipients();
     acceptors = await requirements.acceptors();
@@ -60,17 +67,22 @@
       acceptor,
       status,
       note,
-      label: label.join(","),
-    } as Requirement;
+      label,
+      ...extend,
+    } as ExtendedRequirement;
   };
 
   const save = async () => {
-    if (valid() && (!labels.length || label.length > 0)) {
+    if (
+      valid() &&
+      (!requirements.fields.required("label") ||
+        (requirements.fields.enum("label").length && label.length == 0))
+    ) {
       validated = false;
       const r = current();
       if (requirements.mode == "edit") r.id = requirements.requirement.id;
       try {
-        if (r.status != doneValue) r.done = "";
+        if (r.status != requirements.doneValue) r.done = "";
         const res = await requirements.save(r);
         if (res === 0) {
           if (requirements.mode == "add") requirements.clearSearch();
@@ -136,25 +148,24 @@
   </header>
   {#await promise then _}
     <div class="row g-3" class:was-validated={validated}>
-      {#if requirements.fields.enable("title")}
-        <div class="col-md-8 col-sm-12">
-          <Textarea
-            id="title"
-            bind:value={title}
-            required={true}
-            disabled={requirements.mode == "view"}
-            label={requirements.fields.name("title")}
-          />
-        </div>
-      {/if}
+      <div class="col-md-8 col-sm-12">
+        <Textarea
+          id="title"
+          bind:value={title}
+          height={requirements.fields.height("title")}
+          required={true}
+          disabled={requirements.mode == "view"}
+          label={requirements.fields.name("title")}
+        />
+      </div>
       <div class="w-100 m-0"></div>
       {#if requirements.fields.enable("type")}
         <div class="col-md-3 col-sm-4">
           <Select
             id="type"
             bind:value={type}
-            options={requirements.types}
-            required={true}
+            options={requirements.fields.enum("type")}
+            required={requirements.fields.required("type")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("type")}
           />
@@ -166,7 +177,7 @@
             id="status"
             bind:value={status}
             options={requirements.statuses.map((status) => status.value)}
-            required={true}
+            required={requirements.fields.required("status")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("status")}
           />
@@ -178,7 +189,7 @@
           <Date
             id="date"
             bind:value={date}
-            required={true}
+            required={requirements.fields.required("date")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("date")}
           />
@@ -190,18 +201,19 @@
             id="deadline"
             bind:value={deadline}
             min={date}
+            required={requirements.fields.required("deadline")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("deadline")}
           />
         </div>
       {/if}
-      {#if requirements.fields.enable("done") && status === doneValue}
+      {#if requirements.fields.enable("done") && status === requirements.doneValue}
         <div class="col-md-3 col-sm-4">
           <Date
             id="done"
             bind:value={done}
             min={date}
-            required={true}
+            required={requirements.fields.required("done")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("done")}
           />
@@ -213,7 +225,7 @@
           <Input
             id="submitter"
             bind:value={submitter}
-            required={true}
+            required={requirements.fields.required("submitter")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("submitter")}
             list={submitters}
@@ -225,6 +237,7 @@
           <Input
             id="recipient"
             bind:value={recipient}
+            required={requirements.fields.required("recipient")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("recipient")}
             list={recipients}
@@ -236,7 +249,7 @@
           <Input
             id="acceptor"
             bind:value={acceptor}
-            required={true}
+            required={requirements.fields.required("acceptor")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("acceptor")}
             list={acceptors}
@@ -248,23 +261,71 @@
         <div class="col-md-6">
           <Checkbox
             id="label"
-            bind:value={label}
-            required={true}
+            bind:value={labelValue}
+            required={requirements.fields.required("label")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("label")}
-            options={labels}
+            options={requirements.fields.enum("label")}
             {validated}
           />
         </div>
       {/if}
       <div class="w-100 m-0"></div>
+      {#each requirements.fields.custom as field (field.key)}
+        {@const type = field.type || "input"}
+        {@const props = {
+          id: field.key,
+          required: field.required,
+          disabled: requirements.mode == "view",
+          label: field.name || field.key,
+        }}
+        {#if type == "checkbox"}
+          <div class="col-md-6">
+            <Checkbox
+              {...props}
+              bind:value={extendValue[field.key] as string[]}
+              options={field.enum}
+              {validated}
+            />
+          </div>
+        {:else if type == "date"}
+          <div class="col-md-3 col-sm-4">
+            <Date {...props} bind:value={extendValue[field.key] as string} />
+          </div>
+        {:else if type == "input"}
+          <div class="col-md-3 col-sm-4">
+            <Input
+              {...props}
+              bind:value={extendValue[field.key] as string}
+              list={field.enum}
+            />
+          </div>
+        {:else if type == "select"}
+          <div class="col-md-3 col-sm-4">
+            <Select
+              {...props}
+              bind:value={extendValue[field.key] as string}
+              options={field.enum}
+            />
+          </div>
+        {:else if type == "textarea"}
+          <div class="col-md-8 col-sm-12">
+            <Textarea
+              {...props}
+              height={field.height}
+              bind:value={extendValue[field.key] as string}
+            />
+          </div>
+        {/if}
+        <div class="w-100 m-0"></div>
+      {/each}
       {#if requirements.fields.enable("note")}
         <div class="col-md-8 col-sm-12">
           <Textarea
             id="note"
-            height="7rem"
+            height={requirements.fields.height("note")}
             bind:value={note}
-            required={true}
+            required={requirements.fields.required("note")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("note")}
           />

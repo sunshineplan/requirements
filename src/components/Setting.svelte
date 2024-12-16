@@ -2,40 +2,48 @@
   import Swal from "sweetalert2";
   import { confirm, fire, post, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
+  import Textarea from "./form-control/Textarea.svelte";
 
-  let labels = $state("");
-  let types = $state("");
+  let fields = $state("");
+  let custom = $state("");
   let users: string[] = $state([]);
   let validated = $state(false);
 
+  const height = "18rem";
+
   const load = async () => {
-    const res = await requirements.init();
-    types = requirements.types.join("\n");
-    labels = res.labels.join("\n");
-    users = res.users;
+    users = await requirements.init();
+    fields = JSON.stringify(requirements.fields.raw, null, 2);
+    custom = JSON.stringify(requirements.fields.custom, null, 2);
   };
   const promise = load();
 
-  const updateTypes = async () => {
+  const updateFields = async () => {
     if (valid()) {
-      validated = false;
-      const restult = types.split("\n").filter(Boolean);
-      const resp = await post("/types", restult);
-      if (resp.ok) {
-        await fire("成功", "保存成功", "success");
-      } else await fire("错误", await resp.text(), "error");
+      try {
+        validated = false;
+        const resp = await post("/fields", JSON.parse(fields));
+        if (resp.ok) {
+          await fire("成功", "字段保存成功", "success");
+          await requirements.init();
+        } else await fire("错误", await resp.text(), "error");
+      } catch (e) {
+        await fire("错误", String(e), "error");
+      }
     } else validated = true;
   };
 
-  const updateLabels = async () => {
-    if (valid()) {
+  const updateCustom = async () => {
+    try {
       validated = false;
-      const restult = labels.split("\n").filter(Boolean);
-      const resp = await post("/labels", restult);
+      const resp = await post("/custom", JSON.parse(custom));
       if (resp.ok) {
-        await fire("成功", "保存成功", "success");
+        await fire("成功", "自定义保存成功", "success");
+        await requirements.init();
       } else await fire("错误", await resp.text(), "error");
-    } else validated = true;
+    } catch (e) {
+      await fire("错误", String(e), "error");
+    }
   };
 
   const addUser = async () => {
@@ -152,25 +160,23 @@
   </header>
   {#await promise then _}
     <div class="row g-3" class:was-validated={validated}>
-      <div class="col-md-6 col-sm-12">
-        <label for="types" class="form-label">
-          {requirements.fields.name("type")}
-        </label>
-        <textarea class="form-control" id="types" bind:value={types} required
-        ></textarea>
-        <div class="invalid-feedback">必填字段</div>
-        <button class="btn btn-primary float-end mt-2" onclick={updateTypes}>
-          保存{requirements.fields.name("type")}
+      <div class="col-md-6 col-sm-12 mt-0">
+        <Textarea
+          id="fields"
+          label="字段"
+          {height}
+          bind:value={fields}
+          required={true}
+          absolute={true}
+        />
+        <button class="btn btn-primary float-end mt-2" onclick={updateFields}>
+          保存字段
         </button>
       </div>
-      <div class="col-md-6 col-sm-12">
-        <label for="labels" class="form-label">
-          {requirements.fields.name("label")}
-        </label>
-        <textarea class="form-control" id="labels" bind:value={labels}
-        ></textarea>
-        <button class="btn btn-primary float-end mt-2" onclick={updateLabels}>
-          保存{requirements.fields.name("label")}
+      <div class="col-md-6 col-sm-12 mt-0">
+        <Textarea id="custom" label="自定义" {height} bind:value={custom} />
+        <button class="btn btn-primary float-end mt-2" onclick={updateCustom}>
+          保存自定义
         </button>
       </div>
       <hr />
@@ -225,19 +231,10 @@
     margin: 0;
   }
 
-  #labels,
-  #types {
-    height: 9rem;
-  }
-
   .row {
     padding: 0 20px;
     overflow: auto;
     margin-top: 0;
     max-height: calc(100% - 60px);
-  }
-
-  .invalid-feedback {
-    position: absolute;
   }
 </style>

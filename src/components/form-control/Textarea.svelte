@@ -6,6 +6,7 @@
     height = "5rem",
     required,
     disabled,
+    absolute,
   }: {
     id: string;
     label: string;
@@ -13,6 +14,7 @@
     height?: string;
     required?: boolean;
     disabled?: boolean;
+    absolute?: boolean;
   } = $props();
 </script>
 
@@ -28,5 +30,7 @@
   {disabled}
 ></textarea>
 {#if required}
-  <div class="invalid-feedback">必填字段</div>
+  <div class="invalid-feedback" style:position={absolute ? "absolute" : ""}>
+    必填字段
+  </div>
 {/if}

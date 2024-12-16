@@ -13,26 +13,33 @@ interface Requirement {
   note: string
 }
 
+interface ExtendedRequirement extends Requirement {
+  [key: string]: string
+}
+
 interface Field {
-  key: keyof Requirement
+  key: string
   name: string
-  size?: number
-  title?: boolean
-  searchable?: boolean
-  enum?: string[]
+  size: number
+  height: string
+  title: boolean
+  searchable: boolean
+  required: boolean
+  enum: string[]
+}
+
+interface MainField extends Field {
+  key: keyof Requirement
 }
 
 type FieldMap = {
-  [key in keyof Requirement]: Field
+  [key in keyof Requirement]: MainField
 }
 
-interface Info {
-  brand: string
-  username: string
-  done: string
-  labels: string[]
-  types: string[]
-  users: string[]
+type Type = 'checkbox' | 'date' | 'input' | 'select' | 'textarea'
+
+interface CustomField extends Field {
+  type: Type
 }
 
 interface Status {
@@ -42,9 +49,9 @@ interface Status {
 
 interface Search {
   search: string
-  field: keyof Requirement | ''
-  sort: keyof Requirement | ''
+  field: string
+  sort: string
   desc: boolean
-  filter: '' | 'type' | 'status'
+  filter: 'type' | 'status' | ''
   value: string
 }

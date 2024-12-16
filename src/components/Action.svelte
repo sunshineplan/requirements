@@ -6,10 +6,10 @@
   let {
     requirement,
   }: {
-    requirement: Requirement;
+    requirement: ExtendedRequirement;
   } = $props();
 
-  const done = async (r: Requirement) => {
+  const done = async (r: ExtendedRequirement) => {
     const today = new Date().toISOString().split("T")[0];
     const { value: date } = await Swal.fire({
       title: `选择${requirements.fields.name("done")}`,
@@ -64,12 +64,12 @@
     }
   };
 
-  const edit = (r: Requirement) => {
+  const edit = (r: ExtendedRequirement) => {
     requirements.requirement = r;
     requirements.goto("edit");
   };
 
-  const del = async (r: Requirement) => {
+  const del = async (r: ExtendedRequirement) => {
     if (await confirm("该条记录将被永久删除。", true)) {
       try {
         await requirements.delete(r);

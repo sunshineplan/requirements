@@ -11,7 +11,10 @@ export const loading = new Loading
 export const fire = async (title?: string, html?: string, icon?: SweetAlertIcon) => {
   const swal = Swal.mixin({
     confirmButtonText: '确定',
-    customClass: { confirmButton: 'swal btn btn-primary' },
+    customClass: {
+      htmlContainer: 'text-wrap',
+      confirmButton: 'swal btn btn-primary'
+    },
     buttonsStyling: false
   })
   await swal.fire(title, html, icon)

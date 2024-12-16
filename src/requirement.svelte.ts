@@ -6,7 +6,7 @@ const db = new Dexie('requirement')
 db.version(1).stores({
   requirements: 'id'
 })
-const table = db.table<Requirement>('requirements')
+const table = db.table<ExtendedRequirement>('requirements')
 
 const defaultFieldNames: {
   [key in keyof Requirement]: string
@@ -26,37 +26,61 @@ const defaultFieldNames: {
 }
 
 class Fields {
+  raw: MainField[]
+  custom: CustomField[]
   #fields: FieldMap
-  constructor(fields: Field[]) {
+  constructor(fields: MainField[], custom: CustomField[]) {
+    this.raw = fields
+    this.custom = custom
     this.#fields = fields.reduce((m, field) => {
-      if (field.key) { m[field.key] = field }
+      if (field.key) {
+        if (!field.name)
+          field.name = defaultFieldNames[field.key as keyof Requirement]
+        m[field.key] = field
+      }
       return m
     }, {} as FieldMap)
   }
   enable(key: keyof Requirement) {
     return this.#fields[key] != undefined
   }
-  name(key: keyof Requirement) {
-    return this.#fields[key]?.name || defaultFieldNames[key]
+  name(key: string) {
+    return this.#fields[key as keyof Requirement]?.name ||
+      defaultFieldNames[key as keyof Requirement] ||
+      this.custom.find(field => field.key === key)?.name ||
+      key
   }
-  size(key: keyof Requirement) {
-    return this.#fields[key]?.size || 0
+  height(key: keyof Requirement) {
+    return this.#fields[key]?.height
   }
-  title(key: keyof Requirement) {
-    return this.#fields[key]?.title
+  required(key: keyof Requirement) {
+    return this.#fields[key]?.required
+  }
+  enum(key: keyof Requirement) {
+    return this.#fields[key]?.enum || []
   }
   columns(all?: boolean) {
-    const columns = <(keyof Requirement)[]>[]
+    const columns = <Field[]>[]
     for (const key in this.#fields)
       if (all || this.#fields[key as keyof Requirement].size)
-        columns.push(key as keyof Requirement)
+        columns.push(this.#fields[key as keyof Requirement])
+    if (this.custom)
+      this.custom.forEach(field => {
+        if (all || field.size)
+          columns.push(field)
+      })
     return columns
   }
   searchable() {
-    const fields = <(keyof Requirement)[]>[]
+    const fields = <(Field)[]>[]
     for (const key in this.#fields)
       if (this.#fields[key as keyof Requirement].searchable)
-        fields.push(key as keyof Requirement)
+        fields.push(this.#fields[key as keyof Requirement])
+    if (this.custom)
+      this.custom.forEach(field => {
+        if (field.searchable)
+          fields.push(field)
+      })
     return fields
   }
 }
@@ -65,36 +89,36 @@ class Requirements {
   brand = $state('')
   username = $state('')
   component = $state('show')
-  fields = new Fields([])
-  mode = $state('')
-  requirement = $state({} as Requirement)
-  requirements = $state.raw<Requirement[]>([])
-  types = $state<string[]>([])
+  fields = new Fields([], [])
+  doneValue = $state('')
   statuses = $state.raw<Status[]>([])
+  mode = $state('')
+  requirement = $state({} as ExtendedRequirement)
+  requirements = $state.raw<ExtendedRequirement[]>([])
   search = $state<Search>({ search: '', field: '', sort: '', desc: true, filter: '', value: '' })
   scrollTop = $state(0)
   controller = $state(new AbortController())
   results = $derived.by(() => {
-    let array: Requirement[] = []
+    let array: ExtendedRequirement[] = []
     if (!this.search.search) array = this.requirements
     else if (this.search.field)
       array = this.requirements.filter((i) =>
-        i[this.search.field as keyof Requirement].includes(this.search.search),
+        i[this.search.field as keyof ExtendedRequirement].includes(this.search.search),
       )
     else
       array = this.requirements.filter((i) =>
         this.fields
           .searchable()
-          .some((field) => i[field].includes(this.search.search)),
+          .some(field => i[field.key].includes(this.search.search)),
       )
     if (this.search.filter && this.search.value)
       array = array.filter((i) =>
-        i[this.search.filter as keyof Requirement] === this.search.value,
+        i[this.search.filter as keyof ExtendedRequirement] === this.search.value,
       )
     if (this.search.sort)
       return array.toSorted((a, b) => {
-        const v1 = a[this.search.sort as keyof Requirement],
-          v2 = b[this.search.sort as keyof Requirement]
+        const v1 = a[this.search.sort as keyof ExtendedRequirement],
+          v2 = b[this.search.sort as keyof ExtendedRequirement]
         let res = 0
         if (v1 < v2) res = 1
         else if (v1 > v2) res = -1
@@ -106,11 +130,11 @@ class Requirements {
   async clear() { await table.clear() }
   async reset() {
     this.username = ''
-    this.requirement = {} as Requirement
+    this.requirement = {} as ExtendedRequirement
     this.requirements = []
     await this.clear()
   }
-  async init(load?: Boolean): Promise<Info> {
+  async init(load?: Boolean): Promise<string[]> {
     loading.start()
     let resp: Response
     try {
@@ -125,9 +149,9 @@ class Requirements {
       this.brand = res.brand
       if (res.username) {
         this.username = res.username
-        this.fields = new Fields(res.fields)
-        this.types = res.types
-        this.statuses = res.statuses
+        this.doneValue = res.done
+        this.fields = new Fields(res.fields, res.custom)
+        this.statuses = this.#parseStatuses(this.fields.enum('status'))
         if (load) {
           const n = await this.load()
           if (!n) {
@@ -135,17 +159,13 @@ class Requirements {
             await this.load()
           }
         }
-        return {
-          done: res.done,
-          labels: res.labels,
-          users: res.users
-        } as Info
+        return res.users
       } else await this.reset()
     } else if (resp.status == 409) {
       await this.clear()
       return await this.init(load)
     } else await this.reset()
-    return {} as Info
+    return []
   }
   async load() {
     const array = await table.toArray()
@@ -157,7 +177,7 @@ class Requirements {
     if (resp.ok) await table.bulkAdd(await resp.json())
     else await fire('Fatal', await resp.text(), 'error')
   }
-  async save(r: Requirement) {
+  async save(r: ExtendedRequirement) {
     let resp: Response | undefined = undefined
     if (r.id) {
       if (this.#isEqual(this.requirement, r)) return 0
@@ -186,7 +206,7 @@ class Requirements {
     } else await fire('Fatal', await resp.text(), 'error')
     return 0
   }
-  async done(r: Requirement, date: string) {
+  async done(r: ExtendedRequirement, date: string) {
     const resp = await post(`/done?date=${date}`, r)
     if (resp.ok) {
       const res = await resp.json()
@@ -221,14 +241,31 @@ class Requirements {
       await this.load()
     } else await fire('Fatal', await resp.text(), 'error')
   }
-  #isEqual(a: Requirement, b: Requirement) {
+  #parseStatus(s: string): Status {
+    const res = s.split(/[:\s]+/);
+    const status: Status = { value: res[0].trim(), closed: false }
+    if (res.length > 1) {
+      const closed = res[1].toLowerCase().trim()
+      if (closed == "1" || closed == "t" || closed == "true")
+        status.closed = true
+    }
+    if (status.value === this.doneValue)
+      status.closed = true
+    return status
+  }
+  #parseStatuses(array: string[]) {
+    const statuses: Status[] = []
+    array.forEach(s => statuses.push(this.#parseStatus(s)))
+    return statuses
+  }
+  #isEqual(a: ExtendedRequirement, b: ExtendedRequirement) {
     for (const k in a) {
-      const key = k as keyof Requirement
+      const key = k as keyof ExtendedRequirement
       if (a[key] != b[key]) return false
     }
     return true
   }
-  isClosed(r: Requirement) {
+  isClosed(r: ExtendedRequirement) {
     const status = this.statuses.find(e => e.value === r.status)
     return status ? status.closed : false
   }

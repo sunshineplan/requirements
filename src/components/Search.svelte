@@ -55,7 +55,9 @@
   <div
     class="icon reset"
     style:display={hover &&
-    (requirements.search.search || requirements.search.field)
+    (requirements.search.search ||
+      requirements.search.field ||
+      requirements.search.filter)
       ? "flex"
       : "none"}
   >
@@ -87,8 +89,8 @@
           onchange={() => (showOption = false)}
         >
           <option value="">所有</option>
-          {#each requirements.fields.searchable() as field (field)}
-            <option value={field}>{requirements.fields.name(field)}</option>
+          {#each requirements.fields.searchable() as field (field.key)}
+            <option value={field.key}>{field.name || field.key}</option>
           {/each}
         </select>
       </div>
@@ -158,7 +160,7 @@
             {/each}
           {:else if requirements.search.filter === "type"}
             <option value="">所有</option>
-            {#each requirements.types as type (type)}
+            {#each requirements.fields.enum("type") as type (type)}
               <option value={type}>{type}</option>
             {/each}
           {/if}

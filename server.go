@@ -3,11 +3,9 @@ package main
 import (
 	"crypto/rand"
 	"embed"
-	"encoding/json"
 	"html/template"
 	"io/fs"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -22,13 +20,7 @@ func run() error {
 	if err := loadUsers(); err != nil {
 		return err
 	}
-	if err := loadLabels(); err != nil {
-		return err
-	}
-	if err := loadTypes(); err != nil {
-		return err
-	}
-	if err := loadStatuses(); err != nil {
+	if err := loadFields(); err != nil {
 		return err
 	}
 
@@ -64,20 +56,14 @@ func run() error {
 			c.JSON(200, obj)
 			return
 		}
-		obj["username"] = user
-		b, err := os.ReadFile(joinPath(dir(self), "fields.json"))
-		if err != nil {
-			svc.Print(err)
-			c.String(500, "")
-			return
-		}
-		obj["fields"] = json.RawMessage(b)
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
+		obj["username"] = user
+		obj["fields"] = fields
+		if len(custom) > 0 {
+			obj["custom"] = custom
+		}
 		obj["done"] = *doneValue
-		obj["labels"] = labels
-		obj["types"] = types
-		obj["statuses"] = statuses
 		if user == "admin" {
 			obj["users"] = usernames()
 		}
@@ -118,8 +104,8 @@ func run() error {
 
 	admin := base.Group("/", adminRequired)
 	admin.POST("/delete/:id", del)
-	admin.POST("/labels", updateLabels)
-	admin.POST("/types", updateTypes)
+	admin.POST("/fields", updateFields)
+	admin.POST("/custom", updateCustom)
 	admin.POST("/addUser", func(c *gin.Context) { updateUser(c, true) })
 	admin.POST("/chgpwd", func(c *gin.Context) { updateUser(c, false) })
 	admin.POST("/deleteUser", deleteUser)

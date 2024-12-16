@@ -6,11 +6,11 @@
   import Search from "./Search.svelte";
 
   const add = () => {
-    requirements.requirement = {} as Requirement;
+    requirements.requirement = {} as ExtendedRequirement;
     requirements.goto("add");
   };
 
-  const view = async (e: MouseEvent, r: Requirement) => {
+  const view = async (e: MouseEvent, r: ExtendedRequirement) => {
     if (window.getSelection()?.toString() !== "") return;
     if (!(e.target as HTMLElement).dataset["action"]) {
       requirements.requirement = r;
@@ -25,9 +25,9 @@
         stringify(requirements.results, {
           bom: true,
           header: true,
-          columns: requirements.fields.columns(true).map((key) => ({
-            key,
-            header: requirements.fields.name(key as keyof Requirement),
+          columns: requirements.fields.columns(true).map((field) => ({
+            key: field.key,
+            header: field.name || field.key,
           })),
         }),
       ],
@@ -67,26 +67,25 @@
   <table class="table table-hover table-sm">
     <thead>
       <tr>
-        {#each requirements.fields.columns() as field (field)}
-          {@const size = requirements.fields.size(field)}
-          {#if size}
+        {#each requirements.fields.columns() as field (field.key)}
+          {#if field.size}
             <th
-              class="sortable {requirements.search.sort == field
+              class="sortable {requirements.search.sort == field.key
                 ? requirements.search.desc
                   ? 'desc'
                   : 'asc'
                 : 'default'}"
-              class:auto={size == -1}
-              style:width={size > 0 ? `${size}rem` : ""}
+              class:auto={field.size == -1}
+              style:width={field.size > 0 ? `${field.size}rem` : ""}
               onclick={() => {
                 const before = requirements.search.sort;
-                requirements.search.sort = field;
+                requirements.search.sort = field.key;
                 if (before == requirements.search.sort)
                   requirements.search.desc = !requirements.search.desc;
                 else requirements.search.desc = true;
               }}
             >
-              {requirements.fields.name(field)}
+              {field.name || field.key}
             </th>
           {/if}
         {/each}
@@ -96,13 +95,11 @@
     <tbody>
       {#each requirements.results as requirement (requirement.id)}
         <tr onclick={(e) => view(e, requirement)}>
-          {#each requirements.fields.columns() as field (field)}
-            <td
-              title={requirements.fields.title(field) ? requirement[field] : ""}
-            >
-              {field == "label"
-                ? labels(requirement[field])
-                : requirement[field]}
+          {#each requirements.fields.columns() as field (field.key)}
+            <td title={field.title ? requirement[field.key] : ""}>
+              {field.key == "label"
+                ? labels(requirement[field.key])
+                : requirement[field.key]}
             </td>
           {/each}
           <td style="vertical-align: middle">
