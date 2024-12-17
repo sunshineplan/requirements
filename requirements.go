@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
+	"reflect"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,6 +25,11 @@ var (
 	mu sync.Mutex
 )
 
+var (
+	_ json.Marshaler   = requirement{}
+	_ json.Unmarshaler = new(requirement)
+)
+
 type requirement struct {
 	ID        ID     `csv:"id" json:"id"`
 	Type      string `csv:"type" json:"type"`
@@ -35,6 +43,92 @@ type requirement struct {
 	Status    string `csv:"status" json:"status"`
 	Label     string `csv:"label" json:"label"`
 	Note      string `csv:"note" json:"note"`
+
+	customFields map[string]string
+}
+
+func (r requirement) MarshalJSON() ([]byte, error) {
+	v := reflect.ValueOf(r)
+	t := v.Type()
+	m := make(map[string]string)
+	for _, field := range reflect.VisibleFields(t) {
+		if !field.IsExported() {
+			continue
+		}
+		m[strings.ToLower(field.Name)] = fmt.Sprint(v.FieldByIndex(field.Index))
+	}
+	maps.Insert(m, maps.All(r.customFields))
+	return json.Marshal(m)
+}
+
+func (r *requirement) UnmarshalJSON(b []byte) error {
+	var m map[string]string
+	if err := json.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	requirement := requirement{customFields: make(map[string]string)}
+	for k, v := range m {
+		switch strings.ToLower(k) {
+		case "id":
+			id, err := parseID(v)
+			if err != nil {
+				return err
+			}
+			requirement.ID = id
+		case "type":
+			requirement.Type = v
+		case "title":
+			requirement.Title = v
+		case "date":
+			date, err := parseDate(v)
+			if err != nil {
+				return err
+			}
+			requirement.Date = date
+		case "deadline":
+			deadline, err := parseDate(v)
+			if err != nil {
+				return err
+			}
+			requirement.Deadline = deadline
+		case "done":
+			done, err := parseDate(v)
+			if err != nil {
+				return err
+			}
+			requirement.Done = done
+		case "submitter":
+			requirement.Submitter = v
+		case "recipient":
+			requirement.Recipient = v
+		case "acceptor":
+			requirement.Acceptor = v
+		case "status":
+			requirement.Status = v
+		case "label":
+			requirement.Label = v
+		case "note":
+			requirement.Note = v
+		default:
+			requirement.customFields[k] = v
+		}
+	}
+	*r = requirement
+	return nil
+}
+
+func (r requirement) IsEqual(u requirement) bool {
+	a, b := reflect.ValueOf(r), reflect.ValueOf(u)
+	t := a.Type()
+	for _, field := range reflect.VisibleFields(t) {
+		if !field.IsExported() {
+			continue
+		}
+		if !a.FieldByIndex(field.Index).Equal(b.FieldByIndex(field.Index)) {
+			return false
+		}
+	}
+	return maps.Equal(r.customFields, u.customFields)
 }
 
 func (r requirement) String() string {
@@ -108,7 +202,7 @@ func edit(c *gin.Context) {
 
 	mu.Lock()
 	defer mu.Unlock()
-	if v := requirementsList[data.Old.ID]; v != data.Old {
+	if v := requirementsList[data.Old.ID]; !v.IsEqual(data.Old) {
 		c.AbortWithStatus(409)
 		return
 	}
@@ -141,7 +235,7 @@ func done(c *gin.Context) {
 	}
 	mu.Lock()
 	defer mu.Unlock()
-	if v := requirementsList[data.ID]; v != data {
+	if v := requirementsList[data.ID]; !v.IsEqual(data) {
 		c.AbortWithStatus(409)
 		return
 	}
@@ -249,6 +343,27 @@ func statistics(c *gin.Context) {
 	c.Data(200, "text/csv", buf.Bytes())
 }
 
+func getFields() []string {
+	fieldnames := []string{
+		"id",
+		"type",
+		"title",
+		"date",
+		"deadline",
+		"done",
+		"submitter",
+		"recipient",
+		"acceptor",
+		"status",
+		"label",
+		"note",
+	}
+	for _, field := range custom {
+		fieldnames = append(fieldnames, field.Key)
+	}
+	return fieldnames
+}
+
 func save() error {
 	var rows []requirement
 	for _, v := range requirementsList {
@@ -260,7 +375,7 @@ func save() error {
 		return err
 	}
 	defer f.Close()
-	if err := csv.ExportUTF8(nil, rows, f); err != nil {
+	if err := csv.ExportUTF8(getFields(), rows, f); err != nil {
 		return err
 	}
 	return setLast()

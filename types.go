@@ -36,7 +36,11 @@ func (id *ID) UnmarshalText(text []byte) error {
 }
 
 func (id ID) MarshalText() ([]byte, error) {
-	return []byte(fmt.Sprintf("%d%04d", id.year, id.serial)), nil
+	return []byte(id.String()), nil
+}
+
+func (id ID) String() string {
+	return fmt.Sprintf("%d%04d", id.year, id.serial)
 }
 
 func newID(last ID) ID {
