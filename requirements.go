@@ -128,7 +128,12 @@ func (r requirement) IsEqual(u requirement) bool {
 			return false
 		}
 	}
-	return maps.Equal(r.customFields, u.customFields)
+	for _, i := range custom {
+		if r.customFields[i.Key] != u.customFields[i.Key] {
+			return false
+		}
+	}
+	return true
 }
 
 func (r requirement) String() string {
@@ -165,6 +170,11 @@ func add(c *gin.Context) {
 	defer mu.Unlock()
 	lastID = newID(lastID)
 	data.ID = lastID
+	for k, v := range data.customFields {
+		if v == "" {
+			delete(data.customFields, k)
+		}
+	}
 	requirementsList[data.ID] = data
 	obj := gin.H{"status": 1, "id": data.ID}
 	if !last.Equal(c) {
@@ -205,6 +215,11 @@ func edit(c *gin.Context) {
 	if v := requirementsList[data.Old.ID]; !v.IsEqual(data.Old) {
 		c.AbortWithStatus(409)
 		return
+	}
+	for k, v := range data.New.customFields {
+		if v == "" {
+			delete(data.New.customFields, k)
+		}
 	}
 	requirementsList[data.New.ID] = data.New
 	obj := gin.H{"status": 1}
@@ -255,6 +270,11 @@ func done(c *gin.Context) {
 		data.Done = date
 		obj["value"] = data.Status
 		obj["done"] = data.Done
+	}
+	for k, v := range data.customFields {
+		if v == "" {
+			delete(data.customFields, k)
+		}
 	}
 	requirementsList[data.ID] = data
 	svc.Printf("%s %v done %s", c.ClientIP(), username, data)
@@ -358,9 +378,20 @@ func getFields() []string {
 		"label",
 		"note",
 	}
-	for _, field := range custom {
-		fieldnames = append(fieldnames, field.Key)
+	var customFields []string
+	for _, i := range requirementsList {
+		var fields []string
+		for key := range maps.Keys(i.customFields) {
+			fields = append(fields, key)
+		}
+		slices.Sort(fields)
+		if !slices.Equal(customFields, fields) {
+			customFields = slices.Concat(customFields, fields)
+			slices.Sort(customFields)
+			customFields = slices.Compact(customFields)
+		}
 	}
+	fieldnames = append(fieldnames, customFields...)
 	return fieldnames
 }
 
