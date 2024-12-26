@@ -8,19 +8,26 @@
     "key": "type",
     "name": "需求类型",
     "size": 11,
-    "searchable": false
+    "required": true,
+    "enum": [
+      "类型1",
+      "类型2",
+      "类型3"
+    ]
   },
   {
     "key": "title",
     "name": "需求描述",
     "size": -1,
     "title": true,
+    "required": true,
     "searchable": true
   },
   {
     "key": "date",
     "name": "提请日期",
     "size": 8,
+    "required": true,
     "searchable": true
   },
   {
@@ -51,7 +58,13 @@
   {
     "key": "status",
     "size": 5,
-    "searchable": false
+    "required": true,
+    "enum": [
+      "状态1",
+      "状态2:done",
+      "状态3:done",
+      "状态4:closed"
+    ]
   },
   {
     "key": "note",
