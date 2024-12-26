@@ -82,7 +82,7 @@
       const r = current();
       if (requirements.mode == "edit") r.id = requirements.requirement.id;
       try {
-        if (r.status != requirements.doneValue) r.done = "";
+        if (!requirements.doneValue.includes(r.status)) r.done = "";
         const res = await requirements.save(r);
         if (res === 0) {
           if (requirements.mode == "add") requirements.clearSearch();
@@ -207,7 +207,7 @@
           />
         </div>
       {/if}
-      {#if requirements.fields.enable("done") && status === requirements.doneValue}
+      {#if requirements.fields.enable("done") && requirements.doneValue.includes(status)}
         <div class="col-md-3 col-sm-4">
           <Date
             id="done"

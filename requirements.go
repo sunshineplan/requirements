@@ -44,18 +44,18 @@ type requirement struct {
 	Label     string `csv:"label" json:"label"`
 	Note      string `csv:"note" json:"note"`
 
-	customFields map[string]string
+	customFields map[string]any
 }
 
 func (r requirement) MarshalJSON() ([]byte, error) {
 	v := reflect.ValueOf(r)
 	t := v.Type()
-	m := make(map[string]string)
+	m := make(map[string]any)
 	for _, field := range reflect.VisibleFields(t) {
 		if !field.IsExported() {
 			continue
 		}
-		m[strings.ToLower(field.Name)] = fmt.Sprint(v.FieldByIndex(field.Index))
+		m[strings.ToLower(field.Name)] = v.FieldByIndex(field.Index).Interface()
 	}
 	maps.Insert(m, maps.All(r.customFields))
 	return json.Marshal(m)
@@ -66,7 +66,7 @@ func (r *requirement) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &m); err != nil {
 		return err
 	}
-	requirement := requirement{customFields: make(map[string]string)}
+	requirement := requirement{customFields: make(map[string]any)}
 	for k, v := range m {
 		switch strings.ToLower(k) {
 		case "id":
@@ -80,23 +80,11 @@ func (r *requirement) UnmarshalJSON(b []byte) error {
 		case "title":
 			requirement.Title = v
 		case "date":
-			date, err := parseDate(v)
-			if err != nil {
-				return err
-			}
-			requirement.Date = date
+			requirement.Date, _ = parseDate(v)
 		case "deadline":
-			deadline, err := parseDate(v)
-			if err != nil {
-				return err
-			}
-			requirement.Deadline = deadline
+			requirement.Deadline, _ = parseDate(v)
 		case "done":
-			done, err := parseDate(v)
-			if err != nil {
-				return err
-			}
-			requirement.Done = done
+			requirement.Done, _ = parseDate(v)
 		case "submitter":
 			requirement.Submitter = v
 		case "recipient":
@@ -262,11 +250,15 @@ func done(c *gin.Context) {
 	if !last.Equal(c) {
 		obj["reload"] = 1
 	}
-	if data.Status == *doneValue {
+	if len(doneValue) == 0 || slices.Contains(doneValue, data.Status) {
 		c.JSON(200, obj)
 		return
 	} else {
-		data.Status = *doneValue
+		if done := c.Query("value"); slices.Contains(doneValue, done) {
+			data.Status = done
+		} else {
+			data.Status = doneValue[0]
+		}
 		data.Done = date
 		obj["value"] = data.Status
 		obj["done"] = data.Done
@@ -342,16 +334,24 @@ func statistics(c *gin.Context) {
 	var s []string
 	for _, i := range types {
 		s = append(s, i)
-		s = append(s, i+*doneValue)
+		for _, done := range doneValue {
+			s = append(s, i+done)
+		}
 	}
-	fieldnames := append(append([]string{"年份", "月"}, s...), "总计", "总计"+*doneValue)
+	sumFields := []string{"总计"}
+	for _, i := range doneValue {
+		sumFields = append(sumFields, "总计"+i)
+	}
+	fieldnames := append(append([]string{"年份", "月"}, s...), sumFields...)
 	var data []map[string]int
 	for _, i := range res {
 		m := i.Types
 		m["年份"] = i.Year
 		m["月"] = i.Month
 		m["总计"] = i.Total
-		m["总计"+*doneValue] = i.TotalDone
+		for k, v := range i.TotalDone {
+			m["总计"+k] = v
+		}
 		data = append(data, m)
 	}
 	var buf bytes.Buffer
@@ -401,12 +401,20 @@ func save() error {
 		rows = append(rows, v)
 	}
 	slices.SortFunc(rows, func(a, b requirement) int { return a.ID.compare(b.ID) })
+	b, err := json.Marshal(rows)
+	if err != nil {
+		return err
+	}
+	var s []map[string]any
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
 	f, err := os.Create(joinPath(dir(self), "requirements.csv"))
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	if err := csv.ExportUTF8(getFields(), rows, f); err != nil {
+	if err := csv.ExportUTF8(getFields(), s, f); err != nil {
 		return err
 	}
 	return setLast()
@@ -430,7 +438,7 @@ type summary struct {
 	Month     int
 	Types     map[string]int
 	Total     int
-	TotalDone int
+	TotalDone map[string]int
 }
 
 func inRange(date, deadline Date, year, month int) bool {
@@ -457,7 +465,7 @@ func inRange(date, deadline Date, year, month int) bool {
 
 func analyze(src []requirement, year, startMonth, endMonth int, isNew bool) (res []summary) {
 	for i := startMonth; i <= endMonth; i++ {
-		sum := summary{Year: year, Month: i, Types: make(map[string]int)}
+		sum := summary{Year: year, Month: i, Types: make(map[string]int), TotalDone: make(map[string]int)}
 		for _, i := range src {
 			if (isNew && i.Date.year == sum.Year && i.Date.month == sum.Month) ||
 				(!isNew && inRange(i.Date, i.Deadline, sum.Year, sum.Month)) {
@@ -465,16 +473,23 @@ func analyze(src []requirement, year, startMonth, endMonth int, isNew bool) (res
 				sum.Total++
 			}
 			if i.Done.year == sum.Year && i.Done.month == sum.Month {
-				sum.Types[i.Type+*doneValue]++
-				sum.TotalDone++
+				sum.Types[i.Type+i.Status]++
+				sum.TotalDone[i.Status]++
 			}
 		}
 		for _, i := range types {
 			if _, ok := sum.Types[i]; !ok {
 				sum.Types[i] = 0
 			}
-			if _, ok := sum.Types[i+*doneValue]; !ok {
-				sum.Types[i+*doneValue] = 0
+			for _, done := range doneValue {
+				if _, ok := sum.Types[i+done]; !ok {
+					sum.Types[i+done] = 0
+				}
+			}
+		}
+		for _, i := range doneValue {
+			if _, ok := sum.TotalDone[i]; !ok {
+				sum.TotalDone[i] = 0
 			}
 		}
 		res = append(res, sum)

@@ -26,9 +26,9 @@ const defaultFieldNames: {
 }
 
 class Fields {
-  raw: MainField[]
-  custom: CustomField[]
-  #fields: FieldMap
+  raw = $state<MainField[]>([])
+  custom = $state<CustomField[]>([])
+  #fields = $state<FieldMap>({} as FieldMap)
   constructor(fields: MainField[], custom: CustomField[]) {
     this.raw = fields
     this.custom = custom
@@ -89,9 +89,9 @@ class Requirements {
   brand = $state('')
   username = $state('')
   component = $state('show')
-  fields = new Fields([], [])
-  doneValue = $state('')
+  fields = $state(new Fields([], []))
   statuses = $state.raw<Status[]>([])
+  doneValue = $state<string[]>([])
   mode = $state('')
   requirement = $state({} as ExtendedRequirement)
   requirements = $state.raw<ExtendedRequirement[]>([])
@@ -149,9 +149,8 @@ class Requirements {
       this.brand = res.brand
       if (res.username) {
         this.username = res.username
-        this.doneValue = res.done
         this.fields = new Fields(res.fields, res.custom)
-        this.statuses = this.#parseStatuses(this.fields.enum('status'))
+        this.#parseStatuses(this.fields.enum('status'))
         if (load) {
           const n = await this.load()
           if (!n) {
@@ -245,18 +244,21 @@ class Requirements {
     const res = s.split(/[:\s]+/);
     const status: Status = { value: res[0].trim(), closed: false }
     if (res.length > 1) {
-      const closed = res[1].toLowerCase().trim()
-      if (closed == "1" || closed == "t" || closed == "true")
+      const s = res[1].toLowerCase().trim()
+      if (s == "closed")
         status.closed = true
+      else if (s == "done") {
+        status.closed = true
+        this.doneValue.push(status.value)
+      }
     }
-    if (status.value === this.doneValue)
-      status.closed = true
     return status
   }
   #parseStatuses(array: string[]) {
+    this.doneValue = []
     const statuses: Status[] = []
     array.forEach(s => statuses.push(this.#parseStatus(s)))
-    return statuses
+    this.statuses = statuses
   }
   #isEqual(a: ExtendedRequirement, b: ExtendedRequirement) {
     for (const k in a) {
@@ -265,9 +267,9 @@ class Requirements {
     }
     return true
   }
-  isClosed(r: ExtendedRequirement) {
-    const status = this.statuses.find(e => e.value === r.status)
-    return status ? status.closed : false
+  isClosed(status: string) {
+    const s = this.statuses.find(e => e.value === status)
+    return s ? s.closed : false
   }
   async submitters() {
     return [...new Set((await table.toArray()).map(i => i.submitter))].sort()

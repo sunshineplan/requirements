@@ -100,13 +100,13 @@ func (d *Date) UnmarshalText(text []byte) error {
 }
 
 func (d Date) MarshalText() ([]byte, error) {
-	if d.isZero() {
-		return nil, nil
-	}
 	return []byte(d.String()), nil
 }
 
 func (d Date) String() string {
+	if d.isZero() {
+		return ""
+	}
 	return fmt.Sprintf("%04d-%02d-%02d", d.year, d.month, d.day)
 }
 

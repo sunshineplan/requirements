@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	types  []string
+	types     []string
+	doneValue []string
+
 	fields []field
 	custom []field
 )
@@ -25,12 +28,23 @@ type field struct {
 	Enum       []string `json:"enum,omitempty"`
 }
 
-func parseFields(fields []field) (types []string, err error) {
+func parseFields(fields []field) (types, doneValue []string, err error) {
 	for _, i := range fields {
 		if i.Key == "type" {
 			types = i.Enum
 			if i.Required && len(types) == 0 {
-				return nil, errors.New("no types")
+				return nil, nil, errors.New("no types")
+			}
+		}
+		if i.Key == "status" {
+			if i.Required && len(i.Enum) == 0 {
+				return nil, nil, errors.New("no statuses")
+			}
+			for _, i := range i.Enum {
+				before, after, found := strings.Cut(i, ":")
+				if found && after == "done" {
+					doneValue = append(doneValue, before)
+				}
 			}
 		}
 	}
@@ -45,7 +59,7 @@ func loadFields() error {
 	if err := json.Unmarshal(b, &fields); err != nil {
 		return err
 	}
-	if types, err = parseFields(fields); err != nil {
+	if types, doneValue, err = parseFields(fields); err != nil {
 		return err
 	}
 	b, err = os.ReadFile(joinPath(dir(self), "custom.json"))
@@ -66,7 +80,7 @@ func updateFields(c *gin.Context) {
 		return
 	}
 
-	res, err := parseFields(data)
+	s1, s2, err := parseFields(data)
 	if err != nil {
 		c.String(400, err.Error())
 		return
@@ -76,7 +90,8 @@ func updateFields(c *gin.Context) {
 	defer infoMutex.Unlock()
 
 	fields = data
-	types = res
+	types = s1
+	doneValue = s2
 	b, _ := json.MarshalIndent(data, "", "  ")
 	if err := os.WriteFile(joinPath(dir(self), "fields.json"), b, 0644); err != nil {
 		svc.Print(err)

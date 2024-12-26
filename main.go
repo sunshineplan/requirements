@@ -57,10 +57,9 @@ func init() {
 }
 
 var (
-	brand     = flag.String("brand", "业务系统", "Brand name")
-	doneValue = flag.String("done", "已完成", "Done value")
-	poll      = flag.Duration("poll", 50*time.Second, "Poll interval")
-	logPath   = flag.String("log", "", "Log file path")
+	brand   = flag.String("brand", "业务系统", "Brand name")
+	poll    = flag.Duration("poll", 50*time.Second, "Poll interval")
+	logPath = flag.String("log", "", "Log file path")
 )
 
 func main() {

@@ -82,7 +82,7 @@
 </script>
 
 <div>
-  {#if !requirements.isClosed(requirement) && !(requirements.component == "requirement" && requirements.mode == "edit")}
+  {#if !requirements.isClosed(requirement.status) && !(requirements.component == "requirement" && requirements.mode == "edit") && requirements.doneValue.length}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <span

@@ -63,7 +63,6 @@ func run() error {
 		if len(custom) > 0 {
 			obj["custom"] = custom
 		}
-		obj["done"] = *doneValue
 		if user == "admin" {
 			obj["users"] = usernames()
 		}
