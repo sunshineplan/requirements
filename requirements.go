@@ -254,7 +254,7 @@ func done(c *gin.Context) {
 		c.JSON(200, obj)
 		return
 	} else {
-		if done := c.Query("value"); slices.Contains(doneValue, done) {
+		if done := c.Query("status"); slices.Contains(doneValue, done) {
 			data.Status = done
 		} else {
 			data.Status = doneValue[0]

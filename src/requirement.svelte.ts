@@ -212,8 +212,10 @@ class Requirements {
     } else await fire('Fatal', await resp.text(), 'error')
     return 0
   }
-  async done(r: ExtendedRequirement, date: string) {
-    const resp = await post(`/done?date=${date}`, r)
+  async done(r: ExtendedRequirement, date: string, status?: string) {
+    let url = `/done?date=${date}`
+    if (status) url += `&status=${status}`
+    const resp = await post(url, r)
     if (resp.ok) {
       const res = await resp.json()
       if (res.status == 1) {
