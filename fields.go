@@ -20,6 +20,7 @@ var (
 type field struct {
 	Key        string   `json:"key"`
 	Name       string   `json:"name,omitempty"`
+	Type       string   `json:"type,omitempty"`
 	Size       int      `json:"size,omitempty"`
 	Height     string   `json:"height,omitempty"`
 	Title      bool     `json:"title,omitempty"`
@@ -78,6 +79,9 @@ func updateFields(c *gin.Context) {
 	if err := c.BindJSON(&data); err != nil {
 		c.String(400, "400")
 		return
+	}
+	for i := range data {
+		data[i].Type = ""
 	}
 
 	s1, s2, err := parseFields(data)

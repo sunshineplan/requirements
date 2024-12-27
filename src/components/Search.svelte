@@ -6,6 +6,11 @@
   let showOption = $state(false);
   let tune: HTMLElement;
   let option: HTMLElement;
+  const filterField = $derived(
+    requirements.fields
+      .filterable()
+      .find((field) => field.key == requirements.search.filter),
+  );
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
@@ -117,8 +122,9 @@
           onchange={() => (requirements.search.value = "")}
         >
           <option value="">无</option>
-          <option value="type">{requirements.fields.name("type")}</option>
-          <option value="status">{requirements.fields.name("status")}</option>
+          {#each requirements.fields.filterable() as field (field.key)}
+            <option value={field.key}>{field.name || field.key}</option>
+          {/each}
         </select>
       </div>
       <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -153,15 +159,14 @@
             requirements.scroll(true);
           }}
         >
+          <option value="">所有</option>
           {#if requirements.search.filter === "status"}
-            <option value="">所有</option>
             {#each requirements.statuses as status (status.value)}
               <option value={status.value}>{status.value}</option>
             {/each}
-          {:else if requirements.search.filter === "type"}
-            <option value="">所有</option>
-            {#each requirements.fields.enum("type") as type (type)}
-              <option value={type}>{type}</option>
+          {:else if filterField}
+            {#each filterField.enum as value (value)}
+              <option {value}>{value}</option>
             {/each}
           {/if}
         </select>

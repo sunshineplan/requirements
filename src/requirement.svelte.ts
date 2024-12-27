@@ -76,11 +76,18 @@ class Fields {
     for (const key in this.#fields)
       if (this.#fields[key as keyof Requirement].searchable)
         fields.push(this.#fields[key as keyof Requirement])
-    if (this.custom)
-      this.custom.forEach(field => {
-        if (field.searchable)
-          fields.push(field)
-      })
+    if (this.custom) this.custom.forEach(field => {
+      if (field.searchable) fields.push(field)
+    })
+    return fields
+  }
+  filterable() {
+    const fields = <(Field)[]>[]
+    if (this.enable('type')) fields.push(this.#fields.type)
+    if (this.enable('status')) fields.push(this.#fields.status)
+    if (this.custom) this.custom.forEach(field => {
+      if (field.type == 'select') fields.push(field)
+    })
     return fields
   }
 }
