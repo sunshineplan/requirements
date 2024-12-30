@@ -102,6 +102,11 @@ func updateFields(c *gin.Context) {
 		c.String(500, "内部错误")
 		return
 	}
+	if err := save(); err != nil {
+		svc.Print(err)
+		c.AbortWithStatus(500)
+		return
+	}
 	c.String(200, "done")
 }
 
@@ -120,6 +125,11 @@ func updateCustom(c *gin.Context) {
 	if err := os.WriteFile(joinPath(dir(self), "custom.json"), b, 0644); err != nil {
 		svc.Print(err)
 		c.String(500, "内部错误")
+		return
+	}
+	if err := save(); err != nil {
+		svc.Print(err)
+		c.AbortWithStatus(500)
 		return
 	}
 	c.String(200, "done")

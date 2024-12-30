@@ -169,7 +169,7 @@ class Requirements {
       } else await this.reset()
     } else if (resp.status == 409) {
       await this.clear()
-      return await this.init(load)
+      return await this.init(true)
     } else await this.reset()
     return []
   }
