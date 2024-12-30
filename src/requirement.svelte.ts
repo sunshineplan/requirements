@@ -212,9 +212,8 @@ class Requirements {
     } else await fire('Fatal', await resp.text(), 'error')
     return 0
   }
-  async done(r: ExtendedRequirement, date: string, status?: string) {
-    let url = `/done?date=${date}`
-    if (status) url += `&status=${status}`
+  async done(r: ExtendedRequirement, date: string, status: string) {
+    let url = `/done?date=${date}&status=${status}`
     const resp = await post(url, r)
     if (resp.ok) {
       const res = await resp.json()
@@ -224,12 +223,10 @@ class Requirements {
           await this.fetch()
           await this.load()
         } else {
-          if (res.value) {
-            r.status = res.value
-            r.done = res.done
-            await table.update(r.id, r)
-            await this.load()
-          }
+          r.status = status
+          r.done = date
+          await table.update(r.id, r)
+          await this.load()
         }
       } else {
         await fire('Error', res.message, 'error')

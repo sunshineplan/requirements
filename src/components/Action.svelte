@@ -1,6 +1,6 @@
 <script lang="ts">
   import Swal from "sweetalert2";
-  import { confirm } from "../misc.svelte";
+  import { confirm, valid } from "../misc.svelte";
   import { requirements } from "../requirement.svelte";
 
   let {
@@ -14,6 +14,7 @@
     const select = document.createElement("select");
     select.id = "done-value";
     select.className = "form-select";
+    select.required = true;
     requirements.doneValue.forEach((done) => {
       const option = document.createElement("option");
       option.value = done;
@@ -22,6 +23,10 @@
     });
     return select.outerHTML;
   });
+
+  const inputElement = (id: string) => {
+    return document.getElementById(id) as HTMLInputElement;
+  };
 
   const done = async (r: ExtendedRequirement) => {
     const today = new Date().toISOString().split("T")[0];
@@ -35,6 +40,7 @@
       <div class="form-floating">
         ${control}
         <label for="done-value">${requirements.fields.name("status")}</label>
+        <div class="invalid-feedback">必填字段</div>
       </div>
     </div>
     <div class="col-5 pt-3">${requirements.fields.name("date")}:</div>
@@ -51,12 +57,17 @@
 </div>`,
       width: "20em",
       didOpen: () => {
-        document.querySelector<HTMLInputElement>("#done-value")!.value =
-          requirements.doneValue[0];
-        const dateInput =
-          document.querySelector<HTMLInputElement>("#done-date")!;
+        inputElement("done-value").value = requirements.doneValue[0];
+        const dateInput = inputElement("done-date");
         dateInput.value = today;
         dateInput.max = today;
+        if (requirements.fields.required("done")) {
+          dateInput.required = true;
+          dateInput.insertAdjacentHTML(
+            "afterend",
+            "<div class='invalid-feedback'>必填字段</div>",
+          );
+        }
       },
       confirmButtonText: "确定",
       cancelButtonText: "取消",
@@ -67,11 +78,15 @@
         cancelButton: "swal btn btn-primary",
       },
       preConfirm: () => {
-        // need check vaild
-        return {
-          date: document.querySelector<HTMLInputElement>("#done-date")!.value,
-          value: document.querySelector<HTMLInputElement>("#done-value")!.value,
-        };
+        if (valid())
+          return {
+            date: inputElement("done-date").value,
+            status: inputElement("done-value").value,
+          };
+        document
+          .querySelector(".container .row")!
+          .classList.add("was-validated");
+        return false;
       },
     });
     if (value) {

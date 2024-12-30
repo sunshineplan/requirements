@@ -89,11 +89,6 @@ func parseDate(s string) (Date, error) {
 	return Date{t.Year(), int(t.Month()), t.Day()}, nil
 }
 
-func now() Date {
-	y, m, d := time.Now().Date()
-	return Date{y, int(m), d}
-}
-
 func (d *Date) UnmarshalText(text []byte) error {
 	*d, _ = parseDate(string(text))
 	return nil

@@ -242,10 +242,7 @@ func done(c *gin.Context) {
 		c.AbortWithStatus(409)
 		return
 	}
-	date, err := parseDate(c.Query("date"))
-	if err != nil {
-		date = now()
-	}
+	date, _ := parseDate(c.Query("date"))
 	obj := gin.H{"status": 1}
 	if !last.Equal(c) {
 		obj["reload"] = 1
@@ -260,8 +257,6 @@ func done(c *gin.Context) {
 			data.Status = doneValue[0]
 		}
 		data.Done = date
-		obj["value"] = data.Status
-		obj["done"] = data.Done
 	}
 	for k, v := range data.customFields {
 		if v == "" {
