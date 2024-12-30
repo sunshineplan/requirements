@@ -31,7 +31,16 @@
   );
   const label = $derived(labelValue.join(","));
 
-  let extendValue = $state<{ [key: string]: string | string[] }>({});
+  const getExtendValue = () => {
+    const extendValue: { [key: string]: string | string[] } = {};
+    requirements.fields.custom.forEach((field) => {
+      if (field.type == "checkbox")
+        extendValue[field.key] = requirements.requirement[field.key] || [];
+      else extendValue[field.key] = requirements.requirement[field.key] || "";
+    });
+    return extendValue;
+  };
+  let extendValue = $state(getExtendValue());
   const extend = $derived(
     Object.fromEntries(
       Object.entries(extendValue).map(([k, v]) => [
