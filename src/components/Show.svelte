@@ -102,7 +102,7 @@
                 : requirement[field.key]}
             </td>
           {/each}
-          <td style="vertical-align: middle">
+          <td class="align-middle">
             <Action {requirement} --icon="18px" --margin="2px" />
           </td>
         </tr>

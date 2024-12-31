@@ -43,7 +43,7 @@
 
 <Nav />
 {#await promise then _}
-  <div class="content" style="opacity: {loading.show ? 0.5 : 1}">
+  <div class="content" style:opacity={loading.show ? 0.5 : 1}>
     {#if !requirements.username}
       {#if !loading.show}
         <Login />
