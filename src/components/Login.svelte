@@ -36,12 +36,7 @@
 <svelte:head><title>登录</title></svelte:head>
 
 <header>
-  <h3
-    class="d-flex justify-content-center align-items-center"
-    style="height: 100%"
-  >
-    登录
-  </h3>
+  <h3 class="d-flex h-100 justify-content-center align-items-center">登录</h3>
 </header>
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="login" onkeyup={handleEnter}>

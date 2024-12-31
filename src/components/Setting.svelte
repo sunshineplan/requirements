@@ -145,7 +145,7 @@
 </svelte:head>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div style="height: 100%;">
+<div class="h-100">
   <header>
     <div class="back">
       <!-- svelte-ignore a11y_click_events_have_key_events -->
