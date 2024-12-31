@@ -33,12 +33,30 @@
 
   const getExtendValue = () => {
     const extendValue: { [key: string]: string | string[] } = {};
+    const fields = [
+      "id",
+      "type",
+      "title",
+      "date",
+      "deadline",
+      "done",
+      "submitter",
+      "recipient",
+      "acceptor",
+      "status",
+      "label",
+      "note",
+    ];
     if (requirements.fields.custom)
       requirements.fields.custom.forEach((field) => {
+        fields.push(field.key);
         if (field.type == "checkbox")
           extendValue[field.key] = requirements.requirement[field.key] || [];
         else extendValue[field.key] = requirements.requirement[field.key] || "";
       });
+    for (let [key, value] of Object.entries(requirements.requirement)) {
+      if (!fields.includes(key)) extendValue[key] = value;
+    }
     return extendValue;
   };
   let extendValue = $state(getExtendValue());
