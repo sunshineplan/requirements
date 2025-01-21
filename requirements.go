@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sunshineplan/utils/archive"
 	"github.com/sunshineplan/utils/csv"
 	"github.com/sunshineplan/utils/mail"
 )
@@ -421,10 +422,20 @@ func backup() {
 	if len(requirementsList) == 0 {
 		return
 	}
+	b, err := os.ReadFile(joinPath(dir(self), "requirements.csv"))
+	if err != nil {
+		svc.Print(err)
+		return
+	}
+	var buf bytes.Buffer
+	if err := archive.Pack(&buf, archive.ZIP, archive.File{Name: "requirements.csv", Body: b}); err != nil {
+		svc.Print(err)
+		return
+	}
 	sendMail(
 		fmt.Sprintf("数据备份-%s", time.Now().Format("20060102")),
 		fmt.Sprintf("备份时间: %s", time.Now()),
-		[]*mail.Attachment{{Path: joinPath(dir(self), "requirements.csv")}},
+		[]*mail.Attachment{{Filename: "backup.zip", Bytes: buf.Bytes()}},
 	)
 }
 
