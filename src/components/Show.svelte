@@ -51,8 +51,8 @@
 
   onMount(() => {
     requirements.scroll(true);
-    requirements.subscribe(true);
-    return () => requirements.controller.abort();
+    requirements.subscribe();
+    return () => requirements.abort();
   });
 </script>
 

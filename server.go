@@ -58,6 +58,7 @@ func run() error {
 		}
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
+		obj["interval"] = int64(*poll / time.Second)
 		obj["username"] = user
 		obj["fields"] = fields
 		if len(custom) > 0 {
@@ -74,7 +75,6 @@ func run() error {
 		}
 	})
 	router.GET("/poll", authRequired, func(c *gin.Context) {
-		time.Sleep(*poll)
 		infoMutex.Lock()
 		defer infoMutex.Unlock()
 		c.String(200, last.String())
