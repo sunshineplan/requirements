@@ -91,7 +91,7 @@
     });
     if (value) {
       requirements.requirement = r;
-      if (requirements.component == "show") requirements.controller.abort();
+      if (requirements.component == "show") requirements.abort();
       try {
         const res = await requirements.done({ ...r }, value.date, value.status);
         if (res === 0)
@@ -103,7 +103,7 @@
             await requirements.init();
             requirements.scroll(true);
           }
-        requirements.subscribe(true);
+        requirements.subscribe();
       } catch {
         await requirements.init();
         requirements.goto("show");

@@ -95,6 +95,7 @@ class Fields {
 class Requirements {
   brand = $state('')
   username = $state('')
+  #interval = 0
   component = $state('show')
   fields = $state(new Fields([], []))
   statuses = $state.raw<Status[]>([])
@@ -104,7 +105,8 @@ class Requirements {
   requirements = $state.raw<ExtendedRequirement[]>([])
   search = $state<Search>({ search: '', field: '', sort: '', desc: true, filter: '', value: '' })
   scrollTop = $state(0)
-  controller = $state(new AbortController())
+  #timer = 0
+  #controller = new AbortController()
   results = $derived.by(() => {
     let array: ExtendedRequirement[] = []
     if (!this.search.search) array = this.requirements
@@ -156,6 +158,7 @@ class Requirements {
       this.brand = res.brand
       if (res.username) {
         this.username = res.username
+        this.#interval = res.interval
         this.fields = new Fields(res.fields, res.custom)
         this.#parseStatuses(this.fields.enum('status'))
         if (load) {
@@ -326,27 +329,33 @@ class Requirements {
     this.search = { search: '', field: '', sort: '', desc: true, filter: '', value: '' }
     this.scrollTop = 0
   }
-  async subscribe(reset?: boolean) {
-    if (reset)
-      this.controller = new AbortController()
-    let resp: Response
-    try {
-      resp = await fetch('/poll', { signal: this.controller.signal })
-    } catch (e) {
-      if (e instanceof DOMException && e.name === 'AbortError') return
-      console.error(e)
-      resp = new Response(null, { status: 500 })
+  subscribe() {
+    this.#controller = new AbortController()
+    const poll = async () => {
+      let resp: Response
+      try {
+        resp = await fetch('/poll', { signal: this.#controller.signal })
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') return
+        console.error(e)
+        resp = new Response(null, { status: 500 })
+      }
+      let timeout = 30
+      if (resp.ok) {
+        const last = await resp.text()
+        if (last && getCookie('last') != last) await this.init()
+        timeout = this.#interval || 30
+      } else if (resp.status == 401) {
+        await this.init()
+        return
+      }
+      this.#timer = setTimeout(poll, timeout * 1000)
     }
-    if (resp.ok) {
-      const last = await resp.text()
-      if (last && getCookie('last') != last) await this.init()
-      await this.subscribe()
-    } else if (resp.status == 401) {
-      await this.init()
-    } else {
-      await new Promise((sleep) => setTimeout(sleep, 30000))
-      await this.subscribe()
-    }
+    poll()
+  }
+  abort() {
+    clearTimeout(this.#timer)
+    this.#controller.abort()
   }
 }
 export const requirements = new Requirements
