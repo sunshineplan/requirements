@@ -104,7 +104,7 @@
     if (
       valid() &&
       (!requirements.fields.required("label") ||
-        (requirements.fields.enum("label").length && label.length == 0))
+        (requirements.fields.enum("label").length && label.length != 0))
     ) {
       validated = false;
       const r = current();
