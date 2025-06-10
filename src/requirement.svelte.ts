@@ -120,6 +120,7 @@ class Requirements {
           .searchable()
           .some(field => i[field.key].includes(this.search.search)),
       )
+    console.log(this.search.value) // Log to force access; workaround for reactivity.
     if (this.search.filter && this.search.value)
       array = array.filter((i) =>
         i[this.search.filter as keyof ExtendedRequirement] === this.search.value,
@@ -131,8 +132,7 @@ class Requirements {
         let res = 0
         if (v1 < v2) res = 1
         else if (v1 > v2) res = -1
-        if (this.search.desc) return res
-        else return -res
+        return this.search.desc ? res : -res
       })
     else return array.sort()
   })
