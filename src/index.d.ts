@@ -52,6 +52,6 @@ interface Search {
   field: string
   sort: string
   desc: boolean
-  filter: 'type' | 'status' | ''
+  filter: string
   value: string
 }
