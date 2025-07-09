@@ -47,11 +47,15 @@ interface Status {
   closed: boolean
 }
 
+interface Filter {
+  field: string
+  value: string
+}
+
 interface Search {
   search: string
   field: string
   sort: string
   desc: boolean
-  filter: string
-  value: string
+  filter: Filter[]
 }

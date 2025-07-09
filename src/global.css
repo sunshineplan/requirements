@@ -56,6 +56,19 @@ button+button {
   visibility: hidden;
 }
 
+.add,
+.remove {
+  display: flex;
+  position: absolute;
+  padding: 7px;
+  right: 12px;
+  cursor: pointer;
+}
+
+.d-flex+.d-flex {
+  margin-top: 1rem;
+}
+
 @media (max-width: 900px) {
   .content {
     padding-left: 0 !important;

@@ -103,7 +103,7 @@ class Requirements {
   mode = $state('')
   requirement = $state({} as ExtendedRequirement)
   requirements = $state.raw<ExtendedRequirement[]>([])
-  search = $state<Search>({ search: '', field: '', sort: '', desc: true, filter: '', value: '' })
+  search = $state<Search>({ search: '', field: '', sort: '', desc: true, filter: [] })
   scrollTop = $state(0)
   #timer = 0
   #controller = new AbortController()
@@ -120,10 +120,11 @@ class Requirements {
           .searchable()
           .some(field => i[field.key].includes(this.search.search)),
       )
-    this.search.value // Force access; workaround for reactivity.
-    if (this.search.filter && this.search.value)
+    if (this.search.filter.length)
       array = array.filter((i) =>
-        i[this.search.filter as keyof ExtendedRequirement] === this.search.value,
+        this.search.filter.every(f =>
+          f.value === '' || i[f.field as keyof ExtendedRequirement] === f.value,
+        ),
       )
     if (this.search.sort)
       return array.toSorted((a, b) => {
@@ -326,7 +327,7 @@ class Requirements {
     if (table) this.scrollTop = table.scrollTop
   }
   clearSearch() {
-    this.search = { search: '', field: '', sort: '', desc: true, filter: '', value: '' }
+    this.search = { search: '', field: '', sort: '', desc: true, filter: [] }
     this.scrollTop = 0
   }
   subscribe() {

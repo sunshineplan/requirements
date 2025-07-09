@@ -1,16 +1,12 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { requirements } from "../requirement.svelte";
+  import Filter from "./Filter.svelte";
 
   let hover = $state(false);
   let showOption = $state(false);
   let tune: HTMLElement;
   let option: HTMLElement;
-  const filterField = $derived(
-    requirements.fields
-      .filterable()
-      .find((field) => field.key == requirements.search.filter),
-  );
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
@@ -45,9 +41,7 @@
     bind:this={tune}
     class="icon tune"
     class:show={showOption}
-    style:color={requirements.search.field ||
-    requirements.search.filter ||
-    requirements.search.value
+    style:color={requirements.search.field || requirements.search.filter.length
       ? "#1a73e8"
       : ""}
     onclick={() => {
@@ -112,80 +106,7 @@
         <span class="material-symbols-outlined">do_not_disturb_on</span>
       </div>
     </div>
-    <div class="d-flex w-100">
-      <div class="input-group">
-        <label class="input-group-text" for="filter">筛选字段</label>
-        <select
-          class="form-select"
-          id="filter"
-          bind:value={requirements.search.filter}
-          onchange={() => (requirements.search.value = "")}
-        >
-          <option value="">无</option>
-          {#each requirements.fields.filterable() as field (field.key)}
-            <option value={field.key}>{field.name || field.key}</option>
-          {/each}
-        </select>
-      </div>
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div
-        class="remove text-danger"
-        style:display={requirements.search.filter ? "" : "none"}
-        onclick={() => {
-          requirements.search.filter = "";
-          requirements.search.value = "";
-          showOption = false;
-          requirements.scrollTop = 0;
-          requirements.scroll(true);
-        }}
-      >
-        <span class="material-symbols-outlined">do_not_disturb_on</span>
-      </div>
-    </div>
-    <div
-      class="d-flex w-100"
-      style:display|important={requirements.search.filter ? "" : "none"}
-    >
-      <div class="input-group">
-        <label class="input-group-text" for="value">筛选内容</label>
-        <select
-          class="form-select"
-          id="value"
-          bind:value={requirements.search.value}
-          onchange={() => {
-            showOption = false;
-            requirements.scrollTop = 0;
-            requirements.scroll(true);
-          }}
-        >
-          <option value="">所有</option>
-          {#if requirements.search.filter === "status"}
-            {#each requirements.statuses as status (status.value)}
-              <option value={status.value}>{status.value}</option>
-            {/each}
-          {:else if filterField}
-            {#each filterField.enum as value (value)}
-              <option {value}>{value}</option>
-            {/each}
-          {/if}
-        </select>
-      </div>
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div
-        class="remove text-danger"
-        style:display={requirements.search.value ? "" : "none"}
-        onclick={() => {
-          requirements.search.value = "";
-          showOption = false;
-          requirements.scrollTop = 0;
-          requirements.scroll(true);
-        }}
-      >
-        <span class="material-symbols-outlined">do_not_disturb_on</span>
-      </div>
-    </div>
+    <Filter bind:showOption />
   </div>
 </div>
 
@@ -259,17 +180,5 @@
     cursor: pointer;
     right: 0;
     z-index: 100;
-  }
-
-  .d-flex + .d-flex {
-    margin-top: 1rem;
-  }
-
-  .remove {
-    display: flex;
-    position: absolute;
-    padding: 7px;
-    right: 12px;
-    cursor: pointer;
   }
 </style>
