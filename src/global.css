@@ -69,6 +69,10 @@ button+button {
   margin-top: 1rem;
 }
 
+.dropdown-menu {
+  margin-top: 2px;
+}
+
 @media (max-width: 900px) {
   .content {
     padding-left: 0 !important;

@@ -123,7 +123,7 @@ class Requirements {
     if (this.search.filter.length)
       array = array.filter((i) =>
         this.search.filter.every(f =>
-          f.value === '' || i[f.field as keyof ExtendedRequirement] === f.value,
+          f.value.length == 0 || f.value.some(v => i[f.field as keyof ExtendedRequirement] === v)
         ),
       )
     if (this.search.sort)

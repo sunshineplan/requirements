@@ -49,7 +49,7 @@ interface Status {
 
 interface Filter {
   field: string
-  value: string
+  value: string[]
 }
 
 interface Search {
