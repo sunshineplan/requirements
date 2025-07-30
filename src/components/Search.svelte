@@ -56,7 +56,7 @@
     style:display={hover &&
     (requirements.search.search ||
       requirements.search.field ||
-      requirements.search.filter)
+      requirements.search.filter.length)
       ? "flex"
       : "none"}
   >
