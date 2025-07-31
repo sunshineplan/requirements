@@ -3,9 +3,9 @@
   import { requirements } from "../requirement.svelte";
   import Action from "./Action.svelte";
   import Checkbox from "./form-control/Checkbox.svelte";
-  import Date from "./form-control/Date.svelte";
   import Input from "./form-control/Input.svelte";
   import Select from "./form-control/Select.svelte";
+  import Text from "./form-control/Text.svelte";
   import Textarea from "./form-control/Textarea.svelte";
 
   const modeList: { [key: string]: string } = {
@@ -214,7 +214,8 @@
       <div class="w-100 m-0"></div>
       {#if requirements.fields.enable("date")}
         <div class="col-md-3 col-sm-4">
-          <Date
+          <Input
+            type="date"
             id="date"
             bind:value={date}
             required={requirements.fields.required("date")}
@@ -225,10 +226,11 @@
       {/if}
       {#if requirements.fields.enable("deadline")}
         <div class="col-md-3 col-sm-4">
-          <Date
+          <Input
+            type="date"
             id="deadline"
             bind:value={deadline}
-            min={date}
+            props={{ min: date }}
             required={requirements.fields.required("deadline")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("deadline")}
@@ -237,10 +239,11 @@
       {/if}
       {#if requirements.fields.enable("done") && requirements.doneValue.includes(status)}
         <div class="col-md-3 col-sm-4">
-          <Date
+          <Input
+            type="date"
             id="done"
             bind:value={done}
-            min={date}
+            props={{ min: date }}
             required={requirements.fields.required("done")}
             disabled={requirements.mode == "view"}
             label={requirements.fields.name("done")}
@@ -250,7 +253,7 @@
       <div class="w-100 m-0"></div>
       {#if requirements.fields.enable("submitter")}
         <div class="col-md-3 col-sm-4">
-          <Input
+          <Text
             id="submitter"
             bind:value={submitter}
             required={requirements.fields.required("submitter")}
@@ -262,7 +265,7 @@
       {/if}
       {#if requirements.fields.enable("recipient")}
         <div class="col-md-3 col-sm-4">
-          <Input
+          <Text
             id="recipient"
             bind:value={recipient}
             required={requirements.fields.required("recipient")}
@@ -274,7 +277,7 @@
       {/if}
       {#if requirements.fields.enable("acceptor")}
         <div class="col-md-3 col-sm-4">
-          <Input
+          <Text
             id="acceptor"
             bind:value={acceptor}
             required={requirements.fields.required("acceptor")}
@@ -316,18 +319,6 @@
               {validated}
             />
           </div>
-        {:else if type == "date"}
-          <div class="col-md-3 col-sm-4">
-            <Date {...props} bind:value={extendValue[field.key] as string} />
-          </div>
-        {:else if type == "input"}
-          <div class="col-md-3 col-sm-4">
-            <Input
-              {...props}
-              bind:value={extendValue[field.key] as string}
-              list={field.enum}
-            />
-          </div>
         {:else if type == "select"}
           <div class="col-md-3 col-sm-4">
             <Select
@@ -336,11 +327,27 @@
               options={field.enum}
             />
           </div>
+        {:else if type == "text"}
+          <div class="col-md-3 col-sm-4">
+            <Text
+              {...props}
+              bind:value={extendValue[field.key] as string}
+              list={field.enum}
+            />
+          </div>
         {:else if type == "textarea"}
           <div class="col-md-8 col-sm-12">
             <Textarea
               {...props}
               height={field.height}
+              bind:value={extendValue[field.key] as string}
+            />
+          </div>
+        {:else}
+          <div class="col-md-3 col-sm-4">
+            <Input
+              {type}
+              {...props}
               bind:value={extendValue[field.key] as string}
             />
           </div>

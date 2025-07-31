@@ -1,39 +1,38 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   let {
+    type,
     id,
     label,
     value = $bindable(),
-    list,
     required,
     disabled,
+    props,
+    html,
   }: {
+    type: string;
     id: string;
     label: string;
     value: string;
-    list?: string[];
     required?: boolean;
     disabled?: boolean;
+    props?: Record<string, any>;
+    html?: Snippet<[]>;
   } = $props();
-
-  const showList = $derived(!disabled && list && list.length);
 </script>
 
 <div class="form-floating">
   <input
     class="form-control"
+    {type}
     {id}
-    list={showList ? id + "-list" : ""}
     bind:value
+    {...props}
     {required}
     {disabled}
   />
-  {#if showList}
-    <datalist id={id + "-list"}>
-      {#each list! as option (option)}
-        <option>{option}</option>
-      {/each}
-    </datalist>
-  {/if}
+  {@render html?.()}
   <label for={id}>{label}</label>
   {#if required}
     <div class="invalid-feedback">必填字段</div>

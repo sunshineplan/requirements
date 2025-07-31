@@ -36,7 +36,7 @@ type FieldMap = {
   [key in keyof Requirement]: MainField
 }
 
-type Type = 'checkbox' | 'date' | 'input' | 'select' | 'textarea'
+type Type = 'checkbox' | 'select' | 'text' | 'textarea'
 
 interface CustomField extends Field {
   type: Type
