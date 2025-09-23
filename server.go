@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/rand"
 	"embed"
-	"html/template"
 	"io/fs"
 	"net/http"
 	"time"
@@ -44,7 +43,7 @@ func run() error {
 	}
 	router.StaticFS("/assets", http.FS(assets))
 	router.StaticFileFS("favicon.ico", "dist/favicon.ico", http.FS(dist))
-	router.SetHTMLTemplate(template.Must(template.New("").ParseFS(dist, "dist/*.html")))
+	router.LoadHTMLFS(http.FS(dist), "dist/*.html")
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)
