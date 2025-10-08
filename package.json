@@ -11,7 +11,7 @@
     "@tsconfig/svelte": "^5.0.5",
     "csv-stringify": "^6.6.0",
     "dexie": "^4.2.1",
-    "svelte": "^5.39.9",
+    "svelte": "^5.39.11",
     "svelte-check": "^4.3.2",
     "sweetalert2": "^11.24.0",
     "tslib": "^2.8.1",
