@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io/fs"
+	"time"
 
 	"github.com/sunshineplan/utils/csv"
 	"github.com/sunshineplan/utils/mail"
@@ -15,7 +16,7 @@ func initSrv() error {
 	}
 	if err := retry.Do(func() error {
 		return meta.Get("requirements", &data)
-	}, 3, 20); err != nil {
+	}, 3, 20*time.Second); err != nil {
 		return err
 	}
 	if data.Dialer.Server == "" {
