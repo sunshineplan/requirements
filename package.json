@@ -12,7 +12,7 @@
     "csv-stringify": "^6.6.0",
     "dexie": "^4.3.0",
     "svelte": "^5.53.5",
-    "svelte-check": "^4.4.3",
+    "svelte-check": "^4.4.4",
     "sweetalert2": "^11.26.20",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
