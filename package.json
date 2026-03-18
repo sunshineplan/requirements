@@ -9,7 +9,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@tsconfig/svelte": "^5.0.8",
-    "csv-stringify": "^6.6.0",
+    "csv-stringify": "^6.7.0",
     "dexie": "^4.3.0",
     "svelte": "^5.53.10",
     "svelte-check": "^4.4.5",
