@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/utils/flags"
 	"github.com/sunshineplan/utils/httpsvr"
@@ -21,7 +20,6 @@ var (
 
 	server = httpsvr.New()
 	svc    = service.New()
-	meta   metadata.Server
 	dialer mail.Dialer
 
 	joinPath = filepath.Join
@@ -65,9 +63,11 @@ var (
 func main() {
 	flag.StringVar(&svc.Name, "name", "Requirements", "Service Name")
 	flag.TextVar(&to, "to", mail.Receipts(nil), "Mail Subscriber")
-	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
-	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
-	flag.StringVar(&meta.Value, "value", "", "Verify Header Value")
+	flag.StringVar(&dialer.Server, "mail-server", "", "Mail Server Address")
+	flag.IntVar(&dialer.Port, "mail-port", 465, "Mail Server Port")
+	flag.StringVar(&dialer.Account, "mail-account", "", "Mail Account")
+	flag.StringVar(&dialer.Password, "mail-password", "", "Mail Password")
+	flag.BoolVar(&dialer.TLS, "mail-tls", true, "Mail use TLS")
 	flag.StringVar(&server.Unix, "unix", "", "UNIX-domain Socket")
 	flag.StringVar(&server.Host, "host", "0.0.0.0", "Server Host")
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
