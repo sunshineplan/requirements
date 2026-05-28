@@ -10,7 +10,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tsconfig/svelte": "^5.0.8",
     "csv-stringify": "^6.7.0",
-    "dexie": "^4.4.2",
+    "dexie": "^4.4.3",
     "svelte": "^5.55.10",
     "svelte-check": "^4.4.8",
     "sweetalert2": "^11.26.25",
